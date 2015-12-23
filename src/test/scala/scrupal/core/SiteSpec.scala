@@ -1,13 +1,13 @@
 package scrupal.core
 
-import org.specs2.mutable.Specification
+import scrupal.test.ScrupalSpecification
 
-class SiteSpec extends Specification {
+class SiteSpec extends ScrupalSpecification("Site") {
 
   "Site" should {
     "register instances" in {
-      val instance = new Site("foo")
-      Site.lookup('foo) must beEqualTo(Some(instance))
+      val instance = new Site("foo")(scrupal)
+      scrupal.sites.lookup('foo) must beEqualTo(Some(instance))
     }
   }
 }

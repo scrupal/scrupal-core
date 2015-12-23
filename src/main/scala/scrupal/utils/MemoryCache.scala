@@ -20,17 +20,20 @@ class MemoryCache[K,V] {
 
   def getOrElse(key : K)(value: ⇒  V) : V = { cache.getOrElseUpdate(key, value) }
 
-  def size = cache.size
+  def size : Int = cache.size
 
-  def clear() = cache.clear()
+  def clear() : Unit = cache.clear()
 
-  def remove(k : K) = cache.remove(k)
+  def replace(k:K, newV: V) : Option[V] = { cache.replace(k, newV) }
+
+  def remove(k:K) : Option[V] = cache.remove(k)
+
 }
 
 object MemoryCache {
-  def apply[K,V] = new MemoryCache[K,V]
+  def apply[K,V]() : MemoryCache[K,V] = new MemoryCache[K,V]
 }
 
 object ActorRefCache {
-  def apply[K] = new MemoryCache[K,ActorRef]
+  def apply[K]() : MemoryCache[K,ActorRef] = new MemoryCache[K,ActorRef]
 }

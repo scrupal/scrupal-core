@@ -17,9 +17,10 @@ package scrupal.core
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.http.DefaultHttpRequestHandler
+import play.api.http.{HttpConfiguration, HttpFilters, HttpErrorHandler, DefaultHttpRequestHandler}
 import play.api.http.Status._
 import play.api.mvc._
+import play.api.routing.Router
 import scrupal.utils.DomainNames
 
 import scala.language.implicitConversions
@@ -29,24 +30,29 @@ import scala.language.implicitConversions
   * Play will invoke this handler to dispatch HTTP Requests as they come in. It's job is
   */
 @Singleton()
-class ScrupalRequestHandler @Inject() (scrupal: Scrupal) extends
-  DefaultHttpRequestHandler(scrupal.globalRouter, scrupal.errorHandler, scrupal.httpConfiguration, scrupal.httpFilters) {
+class ScrupalRequestHandler @Inject() (
+    scrupal: Scrupal,
+    globalRouter : Router,
+    errorHandler : HttpErrorHandler,
+    httpConfiguration : HttpConfiguration,
+    httpFilters : HttpFilters
+) extends DefaultHttpRequestHandler(globalRouter, errorHandler, httpConfiguration, httpFilters) {
 
   private def notFoundHandler = Action.async(BodyParsers.parse.empty)(req =>
-    scrupal.errorHandler.onClientError(req, NOT_FOUND)
+    errorHandler.onClientError(req, NOT_FOUND)
   )
 
   override def handlerForRequest(header: RequestHeader) : (RequestHeader, Handler) = {
     DomainNames.matchDomainName(header.host) match {
       case (Some(domain), Some(sub)) =>
-        Site.lookup(Symbol(domain)) match {
+        scrupal.sites.lookup(Symbol(domain)) match {
           case Some(site) =>
             site.handlerForRequest(header)
           case None =>
             header -> notFoundHandler
         }
       case (Some(domain), None) =>
-        Site.lookup(Symbol(domain)) match {
+        scrupal.sites.lookup(Symbol(domain)) match {
           case Some(site) =>
             site.handlerForRequest(header)
           case None =>
@@ -59,6 +65,7 @@ class ScrupalRequestHandler @Inject() (scrupal: Scrupal) extends
 
   override def routeRequest(header: RequestHeader): Option[Handler] = {
     super.routeRequest(header)
+  }
       /*
     val handlers = {
       for ( site ← scrupal.Sites.forHost(header.host) ;
@@ -85,5 +92,4 @@ class ScrupalRequestHandler @Inject() (scrupal: Scrupal) extends
         }
     }
     */
-  }
 }

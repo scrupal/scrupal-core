@@ -3,7 +3,11 @@
     <CLASSES>
       <root url="jar://$USER_HOME$/.ivy2/cache/biz.source_code/base64coder/bundles/base64coder-2010-12-19.jar!/" />
     </CLASSES>
-    <JAVADOC />
-    <SOURCES />
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/biz.source_code/base64coder/docs/base64coder-2010-12-19-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/biz.source_code/base64coder/srcs/base64coder-2010-12-19-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

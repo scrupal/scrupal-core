@@ -17,26 +17,39 @@ package scrupal.core
 
 import com.reactific.helpers.{Registrable, Registry}
 
-import play.api.http.{HttpRequestHandler,HttpErrorHandler}
-import play.api.mvc.{Result, Handler, RequestHeader}
+import play.api.mvc.{Handler, RequestHeader}
 
-import scala.concurrent.Future
+import scala.util.matching.Regex
 
-case class Site(name : String) extends Registrable[Site] with HttpRequestHandler with HttpErrorHandler {
-  def registry: Registry[Site] = Site
+case class Site(name : String, hostNames: Regex = ".*".r)(implicit val scrupal : Scrupal) extends Registrable[Site]
+  with ScrupalUser {
+  def registry: Registry[Site] = scrupal.sites
   def id: Symbol = Symbol(name)
+
+  def requireHttps : Boolean = false
+
+  def forHost(hostName: String) : Boolean = {
+    hostNames.findFirstIn(hostName).isDefined
+  }
 
   /** Get The Handler For The Request */
   def handlerForRequest(request: RequestHeader) : (RequestHeader, Handler) = {
     request -> null
   }
-
-  def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = ???
-
-  def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = ???
 }
 
-object Site extends Registry[Site] {
+case class SitesRegistry() extends Registry[Site] {
   def registryName: String = "Sites"
   def registrantsName: String = "site"
+
+  import scala.language.reflectiveCalls
+
+  def forHost(hostName : String) : Iterable[Site] = {
+    for (
+      (id, site) ← _registry if site.forHost(hostName)
+    ) yield {
+      site
+    }
+  }
+
 }

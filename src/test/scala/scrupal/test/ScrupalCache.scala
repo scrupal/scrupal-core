@@ -2,12 +2,16 @@ package scrupal.test
 
 import java.io.File
 
+import akka.actor.ActorSystem
 import com.google.inject.Guice
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Configuration, Mode, Environment, Application}
+import play.api.http.{HttpFilters, HttpConfiguration, HttpErrorHandler, HttpRequestHandler}
+import play.api.inject.{Injector, DefaultApplicationLifecycle}
+import play.api.inject.guice.{GuiceInjectorBuilder, GuiceApplicationBuilder}
+import play.api._
 import play.api.mvc.Handler
 
 import com.reactific.helpers.AbstractRegistry
+import play.api.routing.Router
 import scrupal.core.Scrupal
 import scrupal.utils.MemoryCache
 
@@ -20,12 +24,11 @@ import scrupal.utils.MemoryCache
   */
 object ScrupalCache extends MemoryCache[String,Scrupal] {
 
-  def apply(
-             name: String,
-             path: java.io.File = new java.io.File("."),
+  def apply(name: String,
+            path: java.io.File = new java.io.File("."),
              additionalConfiguration: Map[String, AnyRef] = Map.empty,
              withRoutes: PartialFunction[(String, String), Handler] = PartialFunction.empty
-           ): Scrupal = {
+           ) : Scrupal = {
     getOrElse(name) {
       val environment: Environment = Environment(path, this.getClass.getClassLoader, Mode.Test)
       val dbName = name.replace(" ", "_")
@@ -38,15 +41,12 @@ object ScrupalCache extends MemoryCache[String,Scrupal] {
       )
       val configuration: Configuration = Configuration.load(environment, config)
 
-      val builder = new GuiceApplicationBuilder()
-        .in(environment)
-        .configure(configuration)
+      val builder = new GuiceApplicationBuilder(environment, configuration, Seq.empty, Seq.empty, Seq.empty)
+      val injector = builder.injector()
+      val application : Application = builder.build()
+      val applicationLifecycle = injector.instanceOf(classOf[DefaultApplicationLifecycle])
 
-      val injector = Guice.createInjector(builder.applicationModule())
-
-      val application = builder.build()
-
-      injector.getInstance(classOf[Scrupal])
+      new Scrupal(name, environment, configuration, applicationLifecycle, injector, application)
     }
   }
 }

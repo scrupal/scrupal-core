@@ -45,5 +45,12 @@ class DomainNamesSpec extends Specification {
     "recognize 'admin.reactific.com'" in {
       DomainNames.matchDomainName("admin.reactific.com") must beEqualTo( Some("reactific.com") -> Some("admin") )
     }
+
+    "recognize 'localhost'" in {
+      DomainNames.matchDomainName("localhost") must beEqualTo (Some("localhost") -> None )
+      DomainNames.matchDomainName("127.0.0.1") must beEqualTo (Some("localhost") -> None )
+      DomainNames.matchDomainName("::1") must beEqualTo (Some("localhost") -> None )
+      DomainNames.matchDomainName("fe80::1%lo0") must beEqualTo (Some("localhost") -> None )
+    }
   }
 }

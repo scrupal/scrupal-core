@@ -17,9 +17,11 @@ package scrupal.core
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
-import com.google.inject.Singleton
 
 import com.reactific.helpers._
+
+import scala.util.{Failure, Success}
+
 // import com.reactific.slickery.Authorable
 
 import java.lang.Thread.UncaughtExceptionHandler
@@ -27,35 +29,29 @@ import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
-import play.api.routing.Router
 import play.api._
-import play.api.http.{HttpRequestHandler, HttpFilters, HttpConfiguration, HttpErrorHandler}
 import play.api.inject.{Injector, DefaultApplicationLifecycle}
 
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 import scrupal.utils.ScrupalComponent
 
+trait ScrupalUser {
+  def scrupal : Scrupal
+}
+
 case class Scrupal @Inject() (
+  name: String = "Scrupal",
   environment : Environment,
+  configuration : Configuration,
   applicationLifecycle : DefaultApplicationLifecycle,
-  override val injector: Injector,
-  override val configuration : Configuration,
-  override val requestHandler : HttpRequestHandler,
-  override val errorHandler: HttpErrorHandler,
-  override val actorSystem : ActorSystem,
-  override val plugins: Plugins,
-  httpConfiguration: HttpConfiguration,
-  httpFilters: HttpFilters,
-  globalRouter: Router,
-  name: String = "Scrupal"
+  injector: Injector,
+  application: Application
 ) extends {
   final val id: Symbol = Symbol(name)
   final val registry = Scrupal
-} with DefaultApplication(environment, applicationLifecycle, injector, configuration, requestHandler,
-                          errorHandler, actorSystem, plugins)
-  with ScrupalComponent with AutoCloseable  with Registrable[Scrupal] {
+} with ScrupalComponent with AutoCloseable  with Registrable[Scrupal] {
 
   val author = "Reactific Software LLC"
   val copyright = "© 2013-2015 Reactific Software LLC. All Rights Reserved."
@@ -67,13 +63,15 @@ case class Scrupal @Inject() (
 
   implicit val _timeout = getTimeout
 
+  val sites : SitesRegistry = SitesRegistry()
+
   applicationLifecycle.addStopHook { () ⇒
     Future.successful {
       this.close()
     }
   }
 
-  def closeTimeout : Duration = 10.seconds
+  def closeTimeout : FiniteDuration = 10.seconds
 
   def close() = {
     log.info("Scrupal shutdown initiated")
@@ -87,25 +85,11 @@ case class Scrupal @Inject() (
         false
     }
     val timeout = closeTimeout
-    try {
-      Await.result(result, timeout) match {
-        case true =>
-          log.info("Scrupal shutdown completed normally.")
-        case false =>
-          log.warn("Scrupal shutdown failed. See above exception report")
-      }
-    } catch {
-      case ix: InterruptedException =>
-        // - if the current thread is interrupted while waiting
-        log.warn("Scrupal shutdown was interrupted", ix)
-      case tx: TimeoutException =>
-        // if after waiting for the specified time awaitable is still not ready
-        log.warn(s"Scrupal shutdown timed out after $timeout", tx)
-      case iax: IllegalArgumentException =>
-        // if atMost is Duration.Undefined
-        log.warn("Scrupal shutdown with untenable 'atMost' argument", iax)
-      case xcptn: Throwable =>
-        log.warn("Scrupal shutdown interrupted by unrecognized exception:", xcptn)
+    await(result, timeout, "scrupal shutdown") match {
+      case Success(x) =>
+        log.info("Scrupal shutdown completed normally.")
+      case Failure(x) =>
+        log.warn("Scrupal shutdown failed: ", x)
     }
   }
 
@@ -133,7 +117,6 @@ case class Scrupal @Inject() (
   protected def getActorSystem: ActorSystem = {
     ActorSystem("Scrupal", configuration.underlying)
   }
-
 
   protected def getTimeout: Timeout = {
     Timeout(

@@ -29,7 +29,7 @@ import scala.runtime.AbstractPartialFunction
 trait OneAppPerSpec extends ScrupalSpecification { self : ScrupalSpecification ⇒
 
   /** Override app if you need a FakeApplication with other than default parameters. */
-  implicit lazy val application : Application = scrupal
+  implicit lazy val application : Application = scrupal.application
 
   private def startRun() = {
     Play.start(application)

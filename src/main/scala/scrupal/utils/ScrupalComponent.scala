@@ -15,6 +15,8 @@
 
 package scrupal.utils
 
+import java.util.concurrent.TimeoutException
+
 import com.reactific.helpers.{TossedException, ThrowingHelper, LoggingHelper}
 
 import scala.concurrent.duration.FiniteDuration
@@ -37,13 +39,26 @@ trait ScrupalComponent extends LoggingHelper with ThrowingHelper {
     * @param opName The name of the operation being waited for, to assist with error messages
     * @return A blob of Html containing either the intended result or an error message.
     */
-  def await[X](future : ⇒ Future[X], duration : FiniteDuration, opName : String) : Try[X] = Try {
-    Await.result(future, duration)
-  } match {
-    case Success(x) ⇒
-      Success(x)
-    case Failure(x) ⇒
-      Failure(TossedException(this, "Exception while waiting " + duration.toSeconds + " seconds for operation '" +
-        opName + "' to complete:", x))
+  def await[X](future : ⇒ Future[X], duration : FiniteDuration, opName : String) : Try[X] = {
+    Try {
+      Await.result(future, duration)
+    } match {
+      case Success(result) =>
+        Success(result)
+      case Failure(xcptn) =>
+        xcptn match {
+          case ix: InterruptedException =>
+            // - if the current thread is interrupted while waiting
+            Failure(TossedException(this, s"Operation '$opName' was interrupted: ", ix))
+          case tx: TimeoutException =>
+            // if after waiting for the specified time awaitable is still not ready
+            Failure(TossedException(this, s"Operation '$opName' timed out after $duration", tx))
+          case iax: IllegalArgumentException =>
+            // if atMost is Duration.Undefined
+            Failure(TossedException(this, s"Operation '$opName' called with untenable 'duration' argument", iax))
+          case xcptn: Throwable =>
+            Failure(TossedException(this, s"Operation '$opName'interrupted by unrecognized exception:", xcptn))
+        }
+    }
   }
 }
