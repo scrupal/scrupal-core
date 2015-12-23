@@ -2,7 +2,7 @@ scalaVersion := "2.10.5"
 
 resolvers ++=  Seq( Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots") )
 
-addSbtPlugin("org.scrupal" % "scrupal-sbt" % "0.2.7" )
+addSbtPlugin("org.scrupal" % "scrupal-sbt" % "0.2.8" )
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.2.2")
 

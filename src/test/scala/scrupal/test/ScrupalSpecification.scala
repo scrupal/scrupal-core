@@ -36,20 +36,13 @@ abstract class ScrupalSpecification(
   // WARNING: Do NOT put anything but def and lazy val because of DelayedInit or app startup will get invoked twice
   // and you'll have a real MESS on your hands!!!! (i.e. no db interaction will work!)
 
-  lazy val testScrupal: Scrupal = {
-    FakeScrupal(
-      ScrupalSpecification.next(specName), Map.empty[String,AnyRef]
-    )
-  }
+  implicit lazy val scrupal : Scrupal = ScrupalCache( ScrupalSpecification.next(specName) )
 
-  implicit lazy val scrupal : Scrupal = testScrupal
-
-  implicit lazy val site : Site = FakeSite(specName)(testScrupal)
-
-  implicit lazy val context = Context(testScrupal, site)
+  implicit lazy val site : Site = new FakeSite(specName)
 
   def withExecutionContext[T](f : ExecutionContext ⇒ T) : T = scrupal.withExecutionContext[T](f)
 
+  /*
   def withStoreContext[T](f : StoreContext ⇒ T) : T =  scrupal.withStoreContext[T](f)
 
   def withSchema[T](schemaName : String)(f : Schema ⇒ T) : T =  scrupal.withSchema(schemaName)(f)
@@ -61,6 +54,7 @@ abstract class ScrupalSpecification(
       }
     }
   }
+  */
 }
 
 object ScrupalSpecification {
@@ -69,7 +63,7 @@ object ScrupalSpecification {
 
   def next(name: String): String = name + "-" + counter.incrementAndGet()
 
-  def storageTestConfig(name: String): Option[Configuration] = {
+/*  def storageTestConfig(name: String): Option[Configuration] = {
     Some(
       ConfigHelpers.default() ++ Configuration(
         ConfigFactory.parseString(
@@ -84,6 +78,7 @@ object ScrupalSpecification {
       )
     )
   }
+  */
 }
 
 

@@ -40,7 +40,7 @@ trait Dependencies
     val akka = "2.3.13"
     val kamon = "0.4.0"
     val silhouette = "3.0.4"
-    val bootswatch = "3.3.6"
+    val bootswatch = "3.3.5+4"
     val font_awesome = "4.3.0-3"
     val marked = "0.3.2-1"
     val jquery = "2.1.4"
@@ -78,6 +78,7 @@ trait Dependencies
   val slickery                = "com.reactific"             %% "slickery"                 % "0.1.0"
 
   // WebJars We Use
+  val wj_bootswatch           = "org.webjars"               % "bootswatch"                % Ver.bootswatch
   val wj_marked               = "org.webjars"               % "marked"                    % Ver.marked
   val wj_requirejs            = "org.webjars"               % "requirejs"                 % "2.1.18"
   val wj_requirejs_domready   = "org.webjars"               % "requirejs-domready"        % "2.0.1-2"
@@ -130,7 +131,7 @@ trait Dependencies
     akka_actor,
     play_json, play_iteratees, play_plugins_mailer, play_plugins_redis, play_slick, play_slick_evols,
     play_silhouette, play_bootstrap, play_html_compressor, // play_geolocation,
-    wj_marked, wj_font_awesome,
+    wj_bootswatch, wj_marked, wj_font_awesome,
     // kamon_core, kamon_scala, kamon_akka, kamon_log_reporter, kamon_play, kamon_system_metrics, kamon_annotation,
     Test.akka, Test.commons_io, Test.nu_validator, Test.silhouette
   )

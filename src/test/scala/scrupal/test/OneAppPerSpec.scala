@@ -28,37 +28,8 @@ import scala.runtime.AbstractPartialFunction
 
 trait OneAppPerSpec extends ScrupalSpecification { self : ScrupalSpecification ⇒
 
-  def fakeApplication() : Application = fakeApplicationBuilder().build()
-  def fakeApplicationBuilder(
-    path: java.io.File = new java.io.File("."),
-    classloader: ClassLoader = classOf[OneAppPerSpec].getClassLoader,
-    additionalConfiguration: Map[String, _ <: Any] = Map.empty,
-    withRoutes: PartialFunction[(String, String), Handler] = PartialFunction.empty,
-    router : Router = null
-  ) : GuiceApplicationBuilder = {
-    val bldr = new GuiceApplicationBuilder()
-      .in(Environment(new java.io.File("."), this.getClass.getClassLoader, Mode.Test))
-      .configure(additionalConfiguration)
-      .bindings(
-        bind[_root_.scrupal.api.Scrupal] to testScrupal
-      )
-    if (router != null) {
-      bldr.bindings(bind[Router].to(router))
-    } else if (withRoutes != null && withRoutes != PartialFunction.empty) {
-      bldr
-        .bindings(
-          bind[FakeRouterConfig] to FakeRouterConfig(withRoutes)
-        )
-        .overrides(
-          bind[play.api.routing.Router].toProvider[FakeRouterProvider]
-        )
-    } else {
-      bldr
-    }
-  }
-
   /** Override app if you need a FakeApplication with other than default parameters. */
-  implicit lazy val application : Application = fakeApplication()
+  implicit lazy val application : Application = scrupal
 
   private def startRun() = {
     Play.start(application)

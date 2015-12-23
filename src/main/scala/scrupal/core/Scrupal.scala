@@ -17,6 +17,7 @@ package scrupal.core
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
+import com.google.inject.Singleton
 
 import com.reactific.helpers._
 // import com.reactific.slickery.Authorable
@@ -27,32 +28,44 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 import play.api.routing.Router
-import play.api.{Environment, Configuration}
-import play.api.http.{HttpFilters, HttpConfiguration, HttpErrorHandler}
-import play.api.inject.ApplicationLifecycle
+import play.api._
+import play.api.http.{HttpRequestHandler, HttpFilters, HttpConfiguration, HttpErrorHandler}
+import play.api.inject.{Injector, DefaultApplicationLifecycle}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.duration._
 
 import scrupal.utils.ScrupalComponent
 
-
 case class Scrupal @Inject() (
-  private [core] val environment : Environment,
-  private [core] val configuration : Configuration,
-  private [core] val applicationLifecycle : ApplicationLifecycle,
-  private [core] val errorHandler: HttpErrorHandler,
-  private [core] val httpConfiguration: HttpConfiguration,
-  private [core] val httpFilters: HttpFilters,
-  private [core] val globalRouter: Router,
+  environment : Environment,
+  applicationLifecycle : DefaultApplicationLifecycle,
+  override val injector: Injector,
+  override val configuration : Configuration,
+  override val requestHandler : HttpRequestHandler,
+  override val errorHandler: HttpErrorHandler,
+  override val actorSystem : ActorSystem,
+  override val plugins: Plugins,
+  httpConfiguration: HttpConfiguration,
+  httpFilters: HttpFilters,
+  globalRouter: Router,
   name: String = "Scrupal"
 ) extends {
   final val id: Symbol = Symbol(name)
   final val registry = Scrupal
-} with ScrupalComponent with AutoCloseable  with Registrable[Scrupal] {
+} with DefaultApplication(environment, applicationLifecycle, injector, configuration, requestHandler,
+                          errorHandler, actorSystem, plugins)
+  with ScrupalComponent with AutoCloseable  with Registrable[Scrupal] {
 
   val author = "Reactific Software LLC"
   val copyright = "© 2013-2015 Reactific Software LLC. All Rights Reserved."
   val license = OSSLicense.ApacheV2
+
+  implicit protected val _executionContext: ExecutionContext = getExecutionContext
+
+  implicit protected val _actorSystem: ActorSystem = getActorSystem
+
+  implicit val _timeout = getTimeout
 
   applicationLifecycle.addStopHook { () ⇒
     Future.successful {
@@ -60,20 +73,42 @@ case class Scrupal @Inject() (
     }
   }
 
-  override def close() = {
-    log.debug("Scrupal shutdown initiated")
-    withExecutionContext { implicit ec: ExecutionContext ⇒
-      _actorSystem.shutdown()
+  def closeTimeout : Duration = 10.seconds
+
+  def close() = {
+    log.info("Scrupal shutdown initiated")
+    val result = applicationLifecycle.stop().map { u =>
       // _storeContext.close()
+      _actorSystem.shutdown()
+      true
+    } recover {
+      case xcptn: Throwable =>
+        log.error("Scrupal shutdown failed with: ", xcptn)
+        false
     }
-    log.debug("Scrupal shutdown completed")
+    val timeout = closeTimeout
+    try {
+      Await.result(result, timeout) match {
+        case true =>
+          log.info("Scrupal shutdown completed normally.")
+        case false =>
+          log.warn("Scrupal shutdown failed. See above exception report")
+      }
+    } catch {
+      case ix: InterruptedException =>
+        // - if the current thread is interrupted while waiting
+        log.warn("Scrupal shutdown was interrupted", ix)
+      case tx: TimeoutException =>
+        // if after waiting for the specified time awaitable is still not ready
+        log.warn(s"Scrupal shutdown timed out after $timeout", tx)
+      case iax: IllegalArgumentException =>
+        // if atMost is Duration.Undefined
+        log.warn("Scrupal shutdown with untenable 'atMost' argument", iax)
+      case xcptn: Throwable =>
+        log.warn("Scrupal shutdown interrupted by unrecognized exception:", xcptn)
+    }
   }
 
-  implicit protected val _executionContext: ExecutionContext = getExecutionContext
-
-  implicit protected val _actorSystem: ActorSystem = getActorSystem
-
-  implicit val _timeout = getTimeout
 
   // implicit val _assetsLocator: AssetsLocator = getAssetsLocator
 

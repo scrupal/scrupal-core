@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets
 
 import nu.validator.htmlparser.dom.HtmlDocumentBuilder
 import org.xml.sax.InputSource
+import scrupal.utils.ScrupalComponent
 
 import scala.util.{Failure, Success, Try}
 
@@ -63,9 +64,9 @@ object HTML5Validator extends ScrupalComponent {
     }
   }
 
-  def validate(document : TagContent) : Boolean = validateFragment(document.render)
+  // def validate(document : TagContent) : Boolean = validateFragment(document.render)
 
-  def validate(document : Page, context : Context) : Boolean = validateDocument(document.render(context))
+  // def validate(document : Page, context : Context) : Boolean = validateDocument(document.render(context))
 
   /*
   val request = WS.url("http://html5.validator.nu/").

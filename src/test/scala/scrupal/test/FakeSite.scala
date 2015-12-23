@@ -23,7 +23,7 @@ import scrupal.core.{Site, Scrupal}
   *
   * This site is very accepting.
   */
-case class FakeSite(override val name: String)(implicit scrpl: Scrupal) extends Site(name) {
+class FakeSite(override val name: String)(implicit scrpl: Scrupal) extends Site(name) {
   val created : Option[Instant] = Some(Instant.now())
   val modified: Option[Instant] = Some(Instant.now())
   val description: String = s"A Fake Site for: $name"

@@ -1,4 +1,4 @@
-/**********************************************************************************************************************
+/***********************************************************************************************************************
   * This file is part of Scrupal, a Scalable Reactive Web Application Framework for Content Management                 *
   *                                                                                                                    *
   * Copyright (c) 2015, Reactific Software LLC. All Rights Reserved.                                                   *
@@ -11,7 +11,7 @@
   * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed   *
   * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for  *
   * the specific language governing permissions and limitations under the License.                                     *
-  **********************************************************************************************************************/
+  *********************************************************************************************************************/
 
 package scrupal.router
 
