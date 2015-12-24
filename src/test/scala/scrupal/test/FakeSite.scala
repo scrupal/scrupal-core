@@ -17,14 +17,22 @@ package scrupal.test
 
 import java.time.Instant
 
-import scrupal.core.{Site, Scrupal}
+import play.api.mvc.RequestHeader
+import scrupal.core.{UnimplementedReactor, Reactor, Site, Scrupal}
 
 /** A Fake Site For Testing
   *
   * This site is very accepting.
   */
-class FakeSite(override val name: String)(implicit scrpl: Scrupal) extends Site(name) {
-  val created : Option[Instant] = Some(Instant.now())
-  val modified: Option[Instant] = Some(Instant.now())
-  val description: String = s"A Fake Site for: $name"
+class FakeSite(override val name: String, override val domainName : String )(implicit scrpl: Scrupal) extends
+  Site(name, domainName, s"Fake Site for: $name ($domainName)", Some(Instant.now()), Some(Instant.now()))(scrpl) {
+
+  override def reactorFor(request: RequestHeader) : Option[Reactor] = {
+    super.reactorFor(request) match {
+      case Some(reactor) ⇒ Some(reactor)
+      case None ⇒  Some(UnimplementedReactor(s"Reactor for: $request"))
+    }
+  }
+
+
 }

@@ -18,12 +18,21 @@ package scrupal.core
 import javax.inject.{Inject, Singleton}
 
 import play.api.http.{HttpConfiguration, HttpFilters, HttpErrorHandler, DefaultHttpRequestHandler}
-import play.api.http.Status._
+import play.api.mvc.Results
 import play.api.mvc._
 import play.api.routing.Router
 import scrupal.utils.DomainNames
 
+import scala.concurrent.Future
 import scala.language.implicitConversions
+
+case class ReactorAction(context: Context, reactor: Reactor) extends Action[AnyContent] {
+  def parser: BodyParser[AnyContent] = BodyParsers.parse.anyContent
+  def apply(request: Request[AnyContent]): Future[Result] = {
+    reactor.resultFrom(context, request)
+  }
+}
+
 
 /** Scrupal Request Handler
   *
@@ -38,26 +47,39 @@ class ScrupalRequestHandler @Inject() (
     httpFilters : HttpFilters
 ) extends DefaultHttpRequestHandler(globalRouter, errorHandler, httpConfiguration, httpFilters) {
 
-  private def notFoundHandler = Action.async(BodyParsers.parse.empty)(req =>
-    errorHandler.onClientError(req, NOT_FOUND)
-  )
-
   override def handlerForRequest(header: RequestHeader) : (RequestHeader, Handler) = {
-    DomainNames.matchDomainName(header.host) match {
-      case (Some(domain), Some(sub)) =>
-        scrupal.sites.lookup(Symbol(domain)) match {
-          case Some(site) =>
-            site.handlerForRequest(header)
-          case None =>
-            header -> notFoundHandler
-        }
-      case (Some(domain), None) =>
-        scrupal.sites.lookup(Symbol(domain)) match {
-          case Some(site) =>
-            site.handlerForRequest(header)
-          case None =>
-            header -> notFoundHandler
-        }
+    def reactorForSite(site : Site, subDomain: Option[String]) : Option[ReactorAction] = {
+      val maybe_reactor : Option[Reactor] = subDomain.flatMap {
+        sub ⇒ site.reactorFor(header, sub) } orElse {
+        site.reactorFor(header)
+      }
+      maybe_reactor. map { rx ⇒
+        val context = Context(scrupal, site)
+        ReactorAction(context, rx)
+      }
+    }
+    def getReactor(sites: Seq[Site], subDomain: Option[String]) : (RequestHeader, Handler) = {
+      sites.size match {
+        case 0 ⇒
+          super.handlerForRequest(header)
+        case 1 ⇒
+          reactorForSite(sites.head, subDomain) match {
+            case Some(reactor) =>
+              header → reactor
+            case None ⇒
+              super.handlerForRequest(header)
+          }
+        case 2 ⇒
+          header → Action { r: RequestHeader ⇒
+            Results.Conflict(s"Found ${sites.size} possible sites for ${header.domain}")
+          }
+      }
+    }
+    DomainNames.matchDomainName(header.domain) match {
+      case (Some(domain),Some(subDomain)) =>
+        getReactor(scrupal.sites.forHost(domain), Some(subDomain))
+      case (Some(domain), None) ⇒
+        getReactor(scrupal.sites.forHost(domain), None)
       case _ =>
         super.handlerForRequest(header)
     }

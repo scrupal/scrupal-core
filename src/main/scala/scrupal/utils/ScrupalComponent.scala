@@ -15,50 +15,12 @@
 
 package scrupal.utils
 
-import java.util.concurrent.TimeoutException
-
-import com.reactific.helpers.{TossedException, ThrowingHelper, LoggingHelper}
-
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ Await, Future }
-import scala.util.{ Failure, Success, Try }
+import com.reactific.helpers.{FutureHelper, ThrowingHelper, LoggingHelper}
 
 /** A Scrupal Component
   * This trait just provides logging and exception throwing support. Mix it in to a Scrupal class to obtain
-  * these facilities.
+  * these facilities. Other functionality may be added in the future.
   */
-trait ScrupalComponent extends LoggingHelper with ThrowingHelper {
+trait ScrupalComponent extends LoggingHelper with ThrowingHelper with FutureHelper {
 
-  /** Handle Exceptions From Asynchronous Results
-    * This awaits a future operation that returns HTML and converts any exception that arises during the
-    * future operation or waiting into HTML as well. So, this is guaranteed to never let an exception escape and to
-    * always return Html.
- *
-    * @param future The Future[Html] to wait for
-    * @param duration How long to wait, at most
-    * @param opName The name of the operation being waited for, to assist with error messages
-    * @return A blob of Html containing either the intended result or an error message.
-    */
-  def await[X](future : ⇒ Future[X], duration : FiniteDuration, opName : String) : Try[X] = {
-    Try {
-      Await.result(future, duration)
-    } match {
-      case Success(result) =>
-        Success(result)
-      case Failure(xcptn) =>
-        xcptn match {
-          case ix: InterruptedException =>
-            // - if the current thread is interrupted while waiting
-            Failure(TossedException(this, s"Operation '$opName' was interrupted: ", ix))
-          case tx: TimeoutException =>
-            // if after waiting for the specified time awaitable is still not ready
-            Failure(TossedException(this, s"Operation '$opName' timed out after $duration", tx))
-          case iax: IllegalArgumentException =>
-            // if atMost is Duration.Undefined
-            Failure(TossedException(this, s"Operation '$opName' called with untenable 'duration' argument", iax))
-          case xcptn: Throwable =>
-            Failure(TossedException(this, s"Operation '$opName'interrupted by unrecognized exception:", xcptn))
-        }
-    }
-  }
 }

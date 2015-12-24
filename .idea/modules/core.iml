@@ -144,8 +144,6 @@
     <orderEntry type="library" scope="TEST" name="SBT: org.scala-lang:scala-compiler:2.11.7:jar" level="project" />
     <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.11.7:jar" level="project" />
     <orderEntry type="library" name="SBT: org.scala-lang:scala-reflect:2.11.7:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.scala-lang.modules:scala-parser-combinators_2.11:1.0.1:jar" level="project" />
-    <orderEntry type="library" scope="TEST" name="SBT: org.scala-lang.modules:scala-parser-combinators_2.11:1.0.4:jar" level="project" />
     <orderEntry type="library" name="SBT: org.scala-lang.modules:scala-xml_2.11:1.0.1:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scala-lang.modules:scala-xml_2.11:1.0.4:jar" level="project" />
     <orderEntry type="library" name="SBT: org.scala-lang.plugins:scala-continuations-library_2.11:1.0.1:jar" level="project" />
@@ -190,10 +188,17 @@
     <orderEntry type="library" name="SBT: xml-apis:xml-apis:1.4.01:jar" level="project" />
     <orderEntry type="library" name="SBT: com.h2database:h2:1.4.187:jar" level="project" />
     <orderEntry type="library" name="SBT: com.typesafe.play.modules:play-modules-redis_2.11:2.4.1:jar" level="project" />
-    <orderEntry type="library" name="SBT: com.reactific:helpers_2.11:0.1.0:jar" level="project" />
-    <orderEntry type="library" name="SBT: com.reactific:slickery_2.11:0.1.0:jar" level="project" />
     <orderEntry type="library" name="SBT: com.typesafe.scala-logging:scala-logging_2.11:3.1.0:jar" level="project" />
-    <orderEntry type="library" name="SBT: org.slf4j:slf4j-api:1.7.12:jar" level="project" />
     <orderEntry type="library" name="SBT: org.webjars:bootswatch:3.3.5+4:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.typesafe:ssl-config-akka_2.11:0.1.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.typesafe:ssl-config-core_2.11:0.1.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.typesafe.akka:akka-http-core-experimental_2.11:2.0.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.typesafe.akka:akka-http-experimental_2.11:2.0.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.typesafe.akka:akka-parsing-experimental_2.11:2.0.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.typesafe.akka:akka-stream-experimental_2.11:2.0.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang.modules:scala-parser-combinators_2.11:1.0.4:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.reactific:helpers_2.11:0.2.0-SNAPSHOT:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.reactific:slickery_2.11:0.2.0-SNAPSHOT:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.slf4j:slf4j-api:1.7.13:jar" level="project" />
   </component>
 </module>

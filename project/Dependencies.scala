@@ -38,6 +38,7 @@ trait Dependencies
   object Ver {
     val play = "2.4.4"
     val akka = "2.3.13"
+    val akka_http = "2.0.1"
     val kamon = "0.4.0"
     val silhouette = "3.0.4"
     val bootswatch = "3.3.5+4"
@@ -68,14 +69,15 @@ trait Dependencies
   // Akka Stuff
   val akka_actor              = "com.typesafe.akka"         %% "akka-actor"               % Ver.akka
   val akka_slf4j              = "com.typesafe.akka"         %% "akka-slf4j"               % Ver.akka
+  val akka_http               = "com.typesafe.akka"         %% "akka-http-experimental"   % Ver.akka_http
 
   // Fundamental Libraries
   val shapeless               = "com.chuusai"               %% "shapeless"                % "2.2.1"
   val scala_arm               = "com.jsuereth"              %% "scala-arm"                % "1.4"
-  val reactific_helpers       = "com.reactific"             %% "helpers"                  % "0.1.0"
+  val reactific_helpers       = "com.reactific"             %% "helpers"                  % "0.2.0-SNAPSHOT"
 
   // Database, Caches, Serialization, Data Storage stuff
-  val slickery                = "com.reactific"             %% "slickery"                 % "0.1.0"
+  val slickery                = "com.reactific"             %% "slickery"                 % "0.2.0-SNAPSHOT"
 
   // WebJars We Use
   val wj_bootswatch           = "org.webjars"               % "bootswatch"                % Ver.bootswatch
@@ -128,7 +130,7 @@ trait Dependencies
   val core_dependencies : Seq[ModuleID] = Seq(
     pbkdf2, bcrypt, scrypt,
     commons_lang3, config, shapeless, scala_arm, slickery, reactific_helpers,
-    akka_actor,
+    akka_actor, akka_http, akka_slf4j,
     play_json, play_iteratees, play_plugins_mailer, play_plugins_redis, play_slick, play_slick_evols,
     play_silhouette, play_bootstrap, play_html_compressor, // play_geolocation,
     wj_bootswatch, wj_marked, wj_font_awesome,

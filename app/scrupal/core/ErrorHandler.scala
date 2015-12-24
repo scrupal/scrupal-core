@@ -20,13 +20,15 @@ import javax.inject.Inject
 import play.api.http.{HttpErrorHandlerExceptions, DefaultHttpErrorHandler}
 import play.api.mvc.{Results, Result, RequestHeader}
 import play.api.mvc.Results._
-import play.api.{Logger, Mode, UsefulException}
+import play.api._
+import play.api.routing.Router
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-class ErrorHandler @Inject()(scrupal: Scrupal) extends
-  DefaultHttpErrorHandler(scrupal.environment, scrupal.configuration, router=Some(scrupal.globalRouter)) {
+class ErrorHandler @Inject()(
+  scrupal: Scrupal, router : Router) extends
+  DefaultHttpErrorHandler(scrupal.environment, scrupal.configuration, router=Some(router)) {
 
   override def onProdServerError(request: RequestHeader, exception: UsefulException) = {
     Future.successful(

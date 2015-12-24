@@ -15,27 +15,39 @@
 
 package scrupal.core
 
+import java.time.Instant
+
 import com.reactific.helpers.{Registrable, Registry}
+import com.reactific.slickery.{Modifiable, Describable, Nameable, Storable}
 
 import play.api.mvc.{Handler, RequestHeader}
 
-import scala.util.matching.Regex
-
-case class Site(name : String, hostNames: Regex = ".*".r)(implicit val scrupal : Scrupal) extends Registrable[Site]
-  with ScrupalUser {
-  def registry: Registry[Site] = scrupal.sites
-  def id: Symbol = Symbol(name)
+case class Site(name : String,
+  domainName: String = "localhost",
+  description : String = "",
+  modified: Option[Instant] = Some(Instant.now()),
+  created : Option[Instant] = Some(Instant.now()),
+  oid : Option[Long] = None
+)(implicit val scrupal : Scrupal) extends {
+    val registry: Registry[Site] = scrupal.sites
+    val id: Symbol = Symbol(name)
+} with EnablementProvider[Site] with Registrable[Site]
+  with Storable with Nameable with Describable with Modifiable {
 
   def requireHttps : Boolean = false
 
-  def forHost(hostName: String) : Boolean = {
-    hostNames.findFirstIn(hostName).isDefined
+  def forHost(hostName: String) : Boolean = { hostName.endsWith(domainName) }
+
+  def reactorFor(request: RequestHeader, subdomain: String) : Option[Reactor] = {
+    reactorFor(request)
   }
 
   /** Get The Handler For The Request */
   def handlerForRequest(request: RequestHeader) : (RequestHeader, Handler) = {
     request -> null
   }
+
+  def isChildScope(e : Enablement[_]) : Boolean = delegates.exists { x ⇒ x == e }
 }
 
 case class SitesRegistry() extends Registry[Site] {
@@ -44,12 +56,6 @@ case class SitesRegistry() extends Registry[Site] {
 
   import scala.language.reflectiveCalls
 
-  def forHost(hostName : String) : Iterable[Site] = {
-    for (
-      (id, site) ← _registry if site.forHost(hostName)
-    ) yield {
-      site
-    }
-  }
+  def forHost(hostName : String) : Seq[Site] = { select { case (id,site) => site.forHost(hostName) }.toSeq }
 
 }
