@@ -47,7 +47,7 @@
             <pattern>%date %-5level %logger{30} - %message%n%xException{5}</pattern>
         </encoder>
     </appender>
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </root>

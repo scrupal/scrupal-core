@@ -8,29 +8,25 @@
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/scala" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/scala-2.11" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/routes/main" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/src_managed/main" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/twirl/main" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/test/scala" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/test/scala-2.11" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/routes/test" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/src_managed/test" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/twirl/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/resource_managed/main" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/test/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/resource_managed/test" type="java-test-resource" />
-      <excludeFolder url="file://$MODULE_DIR$/../../target" />
+      <excludeFolder url="file://$MODULE_DIR$/../../target/native_libraries" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/resolution-cache" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/scala-2.11/routes/main" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/scala-2.11/routes/test" />
-      <excludeFolder url="file://$MODULE_DIR$/../../target/scala-2.11/src_managed/main" />
+      <excludeFolder url="file://$MODULE_DIR$/../../target/scala-2.11/src_managed/test" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/scala-2.11/twirl/main" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/scala-2.11/twirl/test" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/specs2-reports" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/streams" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/test-reports" />
+      <excludeFolder url="file://$MODULE_DIR$/../../target/universal" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/web" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -200,5 +196,11 @@
     <orderEntry type="library" name="SBT: com.reactific:helpers_2.11:0.2.0-SNAPSHOT:jar" level="project" />
     <orderEntry type="library" name="SBT: com.reactific:slickery_2.11:0.2.0-SNAPSHOT:jar" level="project" />
     <orderEntry type="library" name="SBT: org.slf4j:slf4j-api:1.7.13:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.apache.commons:commons-compress:1.9:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.webjars:requirejs:2.1.20:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.webjars:webjars-locator:0.28:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.webjars:webjars-locator-core:0.27:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.webjars:webjars-play_2.11:2.4.0-2:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.webjars.npm:validate.js:0.8.0:jar" level="project" />
   </component>
 </module>

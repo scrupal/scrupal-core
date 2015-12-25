@@ -44,8 +44,6 @@ trait Context {
   val description : String = ""
   val user : String = "guest"
 
-  def suggestURL : URL = new URL("/")
-
   def withConfiguration[T](f : (Configuration) ⇒ T) : T = { scrupal.withConfiguration(f) }
 
   /*

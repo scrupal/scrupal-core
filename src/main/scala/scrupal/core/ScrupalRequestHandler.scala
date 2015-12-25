@@ -18,10 +18,8 @@ package scrupal.core
 import javax.inject.{Inject, Singleton}
 
 import play.api.http.{HttpConfiguration, HttpFilters, HttpErrorHandler, DefaultHttpRequestHandler}
-import play.api.mvc.Results
 import play.api.mvc._
 import play.api.routing.Router
-import scrupal.utils.DomainNames
 
 import scala.concurrent.Future
 import scala.language.implicitConversions
@@ -47,71 +45,28 @@ class ScrupalRequestHandler @Inject() (
     httpFilters : HttpFilters
 ) extends DefaultHttpRequestHandler(globalRouter, errorHandler, httpConfiguration, httpFilters) {
 
-  override def handlerForRequest(header: RequestHeader) : (RequestHeader, Handler) = {
-    def reactorForSite(site : Site, subDomain: Option[String]) : Option[ReactorAction] = {
-      val maybe_reactor : Option[Reactor] = subDomain.flatMap {
-        sub ⇒ site.reactorFor(header, sub) } orElse {
-        site.reactorFor(header)
-      }
-      maybe_reactor. map { rx ⇒
+  def getReactor(header: RequestHeader, site: Site, subDomain: Option[String]) : (RequestHeader, Handler) = {
+    subDomain.flatMap {
+      sub ⇒ site.reactorFor(header, sub)
+    } orElse {
+      site.reactorFor(header)
+    } match {
+      case Some(rx) ⇒
         val context = Context(scrupal, site)
-        ReactorAction(context, rx)
-      }
-    }
-    def getReactor(sites: Seq[Site], subDomain: Option[String]) : (RequestHeader, Handler) = {
-      sites.size match {
-        case 0 ⇒
-          super.handlerForRequest(header)
-        case 1 ⇒
-          reactorForSite(sites.head, subDomain) match {
-            case Some(reactor) =>
-              header → reactor
-            case None ⇒
-              super.handlerForRequest(header)
-          }
-        case 2 ⇒
-          header → Action { r: RequestHeader ⇒
-            Results.Conflict(s"Found ${sites.size} possible sites for ${header.domain}")
-          }
-      }
-    }
-    DomainNames.matchDomainName(header.domain) match {
-      case (Some(domain),Some(subDomain)) =>
-        getReactor(scrupal.sites.forHost(domain), Some(subDomain))
-      case (Some(domain), None) ⇒
-        getReactor(scrupal.sites.forHost(domain), None)
-      case _ =>
+        header → ReactorAction(context, rx)
+      case None ⇒
         super.handlerForRequest(header)
     }
   }
 
-  override def routeRequest(header: RequestHeader): Option[Handler] = {
-    super.routeRequest(header)
+  override def handlerForRequest(header: RequestHeader) : (RequestHeader, Handler) = {
+    scrupal.siteForRequest(header) match {
+      case (Some(site),Some(subDomain)) =>
+        getReactor(header, site, Some(subDomain))
+      case (Some(site), None) ⇒
+        getReactor(header, site, None)
+      case _ =>
+        super.handlerForRequest(header)
+    }
   }
-      /*
-    val handlers = {
-      for ( site ← scrupal.Sites.forHost(header.host) ;
-            context = Context(scrupal, site) ;
-            reactor ← site.reactorFor(header)
-      ) yield {
-        context → reactor
-      }
-    }
-
-    (handlers.size : @switch) match {
-      case 0 ⇒
-        super.routeRequest(header)
-      case 1 ⇒
-        val (context: Context, reactor: Reactor) = handlers.head
-        Some {
-          Action.async { req: Request[AnyContent] ⇒
-            reactor.resultFrom(context, req)
-          }
-        }
-      case _ ⇒
-        Some {
-          Action { r: RequestHeader ⇒ Conflict(s"Found ${handlers.size} possible reactions to $r") }
-        }
-    }
-    */
 }

@@ -52,5 +52,8 @@ class DomainNamesSpec extends Specification {
       DomainNames.matchDomainName("::1") must beEqualTo (Some("localhost") -> None )
       DomainNames.matchDomainName("fe80::1%lo0") must beEqualTo (Some("localhost") -> None )
     }
+    "fail un unrecognized host name" in {
+      DomainNames.matchDomainName("bad") must beEqualTo ( None → None )
+    }
   }
 }

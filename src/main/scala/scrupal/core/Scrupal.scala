@@ -19,6 +19,7 @@ import akka.actor.ActorSystem
 import akka.util.Timeout
 
 import com.reactific.helpers._
+import play.api.mvc.{RequestHeader}
 
 import scala.util.{Failure, Success}
 
@@ -35,7 +36,7 @@ import play.api.inject.{Injector, DefaultApplicationLifecycle}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
-import scrupal.utils.ScrupalComponent
+import scrupal.utils.{DomainNames, ScrupalComponent}
 
 trait ScrupalUser {
   def scrupal : Scrupal
@@ -93,6 +94,16 @@ case class Scrupal @Inject() (
     }
   }
 
+  def siteForRequest(header: RequestHeader) : (Option[Site],Option[String]) = {
+    DomainNames.matchDomainName(header.domain) match {
+      case (Some(domain),Some(subDomain)) =>
+        sites.forHost(domain) → Some(subDomain)
+      case (Some(domain), None) ⇒
+        sites.forHost(domain) → None
+      case _ =>
+        None → None
+    }
+  }
 
   // implicit val _assetsLocator: AssetsLocator = getAssetsLocator
 

@@ -13,23 +13,24 @@
   * the specific language governing permissions and limitations under the License.                                     *
   *********************************************************************************************************************/
 
-package scrupal.router
+package router.scrupal
 
 import javax.inject.{Inject, Singleton}
 
 import com.reactific.helpers.LoggingHelper
+import controllers.WebJarAssets
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.{JsError, JsSuccess, Json}
-import play.api.mvc.{RequestHeader, Action}
+import play.api.mvc.{Action, AnyContent, RequestHeader}
+import play.api.{Configuration, Environment}
 import scrupal.core.ScrupalBuildInfo
+import scrupal.utils.ScrupalComponent
 
 import scala.util.{Failure, Success, Try}
 
-
 @Singleton
-class Assets @Inject()(errHandler: HttpErrorHandler) extends controllers.Assets(errHandler) {
-
-  val themes = Assets.getThemeInfo
+class Assets @Inject() (errorHandler: HttpErrorHandler, configuration: Configuration, environment: Environment)
+  extends WebJarAssets(errorHandler, configuration, environment) with ScrupalComponent {
 
   val versionMap : Map[String,String] = Map(
     "bootswatch" -> ScrupalBuildInfo.bootswatch_version,
@@ -37,48 +38,74 @@ class Assets @Inject()(errHandler: HttpErrorHandler) extends controllers.Assets(
     "marked" -> ScrupalBuildInfo.marked_version
   )
 
-  def mkPrefix(subdir: String, lib: String = "scrupal-core", version : String = ScrupalBuildInfo.version) = {
-    s"/META-INF/resources/webjars/$lib/$version$subdir"
+  import Assets.{webJarPrefix, webPrefix}
+
+  def root(file: String) = {
+    val lookup = if (file.startsWith("/")) file else "/" + file
+    super.at("/", lookup, aggressiveCaching=false)
   }
 
-  def at(file: String) = super.at(mkPrefix(""), file, aggressiveCaching=true)
+  def public(file: String) = super.at("/public", file, aggressiveCaching=false)
 
-  def js(file: String) = super.at(mkPrefix("/javascripts"), file)
+  def js(file: String) = super.at(webPrefix("javascripts"), file, aggressiveCaching=true)
 
-  def img(file: String) = super.at(mkPrefix("/images"), file)
+  def img(file: String) = super.at(webPrefix("images"), file, aggressiveCaching=false)
 
-  def css(file: String) = super.at(mkPrefix("/stylesheets"), file)
+  def css(file: String) = super.at(webPrefix("stylesheets"), file + ".min.css", aggressiveCaching=true)
 
-  def bsjs(file: String)= {
-    val path = s"/META-INF/resources/webjars/bootswatch/${ScrupalBuildInfo.bootswatch_version}/2/js"
-    super.at(path, file)
-  }
+  def bsjs(file: String)= super.at(webJarPrefix("bootswatch","2/js"), file)
 
-  def theme(theme: String) = {
-    themes.get(theme) match {
+  def theme(theme: String) : Action[AnyContent] = {
+    Assets.themes.get(theme) match {
       case Some(thm) ⇒
-        val path = s"/META-INF/resources/webjars/bootswatch/${ScrupalBuildInfo.bootswatch_version}/${theme.toLowerCase}"
+        val path = webJarPrefix("bootswatch", theme.toLowerCase)
+        super.at(path, "bootstrap.min.css", aggressiveCaching=true)
       case None ⇒
         Action { req: RequestHeader ⇒ NotFound(s"Theme '$theme'") }
     }
   }
 
-  def webjar(library: String, file: String) = {
-    versionMap.get(library) match {
-      case Some(version) ⇒
-        val path = s"/META-INF/resources/webjars/$library/$version"
-        super.at(path, file)
-      case None ⇒
-        Action { req: RequestHeader ⇒ NotFound(s"WebJar '$library'") }
-    }
+  def webjar(file: String) : Action[AnyContent] = {
+    super.at(file)
   }
 
+  def webjar(webjar: String, file: String) : Action[AnyContent] = {
+    super.at(super.locate(webjar,file))
+  }
 }
 
 object Assets extends LoggingHelper {
 
+  lazy val themes = Assets.getThemeInfo
+
+  def webJarPrefix(webJar: String, subDir: String) = {
+    s"/public/lib/$webJar/$subDir"
+  }
+
+  def webPrefix(subdir: String) = {
+    s"/public/$subdir"
+  }
+
+  /** Template
+    * {{{
+    * {
+    *   "name": "Cosmo",
+    *   "description": "An ode to Metro",
+    *   "thumbnail": "https://bootswatch.com/cosmo/thumbnail.png",
+    *   "preview": "https://bootswatch.com/cosmo/",
+    *   "css": "https://bootswatch.com/cosmo/bootstrap.css",
+    *   "cssMin": "https://bootswatch.com/cosmo/bootstrap.min.css",
+    *   "cssCdn": "https://maxcdn.bootstrapcdn.com/bootswatch/latest/cosmo/bootstrap.min.css",
+    *   "less": "https://bootswatch.com/cosmo/bootswatch.less",
+    *   "lessVariables": "https://bootswatch.com/cosmo/variables.less",
+    *   "scss": "https://bootswatch.com/cosmo/_bootswatch.scss",
+    *   "scssVariables": "https://bootswatch.com/cosmo/_variables.scss"
+    * }
+    * }}}
+    */
   case class Theme(name: String, description: String, thumbnail: String, preview: String, css: String,
-                   `css-min`: String)
+      cssMin: String, cssCdn: String, less: String, lessVariables: String, scss: String, scssVariables : String)
+
   implicit val ThemeReads = Json.reads[Theme]
   case class ThemeInfo(version: String, themes: List[Theme])
   implicit val ThemeInfoReads = Json.reads[ThemeInfo]
@@ -86,9 +113,9 @@ object Assets extends LoggingHelper {
   lazy val emptyThemeInfo = Map.empty[String,Theme]
 
   def getThemeInfo : Map[String,Theme] = Try[Map[String,Theme]] {
-    val theme_path = s"META-INF/resources/webjars/bootswatch/${ScrupalBuildInfo.bootswatch_version}/2/api/themes.json"
+    val theme_path = webJarPrefix("bootswatch","api") + "/3.json"
     val loader = this.getClass.getClassLoader
-    Option(loader.getResourceAsStream(theme_path)) match {
+    Option(loader.getResourceAsStream(theme_path.drop(1))) match {
       case Some(stream) ⇒ {
         val jsval = Json.parse(stream)
         ThemeInfoReads.reads(jsval) match {

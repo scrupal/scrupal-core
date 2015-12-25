@@ -80,6 +80,7 @@ trait Dependencies
   val slickery                = "com.reactific"             %% "slickery"                 % "0.2.0-SNAPSHOT"
 
   // WebJars We Use
+  val webjars_play            = "org.webjars"               %% "webjars-play"             % "2.4.0-2"
   val wj_bootswatch           = "org.webjars"               % "bootswatch"                % Ver.bootswatch
   val wj_marked               = "org.webjars"               % "marked"                    % Ver.marked
   val wj_requirejs            = "org.webjars"               % "requirejs"                 % "2.1.18"
@@ -133,7 +134,7 @@ trait Dependencies
     akka_actor, akka_http, akka_slf4j,
     play_json, play_iteratees, play_plugins_mailer, play_plugins_redis, play_slick, play_slick_evols,
     play_silhouette, play_bootstrap, play_html_compressor, // play_geolocation,
-    wj_bootswatch, wj_marked, wj_font_awesome,
+    webjars_play, wj_bootswatch, wj_marked, wj_font_awesome,
     // kamon_core, kamon_scala, kamon_akka, kamon_log_reporter, kamon_play, kamon_system_metrics, kamon_annotation,
     Test.akka, Test.commons_io, Test.nu_validator, Test.silhouette
   )

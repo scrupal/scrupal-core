@@ -17,10 +17,13 @@ package scrupal.core
 
 import java.time.Instant
 
-import com.reactific.helpers.{Registrable, Registry}
+import com.reactific.helpers.{MemoryCache, Registrable, Registry}
 import com.reactific.slickery.{Modifiable, Describable, Nameable, Storable}
+import play.api.http.Status
 
-import play.api.mvc.{Handler, RequestHeader}
+import play.api.mvc.{Results, Result, Handler, RequestHeader}
+
+import scala.concurrent.Future
 
 case class Site(name : String,
   domainName: String = "localhost",
@@ -48,14 +51,58 @@ case class Site(name : String,
   }
 
   def isChildScope(e : Enablement[_]) : Boolean = delegates.exists { x ⇒ x == e }
+
+  def onServerError(request : RequestHeader, exception : Throwable, subDomain: Option[String]) : Future[Result] = {
+    Future.successful ( Results.InternalServerError(s"Requested failed: $request: $exception ($subDomain)") )
+  }
+
+  def onNotImplemented(request: RequestHeader, what: String, subDomain: Option[String]) : Future[Result] = {
+    Future.successful ( Results.NotImplemented(s"Not Implemented: $what ($subDomain)"))
+  }
+
+  def onServiceUnavailable(request: RequestHeader, what: String, subDomain: Option[String]) : Future[Result] = {
+    Future.successful ( Results.ServiceUnavailable(s"ServiceUnavailable: $what ($subDomain)"))
+  }
+
+  def onBadRequest(request : RequestHeader, message : String, subDomain: Option[String]) : Future[Result] = {
+    Future.successful ( Results.BadRequest(s"BadRequest: $request: $message ($subDomain)") )
+  }
+
+  def onUnauthorized(request : RequestHeader, message: String, subDomain: Option[String]) : Future[Result] = {
+    Future.successful ( Results.Unauthorized(s"Unauthorized: $request: $message ($subDomain)"))
+  }
+
+  def onForbidden(request : RequestHeader, message : String, subDomain: Option[String]) : Future[Result] = {
+    Future.successful ( Results.Forbidden(s"Forbidden: $request: $message ($subDomain)") )
+  }
+
+  def onNotFound(request : RequestHeader, message : String, subDomain: Option[String]) : Future[Result] = {
+    Future.successful ( Results.NotFound(s"NotFound: $request: $message ($subDomain)") )
+  }
+
+  def onGenericClientError(request: RequestHeader, status: Int, msg: String, sub: Option[String]) : Future[Result] = {
+    Future.successful ( Results.Status(status)(s"Error($status): $request $msg ($sub)"))
+  }
 }
 
 case class SitesRegistry() extends Registry[Site] {
   def registryName: String = "Sites"
   def registrantsName: String = "site"
 
-  import scala.language.reflectiveCalls
+  private val byDomainName = new MemoryCache[String,Site]
 
-  def forHost(hostName : String) : Seq[Site] = { select { case (id,site) => site.forHost(hostName) }.toSeq }
+  override final def register(site : Site) : Unit = {
+    super.register(site)
+    byDomainName.getOrElse(site.domainName)(site)
+  }
+
+  override final def unregister(site: Site) : Unit = {
+    super.unregister(site)
+    byDomainName.remove(site.domainName)
+  }
+
+  def forHost(hostName : String) : Option[Site] = {
+    byDomainName.get(hostName)
+  }
 
 }

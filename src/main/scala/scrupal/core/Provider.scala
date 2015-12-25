@@ -20,7 +20,7 @@ import play.api.mvc._
 
 /** Provider Of Reactors
   *
-  * Scrupal objects that mix in this trait participate in the routing of [[play.api.mvc.RequestHeader]]s to a
+  * Scrupal objects that mix in this trait participate in the routing of RequestHeaders to a
   * [[scrupal.core.Reactor]]. Providers work very much like Play's Router and can even use the SIRD DSL for matching
   * RequestHeader. The only difference is that a Provider is a partial function returning a Reactor instead of a
   * Play Action. The Reactor's Response is converted into a Play Result by the core module. To implement a

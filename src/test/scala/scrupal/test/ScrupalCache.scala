@@ -1,19 +1,12 @@
 package scrupal.test
 
-import java.io.File
-
-import akka.actor.ActorSystem
-import com.google.inject.Guice
-import play.api.http.{HttpFilters, HttpConfiguration, HttpErrorHandler, HttpRequestHandler}
-import play.api.inject.{Injector, DefaultApplicationLifecycle}
-import play.api.inject.guice.{GuiceInjectorBuilder, GuiceApplicationBuilder}
+import play.api.inject.DefaultApplicationLifecycle
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api._
 import play.api.mvc.Handler
 
-import com.reactific.helpers.AbstractRegistry
-import play.api.routing.Router
+import com.reactific.helpers.MemoryCache
 import scrupal.core.Scrupal
-import scrupal.utils.MemoryCache
 
 /** Scrupal Test Cache
   *

@@ -30,16 +30,13 @@ trait AssetsSettings {
   lazy val sbt_web_settings = Seq[Setting[_]](
     unmanagedSourceDirectories in Assets := Seq(baseDirectory.value / "assets"),
     unmanagedSourceDirectories in TestAssets := Seq(baseDirectory.value / "test" / "assets"),
-    moduleName in Assets := "scrupal"
+    moduleName in Assets := name.value
   )
 
-  lazy val general_pipeline_settings = Seq[Setting[_]](
+  lazy val pipeline_settings = Seq[Setting[_]](
     RjsKeys.appDir := (resourceManaged in rjs).value,
-    RjsKeys.mainModule := "scrupal",
-    DigestKeys.algorithms := Seq("md5")
-  )
-
-  lazy val core_pipeline_settings = general_pipeline_settings ++ Seq[Setting[_]](
+    RjsKeys.mainModule := name.value,
+    DigestKeys.algorithms := Seq("md5"),
     pipelineStages := Seq(digest, gzip)
   )
 

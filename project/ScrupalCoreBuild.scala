@@ -15,7 +15,7 @@
 
 import com.typesafe.sbt.web.SbtWeb
 import play.routes.compiler.InjectedRoutesGenerator
-import play.sbt.PlayLayoutPlugin
+import play.sbt.{PlayScala, PlayLayoutPlugin}
 import play.sbt.routes.RoutesKeys._
 import sbt.Keys._
 import sbt._
@@ -39,7 +39,10 @@ object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
 
   lazy val root = Project("core", file("."))
     .disablePlugins(PlayLayoutPlugin)
-    .enablePlugins(BuildInfoPlugin, ScrupalPlugin, SbtWeb)
+    .enablePlugins(PlayScala, BuildInfoPlugin, ScrupalPlugin)
+    // .settings(sbt_web_settings)
+    .settings(pipeline_settings)
+    .settings(less_settings)
     .settings(
       organization := "org.scrupal",
       copyrightHolder := "Reactific Software LLC",

@@ -33,6 +33,7 @@ class FakeSite(override val name: String, override val domainName : String )(imp
       case None ⇒  Some(UnimplementedReactor(s"Reactor for: $request"))
     }
   }
-
-
+}
+object FakeSite {
+  def apply(name : String, domainName: String)(scrpl: Scrupal) : FakeSite = new FakeSite(name, domainName)(scrpl)
 }

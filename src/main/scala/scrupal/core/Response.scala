@@ -21,6 +21,7 @@ import akka.http.scaladsl.model.{MediaType, MediaTypes}
 import org.apache.commons.lang3.exception.ExceptionUtils
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json._
+import play.twirl.api.Html
 
 import scala.concurrent.ExecutionContext
 
@@ -156,10 +157,12 @@ case class StringResponse(
   * @param disposition The disposition of the result.
   */
 case class HtmlResponse(
-  content : String,
+  content : Html,
   disposition : Disposition = Successful) extends Response {
   val mediaType : MediaType = MediaTypes.`text/html`
-  def toEnumerator(implicit ec: ExecutionContext) = Enumerator(content.getBytes(utf8))
+  def toEnumerator(implicit ec: ExecutionContext) = {
+    Enumerator(content.body.getBytes(utf8))
+  }
 }
 
 
@@ -214,7 +217,7 @@ case class JsonExceptionResponse(content : Throwable) extends Response {
     ))
   }
 
-  def toJsonResult : JsonResponse = {
+  def toJsonResponse : JsonResponse = {
     JsonResponse(toJson, disposition)
   }
 
@@ -228,6 +231,7 @@ case class JsonExceptionResponse(content : Throwable) extends Response {
   * This can be used when an error is detected that does not warrant an exception being thrown. Instead, just return
   * the ErrorResult. Note that Disposition is "Unspecified" but this is unlikely what you want so you should always
   * set the Disposition with an ErrorResult.
+ *
   * @param content The error message
   * @param disposition The disposition of the result
   */
