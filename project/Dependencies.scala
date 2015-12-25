@@ -74,10 +74,10 @@ trait Dependencies
   // Fundamental Libraries
   val shapeless               = "com.chuusai"               %% "shapeless"                % "2.2.1"
   val scala_arm               = "com.jsuereth"              %% "scala-arm"                % "1.4"
-  val reactific_helpers       = "com.reactific"             %% "helpers"                  % "0.2.0-SNAPSHOT"
+  val reactific_helpers       = "com.reactific"             %% "helpers"                  % "0.2.0"
 
   // Database, Caches, Serialization, Data Storage stuff
-  val slickery                = "com.reactific"             %% "slickery"                 % "0.2.0-SNAPSHOT"
+  val slickery                = "com.reactific"             %% "slickery"                 % "0.2.0"
 
   // WebJars We Use
   val webjars_play            = "org.webjars"               %% "webjars-play"             % "2.4.0-2"
