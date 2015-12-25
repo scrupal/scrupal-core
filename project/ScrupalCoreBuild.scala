@@ -13,7 +13,6 @@
  * the specific language governing permissions and limitations under the License.                                     *
  **********************************************************************************************************************/
 
-import com.typesafe.sbt.web.SbtWeb
 import play.routes.compiler.InjectedRoutesGenerator
 import play.sbt.{PlayScala, PlayLayoutPlugin}
 import play.sbt.routes.RoutesKeys._
@@ -23,7 +22,7 @@ import sbtbuildinfo.BuildInfoKeys._
 import sbtbuildinfo.BuildInfoPlugin
 import scrupal.sbt.ScrupalPlugin
 import scrupal.sbt.ScrupalPlugin.autoImport._
-import scoverage.ScoverageSbtPlugin.ScoverageKeys._
+import scoverage.ScoverageKeys._
 
 object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
 
@@ -37,7 +36,7 @@ object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
 
   ).mkString(";")
 
-  lazy val root = Project("core", file("."))
+  lazy val root = Project("scrupal-core", file("."))
     .disablePlugins(PlayLayoutPlugin)
     .enablePlugins(PlayScala, BuildInfoPlugin, ScrupalPlugin)
     // .settings(sbt_web_settings)
@@ -56,7 +55,7 @@ object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
       namespaceReverseRouter := true,
       coverageFailOnMinimum := true,
       coverageExcludedPackages := classesIgnoredByScoverage,
-      coverageMinimum := 95,
+      coverageMinimum := 50,
       buildInfoObject := "ScrupalBuildInfo",
       buildInfoPackage := "scrupal.core",
       buildInfoKeys ++= Seq (

@@ -1,0 +1,3 @@
+# Coveralls Configuration File.
+# See: https://coveralls.io/github/scrupal/scrupal-core
+service_name: travis-ci
