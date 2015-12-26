@@ -1,5 +1,7 @@
 *.class
 *.log
+.idea/workspace.xml
+.idea/uiDesigner.xml
 
 # sbt specific
 .cache
