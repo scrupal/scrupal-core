@@ -41,6 +41,7 @@ trait Dependencies
     val akka_http = "2.0.1"
     val kamon = "0.4.0"
     val silhouette = "3.0.4"
+    val bootstrap = "3.3.6" // Note: must match play_bootstrap version
     val bootswatch = "3.3.5+4"
     val font_awesome = "4.3.0-3"
     val marked = "0.3.2-1"
@@ -83,9 +84,9 @@ trait Dependencies
   val webjars_play            = "org.webjars"               %% "webjars-play"             % "2.4.0-2"
   val wj_bootswatch           = "org.webjars"               % "bootswatch"                % Ver.bootswatch
   val wj_marked               = "org.webjars"               % "marked"                    % Ver.marked
+  val wj_font_awesome         = "org.webjars"               % "font-awesome"              % Ver.font_awesome
   val wj_requirejs            = "org.webjars"               % "requirejs"                 % "2.1.18"
   val wj_requirejs_domready   = "org.webjars"               % "requirejs-domready"        % "2.0.1-2"
-  val wj_font_awesome         = "org.webjars"               % "font-awesome"              % Ver.font_awesome
 
   // Hashing Algorithms
   val pbkdf2                  = "io.github.nremond"         %% "pbkdf2-scala"             % "0.4"

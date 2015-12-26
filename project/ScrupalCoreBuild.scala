@@ -65,6 +65,7 @@ object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
         "play_version" -> Ver.play,
         "akka_version" -> Ver.akka,
         "silhouette_version" -> Ver.silhouette,
+        "bootstrap_version" -> Ver.bootstrap,
         "bootswatch_version" -> Ver.bootswatch,
         "font_awesome_version" -> Ver.font_awesome,
         "marked_version" -> Ver.marked

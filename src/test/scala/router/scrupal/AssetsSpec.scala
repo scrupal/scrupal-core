@@ -61,16 +61,17 @@ class AssetsSpec extends ScrupalSpecification("Assets") {
       Await.result(future, 2.seconds)
     }
 
-    "locate logger.xml with at" in new WithApplication(scrupal.application) {
+    "locate logger.xml three ways" in new WithApplication(scrupal.application) {
       foundAsset(mkAssets.at("/", "/logger.xml"))
-    }
-
-    "locate logger.xml with root" in new WithApplication(scrupal.application) {
       foundAsset(mkAssets.root("logger.xml"))
+      foundAsset(mkAssets.root("/logger.xml"))
     }
 
     "locate scrupal.ico with img" in new WithApplication(scrupal.application) {
       foundAsset(mkAssets.img("scrupal.ico"))
+    }
+    "locate scrupal.ico with public" in new WithApplication(scrupal.application) {
+      foundAsset(mkAssets.public("images/scrupal.ico"))
     }
 
     "locate scrupal.css with css" in new WithApplication(scrupal.application) {
@@ -85,31 +86,8 @@ class AssetsSpec extends ScrupalSpecification("Assets") {
       foundAsset(mkAssets.theme("Simplex"))
     }
 
-/*  52   def bsjs(file: String)= {
-      53     val path = s"/META-INF/resources/webjars/bootswatch/${ScrupalBuildInfo.bootswatch_version}/2/js"
-      54     super.at(path, file)
-      55   }
-    56
-    57   def theme(theme: String) = {
-      58     themes.get(theme) match {
-      59       case Some(thm) ⇒
-          60         val path = s"/META-INF/resources/webjars/bootswatch/${ScrupalBuildInfo.bootswatch_version}/${theme.toLowerCase}"
-          61       case None ⇒
-          62         Action { req: RequestHeader ⇒ NotFound(s"Theme '$theme'") }
-          63     }
-      64   }
-    65
-    66   def webjar(library: String, file: String) = {
-      67     versionMap.get(library) match {
-      68       case Some(version) ⇒
-          69         val path = s"/META-INF/resources/webjars/$library/$version"
-          70         super.at(path, file)
-          71       case None ⇒
-          72         Action { req: RequestHeader ⇒ NotFound(s"WebJar '$library'") }
-          73     }
-      74   }
-    75
-    76 }
-             */
+    "locate Simplex with webjar" in new WithApplication(scrupal.application) {
+      foundAsset(mkAssets.webjar("bootswatch", "simplex/bootstrap.min.css"))
+    }
   }
 }

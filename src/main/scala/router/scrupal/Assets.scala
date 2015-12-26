@@ -19,6 +19,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.reactific.helpers.LoggingHelper
 import controllers.WebJarAssets
+import org.webjars.WebJarAssetLocator
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, RequestHeader}
@@ -32,12 +33,6 @@ import scala.util.{Failure, Success, Try}
 class Assets @Inject() (errorHandler: HttpErrorHandler, configuration: Configuration, environment: Environment)
   extends WebJarAssets(errorHandler, configuration, environment) with ScrupalComponent {
 
-  val versionMap : Map[String,String] = Map(
-    "bootswatch" -> ScrupalBuildInfo.bootswatch_version,
-    "font-awesome" -> ScrupalBuildInfo.font_awesome_version,
-    "marked" -> ScrupalBuildInfo.marked_version
-  )
-
   import Assets.{webJarPrefix, webPrefix}
 
   def root(file: String) = {
@@ -45,15 +40,13 @@ class Assets @Inject() (errorHandler: HttpErrorHandler, configuration: Configura
     super.at("/", lookup, aggressiveCaching=false)
   }
 
-  def public(file: String) = super.at("/public", file, aggressiveCaching=false)
+  def public(file: String) = super.at(webPrefix(""), file, aggressiveCaching=false)
 
   def js(file: String) = super.at(webPrefix("javascripts"), file, aggressiveCaching=true)
 
   def img(file: String) = super.at(webPrefix("images"), file, aggressiveCaching=false)
 
   def css(file: String) = super.at(webPrefix("stylesheets"), file + ".min.css", aggressiveCaching=true)
-
-  def bsjs(file: String)= super.at(webJarPrefix("bootswatch","2/js"), file)
 
   def theme(theme: String) : Action[AnyContent] = {
     Assets.themes.get(theme) match {
@@ -65,12 +58,9 @@ class Assets @Inject() (errorHandler: HttpErrorHandler, configuration: Configura
     }
   }
 
-  def webjar(file: String) : Action[AnyContent] = {
-    super.at(file)
-  }
-
   def webjar(webjar: String, file: String) : Action[AnyContent] = {
-    super.at(super.locate(webjar,file))
+    val path = webJarPrefix(webjar,"")
+    super.at(path, file, aggressiveCaching=false)
   }
 }
 
@@ -78,12 +68,23 @@ object Assets extends LoggingHelper {
 
   lazy val themes = Assets.getThemeInfo
 
-  def webJarPrefix(webJar: String, subDir: String) = {
-    s"/public/lib/$webJar/$subDir"
+  lazy val versionMap : Map[String,String] = Map(
+    "bootstrap"  -> ScrupalBuildInfo.bootstrap_version,
+    "bootswatch" -> ScrupalBuildInfo.bootswatch_version,
+    "font-awesome" -> ScrupalBuildInfo.font_awesome_version,
+    "marked" -> ScrupalBuildInfo.marked_version
+  )
+
+  final val webjar_prefix = s"/${WebJarAssetLocator.WEBJARS_PATH_PREFIX}"
+  final val web_prefix = s"$webjar_prefix/${ScrupalBuildInfo.name}/${ScrupalBuildInfo.version}"
+
+  def webJarPrefix(webJar: String, partialPath: String) = {
+    val version = versionMap.getOrElse(webJar,"{missing_version}")
+    s"$webjar_prefix/$webJar/$version/$partialPath"
   }
 
-  def webPrefix(subdir: String) = {
-    s"/public/$subdir"
+  def webPrefix(partialPath: String) = {
+    s"/$web_prefix/$partialPath"
   }
 
   /** Template
