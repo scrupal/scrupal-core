@@ -22,7 +22,9 @@ import sbtbuildinfo.BuildInfoKeys._
 import sbtbuildinfo.BuildInfoPlugin
 import scrupal.sbt.ScrupalPlugin
 import scrupal.sbt.ScrupalPlugin.autoImport._
-import scoverage.ScoverageKeys._
+import scoverage.ScoverageSbtPlugin
+import scoverage.ScoverageSbtPlugin.ScoverageKeys._
+import org.scoverage.coveralls.Imports.CoverallsKeys._
 
 object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
 
@@ -38,7 +40,7 @@ object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
 
   lazy val root = Project("scrupal-core", file("."))
     .disablePlugins(PlayLayoutPlugin)
-    .enablePlugins(PlayScala, BuildInfoPlugin, ScrupalPlugin)
+    .enablePlugins(PlayScala, BuildInfoPlugin, ScrupalPlugin, ScoverageSbtPlugin)
     // .settings(sbt_web_settings)
     .settings(pipeline_settings)
     .settings(less_settings)
@@ -56,6 +58,7 @@ object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
       coverageFailOnMinimum := true,
       coverageExcludedPackages := classesIgnoredByScoverage,
       coverageMinimum := 50,
+      coverallsToken := Some("uoZrsbhbC0E2289tvwp3ISntZLH2yjwqX"),
       buildInfoObject := "ScrupalBuildInfo",
       buildInfoPackage := "scrupal.core",
       buildInfoKeys ++= Seq (

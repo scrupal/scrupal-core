@@ -74,10 +74,10 @@ trait Dependencies
   // Fundamental Libraries
   val shapeless               = "com.chuusai"               %% "shapeless"                % "2.2.1"
   val scala_arm               = "com.jsuereth"              %% "scala-arm"                % "1.4"
-  val reactific_helpers       = "com.reactific"             %% "helpers"                  % "0.2.0"
+  val reactific_helpers       = "com.reactific"             %% "helpers"                  % "0.3.0"
 
   // Database, Caches, Serialization, Data Storage stuff
-  val slickery                = "com.reactific"             %% "slickery"                 % "0.2.0"
+  val slickery                = "com.reactific"             %% "slickery"                 % "0.3.0"
 
   // WebJars We Use
   val webjars_play            = "org.webjars"               %% "webjars-play"             % "2.4.0-2"
@@ -107,23 +107,9 @@ trait Dependencies
   val commons_lang3           = "org.apache.commons"        % "commons-lang3"             % "3.4"
   val hotspot_profiler        = "com.reactific"             %% "hotspot-profiler"         % "0.3.0"
 
-/*  val all_dependencies : Seq[ModuleID] = Seq(
-    play_cache, play_filters, play_test, play_docs, play_ws,
-    mailer_plugin,
-    reactivemongo,
-    pbkdf2, bcrypt, scrypt,
-    osgi_core, slf4j,
-    webjars_play,
-    requirejs, requirejs_domready,
-    angularjs, angular_drag_drop, angular_multi_select,
-    angular_ui, angular_ui_bootstrap, angular_ui_router, angular_ui_utils, angular_ui_calendar,
-    marked, fontawesome
-  )
-  */
-
   object Test {
     val akka             = "com.typesafe.akka"        %% "akka-testkit"             % Ver.akka        % "test"
-    val commons_io       = "commons-io"                %  "commons-io"              % "2.4"           % "test"
+    val commons_io       = "commons-io"                % "commons-io"               % "2.4"           % "test"
     val nu_validator     = "nu.validator.htmlparser"   % "htmlparser"               % "1.4"           % "test"
     val silhouette       = "com.mohiva"               %% "play-silhouette-testkit"  % Ver.silhouette  % "test"
   }

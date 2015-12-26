@@ -1,4 +1,4 @@
 # Coveralls Configuration File.
 # See: https://coveralls.io/github/scrupal/scrupal-core
 service_name: travis-ci
-repo_token: uoZrsbhbC0E2289tvwp3ISntZLH2yjwqX
+# repo_token: uoZrsbhbC0E2289tvwp3ISntZLH2yjwqX
