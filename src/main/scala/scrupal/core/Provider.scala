@@ -88,7 +88,7 @@ trait DelegatingProvider extends Provider {
 
 trait EnablementProvider[T <: EnablementProvider[T]] extends DelegatingProvider with Enablement[T] with Enablee {
   def isEnabledProvider(e : Enablee) : Boolean = { e.isInstanceOf[Provider] && isEnabled(e, this) }
-  def delegates : Iterable[Provider] = forEach[Provider]{ isEnabledProvider } { e : Enablee ⇒ e.asInstanceOf[Provider]}
+  def delegates : Iterable[Provider] = mapIf[Provider]{ isEnabledProvider } { e : Enablee ⇒ e.asInstanceOf[Provider]}
 }
 
 trait SingularProvider extends IdentifiableProvider {
@@ -107,7 +107,12 @@ trait SingularProvider extends IdentifiableProvider {
   }
 
   protected def withPrefix(routes: ReactionRoutes, prefix: String): ReactionRoutes = {
-    val p = if (prefix.startsWith("/")) prefix else "/" + prefix
+
+    val p = if (prefix.startsWith("/")) {
+      prefix
+    } else {
+      "/" + prefix
+    }
     val prefixed: PartialFunction[RequestHeader, RequestHeader] = {
       case header: RequestHeader if header.path.startsWith(p) =>
         header.copy(path = header.path.drop(p.length))

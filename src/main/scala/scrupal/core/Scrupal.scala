@@ -57,36 +57,28 @@ case class Scrupal @Inject() (
   val copyright = "© 2013-2015 Reactific Software LLC. All Rights Reserved."
   val license = OSSLicense.ApacheV2
 
-  implicit protected val _executionContext: ExecutionContext = getExecutionContext
+  implicit val executionContext: ExecutionContext = getExecutionContext
 
-  implicit protected val _actorSystem: ActorSystem = getActorSystem
+  implicit val actorSystem: ActorSystem = getActorSystem
 
-  implicit val _timeout = getTimeout
+  implicit val timeout = getTimeout
 
   val sites : SitesRegistry = SitesRegistry()
 
   applicationLifecycle.addStopHook { () ⇒
     Future.successful {
-      this.close()
+      this.internalClose()
     }
+  }
+
+  def close() : Unit = {
+    doClose()
   }
 
   def closeTimeout : FiniteDuration = 10.seconds
 
-  def close() : Unit = doClose()
-
   def doClose() : Boolean = {
-    log.info("Scrupal shutdown initiated")
-    val futureResult = applicationLifecycle.stop().map { u =>
-      // _storeContext.close()
-      _actorSystem.shutdown()
-      _executionContext match {
-        case eces :  ExecutionContextExecutorService ⇒
-          eces.shutdown()
-        case _ ⇒
-          // nothing
-      }
-    }
+    val futureResult = applicationLifecycle.stop()
     await(futureResult, closeTimeout, "scrupal shutdown") match {
       case Success(x) =>
         log.info("Scrupal shutdown completed normally.")
@@ -94,6 +86,18 @@ case class Scrupal @Inject() (
       case Failure(x) =>
         log.warn("Scrupal shutdown failed: ", x)
         false
+    }
+  }
+
+  protected def internalClose() : Unit = {
+    log.info("Scrupal shutdown initiated")
+    // _storeContext.close()
+    actorSystem.shutdown()
+    executionContext match {
+      case eces: ExecutionContextExecutorService ⇒
+        eces.shutdown()
+      case _ ⇒
+        // nothing
     }
   }
 
@@ -117,15 +121,15 @@ case class Scrupal @Inject() (
   }
 
   def withExecutionContext[T](f: (ExecutionContext) ⇒ T): T = {
-    f(_executionContext)
+    f(executionContext)
   }
 
   def withActorSystem[T](f: (ActorSystem) ⇒ T): T = {
-    f(_actorSystem)
+    f(actorSystem)
   }
 
   def withActorExec[T](f: (ActorSystem, ExecutionContext, Timeout) ⇒ T): T = {
-    f(_actorSystem, _executionContext, _timeout)
+    f(actorSystem, executionContext, timeout)
   }
 
   protected def getActorSystem: ActorSystem = {
@@ -201,7 +205,7 @@ case class Scrupal @Inject() (
           case Some("default") ⇒
             makeWorkStealingPool()
           case Some("akka") ⇒
-            _actorSystem.dispatcher
+            actorSystem.dispatcher
           case Some("fixed-thread-pool") ⇒
             makeFixedThreadPool(conf.getConfig("fixed-thread-pool").getOrElse(Configuration()))
           case Some("work-stealing-pool") ⇒

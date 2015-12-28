@@ -94,9 +94,9 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal, router : Router = Router.e
     * Invoked when a client error occurs, that is, an error in the 4xx series, which is not handled by any of
     * the other methods in this class already.
     *
-    * @param request    The request that caused the client error.
-    * @param statusCode The error status code.  Must be greater or equal to 400, and less than 500.
-    * @param message    The error message.
+    * @param request The request that caused the client error.
+    * @param status  The error status code.  Must be greater or equal to 400, and less than 500.
+    * @param message The error message.
     */
   override protected def onOtherClientError(request: RequestHeader, status: Int, message: String): Future[Result] = {
     status match {

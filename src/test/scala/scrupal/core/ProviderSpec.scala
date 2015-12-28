@@ -68,7 +68,7 @@ class ProviderSpec extends ScrupalSpecification("Provider") {
     "find provides with prefix" in {
       scrupal.withExecutionContext { implicit ec: ExecutionContext ⇒
         val req: RequestHeader = null
-        dp.withPrefix("/foo").provide.lift(req).isDefined must beFalse
+        dp.withPrefix("foo").provide.lift(req).isDefined must beFalse
         val maybe_reaction = dp.withPrefix("/").provide.lift(req)
         maybe_reaction.isDefined must beTrue
         val reaction = maybe_reaction.get
@@ -135,6 +135,15 @@ class ProviderSpec extends ScrupalSpecification("Provider") {
       sp.isSingular(FakeRequest("GET", "foot-")) must beTrue
       sp.isSingular(FakeRequest("GET", "bar")) must beFalse
     }
+
+    "find provides with prefix" in {
+      scrupal.withExecutionContext { implicit ec: ExecutionContext ⇒
+        val req: RequestHeader = null
+        sp.withPrefix("foo").provide.lift(req).isDefined must beFalse
+        sp.withPrefix("/foo").provide.lift(req).isDefined must beFalse
+      }
+    }
+
 
     "provides reactor appropriately" in {
       val request = FakeRequest("GET", "/foot-")

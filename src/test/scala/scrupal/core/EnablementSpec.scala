@@ -15,7 +15,7 @@
 
 package scrupal.core
 
-import com.reactific.helpers.{Registrable, Registry}
+import com.reactific.helpers.{TossedException, Registrable, Registry}
 import org.specs2.mutable.Specification
 import scrupal.test.ClassFixture
 
@@ -56,9 +56,14 @@ class EnablementSpec extends Specification {
 
   "Enablee" should {
     "have parent hierarchy" in scenario { s ⇒
+      val e = new Enablee {
+        override def id: Identifier = 'foo
+      }
+      e.parent must beEqualTo(None)
       s.e_root.parent must beEqualTo(None)
       s.e_root_1.parent must beEqualTo(Some(s.e_root))
     }
+
     "allow enable on multiple scopes" in scenario { s ⇒
       s.e_root.enable(s.root)
       s.e_root.isEnabled(s.root) must beTrue
@@ -85,7 +90,9 @@ class EnablementSpec extends Specification {
       s.e_root.disable(s.root_1)
       s.e_root.isEnabled(s.root_1) must beFalse
     }
+  }
 
+  "Enablement" should {
     "allow query on arbitrary scopes" in scenario { s ⇒
       s.root.enable(s.e_root, s.root_1)
       s.e_root.isEnabled(s.root) must beFalse
@@ -95,12 +102,31 @@ class EnablementSpec extends Specification {
       s.root_1_a.isEnabled(s.e_root) must beFalse
     }
 
-    "should not be enabled if parent is disabled" in scenario { s ⇒
+    "not be enabled if parent is disabled" in scenario { s ⇒
       s.root.disable(s.e_root)
       s.root.enable(s.e_root_1)
       s.root.isEnabled(s.e_root_1) must beFalse
       s.e_root_1.isEnabled(s.root) must beFalse
     }
 
+    "not allow enabling of a parent scope" in scenario { s ⇒
+      s.root_1.enable(s.e_root_1, s.root) must throwA[TossedException]
+      s.root_1.disable(s.e_root_1, s.root) must throwA[TossedException]
+      s.root_1.isEnabled(s.e_root_1, s.root) must throwA[TossedException]
+    }
+
+    "allow enabling with an Option" in scenario { s ⇒
+      s.root_1.enable(Some(s.e_root_1))
+      s.root_1.enable(Some(s.e_root_1), Some(s.root_1))
+      success
+    }
+
+    "allow enabling" in scenario { s ⇒
+      s.root.enable(s.e_root, s.root_1)
+      s.root.disable(s.e_root, s.root_1)
+      s.root.enable(s.e_root_1, s.root_1)
+      s.root.mapEnabled { e : Enablee ⇒ s.root_1.isEnabled(e) must beTrue }
+      success
+    }
   }
 }

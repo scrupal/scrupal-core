@@ -59,6 +59,16 @@ class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler"
       val res = result.value.get.get
       res.header.status must beEqualTo(Status.NOT_FOUND)
     }
+    "generate Other Client errors" in {
+      val header = setup("eight")
+      val seh = new ScrupalErrorHandler(scrupal)
+      val result = seh.onClientError(header, Status.METHOD_NOT_ALLOWED, "fake")
+      result.isCompleted must beTrue
+      result.value.isDefined must beTrue
+      result.value.get.isSuccess must beTrue
+      val res = result.value.get.get
+      res.header.status must beEqualTo(Status.METHOD_NOT_ALLOWED)
+    }
     "handle NotImplementedError" in {
       val header = setup("five")
       val seh = new ScrupalErrorHandler(scrupal)
@@ -79,6 +89,17 @@ class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler"
       result.value.get.isSuccess must beTrue
       val res = result.value.get.get
       res.header.status must beEqualTo(Status.NOT_IMPLEMENTED)
+    }
+    "handle Other exceptions" in {
+      val header = setup("nine")
+      val component = new ThrowingHelper {}
+      val seh = new ScrupalErrorHandler(scrupal)
+      val result = seh.onServerError(header, new IllegalArgumentException("fake: ignore me"))
+      result.isCompleted must beTrue
+      result.value.isDefined must beTrue
+      result.value.get.isSuccess must beTrue
+      val res = result.value.get.get
+      res.header.status must beEqualTo(Status.INTERNAL_SERVER_ERROR)
     }
     "handle timeouts" in {
       val header = setup("seven")

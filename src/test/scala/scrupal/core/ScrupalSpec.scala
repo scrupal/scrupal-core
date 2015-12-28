@@ -23,12 +23,19 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
       Scrupal.lookup(Symbol("AutoRegister")) must beEqualTo(Some(scrupal))
     }
 
-    /*
     "close cleanly" in {
       val scrupal = ScrupalCache("Close")
       scrupal.doClose() must beTrue
     }
-    */
+
+    "can access actor, exec, timeout" in {
+      val scrupal = ScrupalCache("Access")
+      scrupal.withActorExec { (as, ec, to) ⇒
+        scrupal.actorSystem must beEqualTo(as)
+        scrupal.executionContext must beEqualTo(ec)
+        scrupal.timeout must beEqualTo(to)
+      }
+    }
 
     "have appropriately named registry" in {
       Scrupal.registrantsName must beEqualTo("scrupali")

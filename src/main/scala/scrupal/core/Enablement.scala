@@ -31,8 +31,8 @@ import scala.language.reflectiveCalls
 
 trait Enablement[T <: Enablement[T]] extends IdentifiedWithRegistry with ScrupalComponent {
 
-  private val _enabled = new AbstractRegistry[Enablee, mutable.HashSet[AnyRef]] {
-    def register(key : Enablee, obj : mutable.HashSet[AnyRef]) = _register(key, obj)
+  private val _enabled = new AbstractRegistry[Enablee, mutable.HashSet[Enablement[_]]] {
+    def register(key : Enablee, obj : mutable.HashSet[Enablement[_]]) = _register(key, obj)
     def unregister(key : Enablee) = _unregister(key)
   }
 
@@ -69,7 +69,7 @@ trait Enablement[T <: Enablement[T]] extends IdentifiedWithRegistry with Scrupal
   def enable(enablee : Enablee, forScope : Enablement[_] = this) : Unit = {
     if (forScope != this && !isChildScope(forScope))
       toss(s"Scope ${forScope.id} is not a child of $id so ${enablee.enablementName} cannot be enabled for it.")
-    val update_value : mutable.HashSet[AnyRef] = _enabled.lookup(enablee) match {
+    val update_value : mutable.HashSet[Enablement[_]] = _enabled.lookup(enablee) match {
       case Some(set) ⇒ set + forScope
       case None ⇒ mutable.HashSet(forScope)
     }
@@ -89,7 +89,7 @@ trait Enablement[T <: Enablement[T]] extends IdentifiedWithRegistry with Scrupal
       toss(s"Scope ${forScope.id} is not a child of $id so ${enablee.enablementName} cannot be disabled for it.")
     _enabled.lookup(enablee) match {
       case Some(set) ⇒
-        val update_value : mutable.HashSet[AnyRef] = set - forScope
+        val update_value : mutable.HashSet[Enablement[_]] = set - forScope
         if (update_value.isEmpty)
           _enabled.unregister(enablee)
         else
@@ -99,14 +99,12 @@ trait Enablement[T <: Enablement[T]] extends IdentifiedWithRegistry with Scrupal
     }
   }
 
-  def forEach[R](condition : Enablee ⇒ Boolean)(action : Enablee ⇒ R) : Iterable[R] = {
+  def mapIf[R](condition : Enablee ⇒ Boolean)(action : Enablee ⇒ R) : Iterable[R] = {
     for (e ← _enabled.keys if condition(e)) yield { action(e) }
   }
 
-  def forEachEnabled[R](f : Enablee ⇒ R) : Iterable[R] = forEach(e ⇒ isEnabled(e))(f)
-
-  def getEnablementMap : Map[Enablee, Iterable[Enablement[_]]] = {
-    _enabled.map { case (k, v) ⇒ k -> v.map { ar ⇒ ar.asInstanceOf[Enablement[_]] } }
+  def mapEnabled[R](f : Enablee ⇒ R) : Iterable[R] = {
+    mapIf(_.isEnabled(this))(f)
   }
 
 }
