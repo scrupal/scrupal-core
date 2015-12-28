@@ -24,15 +24,14 @@ class Scenario extends AutoCloseable {
   case class TestScope(id : Symbol, children : Seq[Enablement[_]] = Seq())
     extends Enablement[TestScope] with Registrable[TestScope] {
     def registry : Registry[TestScope] = TSRegistry
-    def asT : TestScope = this
     def isChildScope(x : Enablement[_]) : Boolean = children.contains(x)
   }
   object TERegistry extends Registry[TestEnablee] {
     val registryName = "TestEnablees"; val registrantsName = "test enablees"
   }
 
-  case class TestEnablee(id : Symbol, override val parent : Option[Enablee] = None) extends Enablee with Registrable[TestEnablee] {
-    def asT : TestEnablee = this
+  case class TestEnablee(id : Symbol, override val parent : Option[Enablee] = None)
+    extends Enablee with Registrable[TestEnablee] {
     def registry : Registry[TestEnablee] = TERegistry
   }
 
@@ -47,28 +46,46 @@ class Scenario extends AutoCloseable {
   val e_root_1 = TestEnablee('e_root_1, Some(e_root))
   val e_root_2 = TestEnablee('e_root_2, Some(e_root))
 
-  def close() = {
-
-  }
+  def close() = {}
 }
+
 /** Test Suite For Enablement */
 class EnablementSpec extends Specification {
 
   val scenario = new ClassFixture(new Scenario)
 
   "Enablee" should {
+    "have parent hierarchy" in scenario { s ⇒
+      s.e_root.parent must beEqualTo(None)
+      s.e_root_1.parent must beEqualTo(Some(s.e_root))
+    }
     "allow enable on multiple scopes" in scenario { s ⇒
       s.e_root.enable(s.root)
       s.e_root.isEnabled(s.root) must beTrue
+      s.e_root.isEnabled(s.root, how=true) must beTrue
+      s.e_root.isEnabled(s.root, how=false) must beFalse
       s.e_root.enable(s.root_1)
       s.e_root.isEnabled(s.root_1) must beTrue
+      s.e_root.isEnabled(s.root_1, how=true) must beTrue
+      s.e_root.isEnabled(s.root_1, how=false) must beFalse
     }
+
+    "allow enabled with various interfaces" in scenario { s ⇒
+      s.e_root.enable(s.root, how=true)
+      s.e_root.isEnabled(s.root) must beTrue
+      s.e_root.enable(s.root, how=false)
+      s.e_root.isEnabled(s.root) must beFalse
+      s.e_root.isEnabled(s.root, how=true) must beFalse
+      s.e_root.isEnabled(s.root, how=false) must beTrue
+    }
+
     "allow disable on multiple scopes" in scenario { s ⇒
       s.e_root.disable(s.root)
       s.e_root.isEnabled(s.root) must beFalse
       s.e_root.disable(s.root_1)
       s.e_root.isEnabled(s.root_1) must beFalse
     }
+
     "allow query on arbitrary scopes" in scenario { s ⇒
       s.root.enable(s.e_root, s.root_1)
       s.e_root.isEnabled(s.root) must beFalse
@@ -77,6 +94,7 @@ class EnablementSpec extends Specification {
       s.root_1.isEnabled(s.e_root) must beFalse
       s.root_1_a.isEnabled(s.e_root) must beFalse
     }
+
     "should not be enabled if parent is disabled" in scenario { s ⇒
       s.root.disable(s.e_root)
       s.root.enable(s.e_root_1)

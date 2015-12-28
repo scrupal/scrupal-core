@@ -77,11 +77,11 @@ trait Enablement[T <: Enablement[T]] extends IdentifiedWithRegistry with Scrupal
   }
 
   def enable(enablee: Option[Enablee]) : Unit = {
-    enablee.map { e ⇒ enable(e) }
+    enablee.foreach { e ⇒ enable(e) }
   }
 
   def enable(enablee: Option[Enablee], forScope : Option[Enablement[_]]) : Unit = {
-    enablee.map { e ⇒ forScope.map { fs ⇒ enable(e, fs) }}
+    enablee.foreach { e ⇒ forScope.foreach { fs ⇒ enable(e, fs) }}
   }
 
   def disable(enablee : Enablee, forScope : Enablement[_] = this) : Unit = {
@@ -99,8 +99,8 @@ trait Enablement[T <: Enablement[T]] extends IdentifiedWithRegistry with Scrupal
     }
   }
 
-  def forEach[R](p : Enablee ⇒ Boolean)(f : Enablee ⇒ R) : Iterable[R] = {
-    for (e ← _enabled.keys if p(e)) yield { f(e) }
+  def forEach[R](condition : Enablee ⇒ Boolean)(action : Enablee ⇒ R) : Iterable[R] = {
+    for (e ← _enabled.keys if condition(e)) yield { action(e) }
   }
 
   def forEachEnabled[R](f : Enablee ⇒ R) : Iterable[R] = forEach(e ⇒ isEnabled(e))(f)

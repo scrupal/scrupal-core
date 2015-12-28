@@ -15,6 +15,7 @@
 
 package scrupal.core
 
+import akka.http.scaladsl.model.StatusCodes
 import org.specs2.mutable.Specification
 
 /** Test Suite for Disposition class */
@@ -66,6 +67,27 @@ class DispositionSpec extends Specification {
       )
       val set : Set[Int] = {seq.map { x ⇒ x.code }}.toSet
       set.size must beEqualTo(seq.size)
+    }
+    "convert to status code" in {
+      Successful.toStatusCode must beEqualTo(StatusCodes.OK)
+      Received.toStatusCode must beEqualTo(StatusCodes.Accepted)
+      Pending.toStatusCode must beEqualTo(StatusCodes.OK)
+      Promise.toStatusCode must beEqualTo(StatusCodes.OK)
+      Unspecified.toStatusCode must beEqualTo(StatusCodes.InternalServerError)
+      TimedOut.toStatusCode must beEqualTo(StatusCodes.GatewayTimeout)
+      Unintelligible.toStatusCode must beEqualTo(StatusCodes.BadRequest)
+      Unimplemented.toStatusCode must beEqualTo(StatusCodes.NotImplemented)
+      Unsupported.toStatusCode must beEqualTo(StatusCodes.NotImplemented)
+      Unauthorized.toStatusCode must beEqualTo(StatusCodes.Unauthorized)
+      Unavailable.toStatusCode must beEqualTo(StatusCodes.ServiceUnavailable)
+      Unacceptable.toStatusCode must beEqualTo(StatusCodes.NotAcceptable)
+      NotFound.toStatusCode must beEqualTo(StatusCodes.NotFound)
+      Ambiguous.toStatusCode must beEqualTo(StatusCodes.Conflict)
+      Conflict.toStatusCode must beEqualTo(StatusCodes.Conflict)
+      TooComplex.toStatusCode must beEqualTo(StatusCodes.Forbidden)
+      Exhausted.toStatusCode must beEqualTo(StatusCodes.ServiceUnavailable)
+      Exception.toStatusCode must beEqualTo(StatusCodes.InternalServerError)
+      Unacceptable.toStatusCode must beEqualTo(StatusCodes.NotAcceptable)
     }
   }
 }

@@ -57,7 +57,7 @@ object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
       namespaceReverseRouter := true,
       coverageFailOnMinimum := true,
       coverageExcludedPackages := classesIgnoredByScoverage,
-      coverageMinimum := 50,
+      coverageMinimum := 70,
       coverallsToken := Some("uoZrsbhbC0E2289tvwp3ISntZLH2yjwqX"),
       buildInfoObject := "ScrupalBuildInfo",
       buildInfoPackage := "scrupal.core",

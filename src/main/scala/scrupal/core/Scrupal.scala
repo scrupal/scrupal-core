@@ -19,9 +19,6 @@ import akka.actor.ActorSystem
 import akka.util.Timeout
 
 import com.reactific.helpers._
-import play.api.mvc.{RequestHeader}
-
-import scala.util.{Failure, Success}
 
 // import com.reactific.slickery.Authorable
 
@@ -32,9 +29,11 @@ import javax.inject.Inject
 
 import play.api._
 import play.api.inject.{Injector, DefaultApplicationLifecycle}
+import play.api.mvc.RequestHeader
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContextExecutorService, ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 import scrupal.utils.{DomainNames, ScrupalComponent}
 
@@ -74,23 +73,27 @@ case class Scrupal @Inject() (
 
   def closeTimeout : FiniteDuration = 10.seconds
 
-  def close() = {
+  def close() : Unit = doClose()
+
+  def doClose() : Boolean = {
     log.info("Scrupal shutdown initiated")
-    val result = applicationLifecycle.stop().map { u =>
+    val futureResult = applicationLifecycle.stop().map { u =>
       // _storeContext.close()
       _actorSystem.shutdown()
-      true
-    } recover {
-      case xcptn: Throwable =>
-        log.error("Scrupal shutdown failed with: ", xcptn)
-        false
+      _executionContext match {
+        case eces :  ExecutionContextExecutorService ⇒
+          eces.shutdown()
+        case _ ⇒
+          // nothing
+      }
     }
-    val timeout = closeTimeout
-    await(result, timeout, "scrupal shutdown") match {
+    await(futureResult, closeTimeout, "scrupal shutdown") match {
       case Success(x) =>
         log.info("Scrupal shutdown completed normally.")
+        true
       case Failure(x) =>
         log.warn("Scrupal shutdown failed: ", x)
+        false
     }
   }
 

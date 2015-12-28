@@ -18,7 +18,7 @@ package scrupal.test
 import java.util.concurrent.atomic.AtomicInteger
 
 import play.api.test.PlaySpecification
-import scrupal.core.{Site, Scrupal}
+import scrupal.core.{Context, SiteContext, Site, Scrupal}
 import scrupal.utils.ScrupalComponent
 
 import scala.concurrent.duration._
@@ -37,6 +37,8 @@ abstract class ScrupalSpecification(
   implicit lazy val scrupal : Scrupal = ScrupalCache( ScrupalSpecification.next(specName) )
 
   implicit lazy val site : Site = new FakeSite(specName, "localhost")
+
+  implicit lazy val context : SiteContext = Context(scrupal, site)
 
   def withExecutionContext[T](f : ExecutionContext ⇒ T) : T = scrupal.withExecutionContext[T](f)
 

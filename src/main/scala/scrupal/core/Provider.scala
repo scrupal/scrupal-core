@@ -61,8 +61,9 @@ trait Provider { self ⇒
 }
 
 object Provider {
+  val emptyReactionRoutes : Provider#ReactionRoutes = PartialFunction.empty[RequestHeader,Reactor]
   val empty = new Provider {
-    def provide: ReactionRoutes = PartialFunction.empty
+    def provide : ReactionRoutes = emptyReactionRoutes
   }
 }
 
@@ -81,16 +82,13 @@ trait DelegatingProvider extends Provider {
   def isTerminal : Boolean = delegates.isEmpty
 
   override def provide : ReactionRoutes = {
-    delegates.foldLeft(Provider.empty.provide) { case (accum,next) ⇒ accum.orElse(next.provide) }
+    delegates.foldLeft(Provider.emptyReactionRoutes) { case (accum,next) ⇒ accum.orElse(next.provide) }
   }
 }
 
 trait EnablementProvider[T <: EnablementProvider[T]] extends DelegatingProvider with Enablement[T] with Enablee {
-  def delegates : Iterable[Provider] = forEach[Provider] { e : Enablee ⇒
-    e.isInstanceOf[Provider] && isEnabled(e, this)
-  } { e : Enablee ⇒
-    e.asInstanceOf[Provider]
-  }
+  def isEnabledProvider(e : Enablee) : Boolean = { e.isInstanceOf[Provider] && isEnabled(e, this) }
+  def delegates : Iterable[Provider] = forEach[Provider]{ isEnabledProvider } { e : Enablee ⇒ e.asInstanceOf[Provider]}
 }
 
 trait SingularProvider extends IdentifiableProvider {
@@ -120,9 +118,9 @@ trait SingularProvider extends IdentifiableProvider {
   /** Key For Identifying This Provider
     *
     * When matching a path, it is helpful to quickly identify which ActionProvider to apply to a given path. To that
-    * end, the key provides a constant path segment value that identifies this ActionProvider. For example, if
+    * end, the key provides a constant path segment value that identifies this Provider. For example, if
     * your path was /foo/bar/doit then foo and bar are potential keys as they might separately identify
-    * an ActionProvider "foo" that contains an ActionProvider "bar". The "doit" suffix is not a candidate for an
+    * an Provider "foo" that contains an Provider "bar". The "doit" suffix is not a candidate for an
     * ActionProvider's key because it is not / terminated. Keys are path segments and must occur only between slashes.
     *
     * Strings returned by key will be URL sanitized. They should therefore match the regular expression for URL
