@@ -34,12 +34,12 @@ class ContextSpec extends ScrupalSpecification("Context") {
       ctxt.siteName must beEqualTo("<NoSite>")
     }
     "construct a SiteContext with a Site and a Scrupal" in {
-      val site : FakeSite = FakeSite("foo", "foo.com")(scrupal)
+      val site : FakeSite = FakeSite(new SiteData("foo", "foo.com"))(scrupal)
       val ctxt = Context(scrupal, site)
       ctxt.isInstanceOf[SiteContext] must beTrue
       ctxt.site.isDefined must beTrue
       ctxt.site.get must beEqualTo(site)
-      ctxt.site.get.name must beEqualTo("foo")
+      ctxt.site.get.data.name must beEqualTo("foo")
     }
     "provides context features" in {
       val ctxt = Context(scrupal)

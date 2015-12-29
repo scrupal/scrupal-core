@@ -18,28 +18,29 @@ package scrupal.core
 import java.time.Instant
 
 import com.reactific.helpers.{MemoryCache, Registrable, Registry}
-import com.reactific.slickery.{Modifiable, Describable, Nameable, Storable}
+import com.reactific.slickery._
 import play.api.http.Status
 
 import play.api.mvc.{Results, Result, Handler, RequestHeader}
 
 import scala.concurrent.Future
 
-case class Site(name : String,
+case class SiteData(
+  name : String,
   domainName: String = "localhost",
   description : String = "",
-  modified: Option[Instant] = Some(Instant.now()),
-  created : Option[Instant] = Some(Instant.now()),
+  requireHttps : Boolean = false,
+  modified: Instant = Instant.EPOCH,
+  created : Instant = Instant.EPOCH,
   oid : Option[Long] = None
-)(implicit val scrupal : Scrupal) extends {
-    val registry: Registry[Site] = scrupal.sites
-    val id: Symbol = Symbol(name)
-} with EnablementProvider[Site] with Registrable[Site]
-  with Storable with Nameable with Describable with Modifiable {
-
-  def requireHttps : Boolean = false
-
+) extends Useable {
   def forHost(hostName: String) : Boolean = { hostName.endsWith(domainName) }
+}
+
+case class Site(data: SiteData)(implicit val scrupal : Scrupal) extends {
+    val registry: Registry[Site] = scrupal.sites
+    val id: Symbol = Symbol(data.name)
+} with EnablementProvider[Site] with Registrable[Site] {
 
   def reactorFor(request: RequestHeader, subdomain: String) : Option[Reactor] = {
     reactorFor(request)
@@ -93,12 +94,12 @@ case class SitesRegistry() extends Registry[Site] {
 
   override final def register(site : Site) : Unit = {
     super.register(site)
-    byDomainName.getOrElse(site.domainName)(site)
+    byDomainName.getOrElse(site.data.domainName)(site)
   }
 
   override final def unregister(site: Site) : Unit = {
     super.unregister(site)
-    byDomainName.remove(site.domainName)
+    byDomainName.remove(site.data.domainName)
   }
 
   def forHost(hostName : String) : Option[Site] = {

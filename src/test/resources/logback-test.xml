@@ -14,10 +14,7 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <configuration>
-    <logger name="akka" level="WARN" />
-    <logger name="spray" level="WARN"/>
     <logger name="scrupal" level="DEBUG" />
-    <logger name="reactivemongo" level="WARN"/>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%date %-5level %logger{30} - %message%n%xException{5}</pattern>

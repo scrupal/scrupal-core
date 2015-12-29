@@ -14,7 +14,7 @@ import scala.concurrent.TimeoutException
 class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler") {
 
   def setup(name : String) : RequestHeader = {
-    new FakeSite(name, s"$name.com")(scrupal)
+    new FakeSite(SiteData(name, s"$name.com"))(scrupal)
     FakeRequest("GET", "/index.html").withHeaders("Host" -> s"$name.com:80")
   }
 

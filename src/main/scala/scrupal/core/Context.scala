@@ -77,8 +77,8 @@ case class SimpleContext(scrupal : Scrupal) extends Context {
 class SiteContext(scrupal : Scrupal, theSite : Site) extends SimpleContext(scrupal) {
   require(theSite != null)
   override val site : Option[Site] = Some(theSite)
-  override val siteName : String = theSite.name
-  override val description : String = theSite.description
+  override val siteName : String = theSite.data.name
+  override val description : String = theSite.data.description
 //  override val favicon: String = theSite.favicon
 //  override val themeProvider : String = theSite.themeProvider
 //  override val themeName : String = theSite.themeName

@@ -12,8 +12,8 @@ class ScrupalRequestHandlerSpec extends ScrupalSpecification("ScrupalRequestHand
 
   "ScrupalRequestHandler" should {
     "route request to correct site" in {
-      val site1 = new FakeSite("one", "one.com")(scrupal)
-      val site2 = new FakeSite("two", "two.com")(scrupal)
+      val site1 = new FakeSite(SiteData("one", "one.com"))(scrupal)
+      val site2 = new FakeSite(SiteData("two", "two.com"))(scrupal)
       val app = scrupal.application
       val httpConf = HttpConfiguration.fromConfiguration(app.configuration)
       val srh = new ScrupalRequestHandler(scrupal, Router.empty, app.errorHandler, httpConf, NoHttpFilters)

@@ -198,8 +198,8 @@
     <orderEntry type="library" name="SBT: xerces:xercesImpl:2.11.0:jar" level="project" />
     <orderEntry type="library" name="SBT: xml-apis:xml-apis:1.4.01:jar" level="project" />
     <orderEntry type="library" name="SBT: com.reactific:helpers_2.11:0.3.0:jar" level="project" />
-    <orderEntry type="library" name="SBT: com.reactific:slickery_2.11:0.3.0:jar" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="SBT: org.scoverage:scalac-scoverage-plugin_2.11:1.0.1:jar" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="SBT: org.scoverage:scalac-scoverage-runtime_2.11:1.0.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.reactific:slickery_2.11:0.3.1-SNAPSHOT:jar" level="project" />
   </component>
 </module>

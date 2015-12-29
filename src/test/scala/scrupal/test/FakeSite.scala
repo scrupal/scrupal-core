@@ -18,14 +18,13 @@ package scrupal.test
 import java.time.Instant
 
 import play.api.mvc.RequestHeader
-import scrupal.core.{UnimplementedReactor, Reactor, Site, Scrupal}
+import scrupal.core._
 
 /** A Fake Site For Testing
   *
   * This site is very accepting.
   */
-class FakeSite(override val name: String, override val domainName : String )(implicit scrpl: Scrupal) extends
-  Site(name, domainName, s"Fake Site for: $name ($domainName)", Some(Instant.now()), Some(Instant.now()))(scrpl) {
+class FakeSite(data: SiteData)(implicit scrpl: Scrupal) extends Site(data)(scrpl) {
 
   override def reactorFor(request: RequestHeader) : Option[Reactor] = {
     super.reactorFor(request) match {
@@ -35,5 +34,5 @@ class FakeSite(override val name: String, override val domainName : String )(imp
   }
 }
 object FakeSite {
-  def apply(name : String, domainName: String)(scrpl: Scrupal) : FakeSite = new FakeSite(name, domainName)(scrpl)
+  def apply(data: SiteData)(scrpl: Scrupal) : FakeSite = new FakeSite(data)(scrpl)
 }

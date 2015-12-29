@@ -15,27 +15,43 @@
 
 package scrupal.test
 
-import org.specs2.execute.AsResult
+import com.reactific.slickery.Schema
+import org.specs2.execute.{Result, AsResult}
 import org.specs2.specification.Fixture
 
-/** Title Of Thing.
-  *
-  * Description of thing
-  */
-class ClassFixture[CLASS <: AutoCloseable](create : ⇒ CLASS) extends Fixture[CLASS] {
+/** Testing Fixture for an arbitrary class */
+class ClassFixture[CLASS](create : ⇒ CLASS) extends Fixture[CLASS] {
   def apply[R : AsResult](f : CLASS ⇒ R) = {
+    AsResult( f (create) )
+  }
+}
+
+/** Testing fixture for a class that needs to be closed when the test is over */
+class CloseableFixture[CLASS <: AutoCloseable](create : ⇒ CLASS) extends Fixture[CLASS] {
+  def apply[R](f : CLASS ⇒ R)(implicit evidence : AsResult[R]) : Result = {
     val fixture = create
     try {
-      AsResult(f (fixture))
+      AsResult(f(fixture))
     } finally {
       fixture.close()
     }
   }
 }
 
+/** Testing fixture support for a case class (which should inherit this fixture class */
 class CaseClassFixture[T <: CaseClassFixture[T]] extends Fixture[T] {
   def apply[R : AsResult](f : T ⇒ R) = {
     AsResult(f (this.asInstanceOf[T]))
   }
+}
 
+class SchemaFixture[T <: Schema](create: () ⇒ T) extends Fixture[T] {
+  def apply[R](f : T ⇒ R)(implicit evidence : AsResult[R]) : Result = {
+    val fixture = create()
+    try {
+      AsResult(f(fixture))
+    } finally {
+      fixture.close()
+    }
+  }
 }

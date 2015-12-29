@@ -61,10 +61,10 @@ class AssetsSpec extends ScrupalSpecification("Assets") {
       Await.result(future, 2.seconds)
     }
 
-    "locate logger.xml three ways" in new WithApplication(scrupal.application) {
-      foundAsset(mkAssets.at("/", "/logger.xml"))
-      foundAsset(mkAssets.root("logger.xml"))
-      foundAsset(mkAssets.root("/logger.xml"))
+    "locate logback.xml three ways" in new WithApplication(scrupal.application) {
+      foundAsset(mkAssets.at("/", "/logback.xml"))
+      foundAsset(mkAssets.root("logback.xml"))
+      foundAsset(mkAssets.root("/logback.xml"))
     }
 
     "locate scrupal.ico with img" in new WithApplication(scrupal.application) {

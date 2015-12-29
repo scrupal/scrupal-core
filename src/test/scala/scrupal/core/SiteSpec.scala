@@ -1,24 +1,34 @@
 package scrupal.core
 
+import java.time.Instant
+
 import play.api.test.FakeRequest
 import scrupal.test.{FakeSite, ScrupalSpecification}
 
 class SiteSpec extends ScrupalSpecification("Site") {
 
-  "Site" should {
+  "SiteData" should {
     "register instances" in {
-      val instance = new Site("foo")(scrupal)
-      scrupal.sites.lookup('foo) must beEqualTo(Some(instance))
+      val instance = new SiteData("foo")
+      instance.created must beEqualTo(Instant.EPOCH)
+      instance.modified must beEqualTo(Instant.EPOCH)
+      instance.name must beEqualTo("foo")
+      instance.name must be("foo")
+      instance.domainName must be("localhost")
       instance.requireHttps must beFalse
+      instance.description must beEmpty
+      instance.oid must beNone
     }
     "match its host properly" in {
-      val site = new Site("fum","fum.com", "description")
+      val site = new SiteData("fum", "fum.com", "description")
       site.forHost("foo.com") must beFalse
       site.forHost("fum.com") must beTrue
       site.forHost("admin.fum.com") must beTrue
     }
+  }
+  "Site" should {
     "provide reactors and handlers" in {
-      val site = new Site("fie", "fie.com")
+      val site = new Site(new SiteData("fie", "fie.com"))(scrupal)
       val request = FakeRequest("GET", "/")
       site.reactorFor(request, "") must beEqualTo(None)
       site.handlerForRequest(request) must beEqualTo(request → null)
@@ -30,8 +40,8 @@ class SiteSpec extends ScrupalSpecification("Site") {
 class SiteRegistrySpec extends ScrupalSpecification("SiteRegistry") {
   "SitesRegistry" should {
     "keep track of domain names" in {
-      val site1 = FakeSite("foo","foo.com")(scrupal)
-      val site2 = FakeSite("bar", "bar.com")(scrupal)
+      val site1 = FakeSite(SiteData("foo","foo.com"))(scrupal)
+      val site2 = FakeSite(SiteData("bar", "bar.com"))(scrupal)
       scrupal.sites.unregister(site2)
       scrupal.sites.size must beEqualTo(1)
       scrupal.sites.registryName must beEqualTo("Sites")

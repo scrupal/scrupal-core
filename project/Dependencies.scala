@@ -78,7 +78,7 @@ trait Dependencies
   val reactific_helpers       = "com.reactific"             %% "helpers"                  % "0.3.0"
 
   // Database, Caches, Serialization, Data Storage stuff
-  val slickery                = "com.reactific"             %% "slickery"                 % "0.3.0"
+  val slickery                = "com.reactific"             %% "slickery"                 % "0.3.1-SNAPSHOT"
 
   // WebJars We Use
   val webjars_play            = "org.webjars"               %% "webjars-play"             % "2.4.0-2"

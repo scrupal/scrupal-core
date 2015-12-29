@@ -18,7 +18,7 @@ package scrupal.test
 import java.util.concurrent.atomic.AtomicInteger
 
 import play.api.test.PlaySpecification
-import scrupal.core.{Context, SiteContext, Site, Scrupal}
+import scrupal.core._
 import scrupal.utils.ScrupalComponent
 
 import scala.concurrent.duration._
@@ -28,15 +28,18 @@ import scala.concurrent.ExecutionContext
   * Further description here.
   */
 abstract class ScrupalSpecification(
-  val specName : String, val timeout : FiniteDuration = Duration(5, "seconds")
+  val specName : String,
+  val additionalConfig : Map[String,AnyRef] = Map.empty[String,AnyRef],
+  val timeout : FiniteDuration = Duration(5, "seconds")
 ) extends PlaySpecification with ScrupalComponent {
 
   // WARNING: Do NOT put anything but def and lazy val because of DelayedInit or app startup will get invoked twice
   // and you'll have a real MESS on your hands!!!! (i.e. no db interaction will work!)
 
-  implicit lazy val scrupal : Scrupal = ScrupalCache( ScrupalSpecification.next(specName) )
+  implicit lazy val scrupal : Scrupal = ScrupalCache( ScrupalSpecification.next(specName),
+    additionalConfiguration = additionalConfig )
 
-  implicit lazy val site : Site = new FakeSite(specName, "localhost")
+  implicit lazy val site : Site = new FakeSite(SiteData(specName, "localhost"))
 
   implicit lazy val context : SiteContext = Context(scrupal, site)
 
