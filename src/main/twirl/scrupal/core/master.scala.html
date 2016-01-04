@@ -1,0 +1,33 @@
+@(title: String,
+    baseUrl: Option[String] = None,
+    baseTargetBlank: Boolean = false,
+    keywords: Seq[String] = Seq.empty[String],
+    metas : Map[String,String] = Map.empty[String,String],
+    style: Html = Html(""),
+    stylesheets: Seq[String] = Seq.empty[String],
+    alternate: Option[java.net.URL] = None,
+    author: Option[java.net.URL] = None,
+    license: Option[java.net.URL] = None,
+    icon : Option[(java.net.URL,Int,Int)] = None,
+    scriptLinks: Seq[String] = Seq.empty[String],
+    javascript: Option[String] = None,
+    refresh: Int = 0)(content: Html)
+@import router.scrupal.routes
+<!DOCTYPE html>
+<html>
+<head>
+  <title>@title</title>
+  @if(baseUrl.isDefined){<base href="@baseUrl" target="@if(baseTargetBlank){_blank}else{_self}">}
+  @if(alternate.isDefined){<link rel="alternate" href="@alternate.get.toExternalForm" type="text/html">}
+  @if(author.isDefined){<link rel="author" href="@author.get.toExternalForm" type="text/html">}
+  @if(license.isDefined){<link rel="license" href="@license.get.toExternalForm" type="text/html">}
+  @if(icon.isDefined){<link rel="icon" href="@icon.get._1.toExternalForm" type="image/x-icon">}
+  @for(url <- stylesheets){<link rel="stylesheet" type="text/css" href="@url">}
+  <style>@style</style>
+  @for(src ← scriptLinks){<script src="@src" type="text/javascript"></script>}
+  @if(javascript.isDefined){<script>@javascript.get</script>}
+</head>
+<body>
+@content
+</body>
+</html>

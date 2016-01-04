@@ -1,0 +1,7 @@
+@(context: scrupal.core.Context, link: scrupal.core.LinkTags)
+@for(alt <- link.alternate){<link rel="alternate" href="@alt.toExternalForm" type="text/html">"}
+@for(auth <- link.author){<link rel="author" href="@auth.toExternalForm" type="text/html">}
+@for(lic <- link.license){<link rel="license" href="@link.license.get.toExternalForm" type="text/html">}
+@for(icon <- link.icon){<link rel="icon" href="@icon.url.toExternalForm" type="@icon.typ" sizes="@{icon.x}x@{icon.y}" >}
+@for(url <- link.stylesheets){<link rel="stylesheet" type="text/css" href="@url">}
+@for(script ← link.scriptLinks){<script src="@script" type="text/javascript"></script>}

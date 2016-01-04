@@ -1,0 +1,8 @@
+@(context: scrupal.core.Context, meta: scrupal.core.MetaTags)
+<meta charset="UTF-8">
+@if(meta.description.nonEmpty){<meta name="description" content="@meta.description.get">}
+@if(meta.author.nonEmpty){<meta name="author" content="@meta.author.get">}
+@if(meta.generator.nonEmpty){<meta name="generator" content="@meta.generator.get">}
+@if(meta.appName.nonEmpty){<meta name="application-name" content="@meta.appName.get">}
+@if(meta.keywords.nonEmpty){<meta name="keywords" content="@{meta.keywords.mkString(",")}">}
+@if(meta.refresh>0){<meta http-equiv="refresh" content="@meta.refresh">}
