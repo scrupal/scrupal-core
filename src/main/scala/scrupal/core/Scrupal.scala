@@ -61,7 +61,7 @@ case class Scrupal @Inject() (
 
   implicit val actorSystem: ActorSystem = getActorSystem
 
-  implicit val timeout = getTimeout
+  implicit val akkaTimeout = getTimeout
 
   val sites : SitesRegistry = SitesRegistry()
 
@@ -129,7 +129,7 @@ case class Scrupal @Inject() (
   }
 
   def withActorExec[T](f: (ActorSystem, ExecutionContext, Timeout) ⇒ T): T = {
-    f(actorSystem, executionContext, timeout)
+    f(actorSystem, executionContext, akkaTimeout)
   }
 
   protected def getActorSystem: ActorSystem = {

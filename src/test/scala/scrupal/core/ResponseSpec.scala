@@ -33,26 +33,23 @@ class ResponseSpec extends ScrupalSpecification("Response") {
 
     "Response" should {
       "have payload, mediaType and disposition" in {
-        val response = new Response {
-          def disposition: Disposition = Successful
-          def mediaType: MediaType = MediaTypes.`application/octet-stream`
-          def content : Array[Byte] = Array.empty[Byte]
-          def toEnumerator(implicit ec: ExecutionContext) = Enumerator.empty[Array[Byte]]
-        }
-        success
+        val response = Response(Array.empty[Byte], MediaTypes.`application/octet-stream`, Unimplemented)
+        response.payload.content.isEmpty must beTrue
+        response.mediaType must beEqualTo(MediaTypes.`application/octet-stream`)
+        response.disposition must beEqualTo(Unimplemented)
       }
       "generate ExceptionResponse for exceptions thrown in Response.safely" in {
-        val good = Response.safely { () ⇒ NoopResponse }
-        val bad = Response.safely { () ⇒ throw new Exception("oops") }
-        good must beEqualTo(NoopResponse)
-        bad.isInstanceOf[ExceptionResponse] must beTrue
-        val er = bad.asInstanceOf[ExceptionResponse]
-        er.content.getMessage must beEqualTo("oops")
+        val good = Response.safely { NoopResponse }
+        val bad = Response.safely { throw new Exception("oops") }
+        good.payload must beEqualTo(EmptyContent())
+        bad.isInstanceOf[Response[_]] must beTrue
+        val payload = bad.asInstanceOf[Response[_]].payload.asInstanceOf[ThrowableContent].content
+        payload.getMessage must beEqualTo("oops")
       }
     }
     "NoopResponse" should {
-      "be unimplemented" in {
-        NoopResponse.disposition must beEqualTo(Unimplemented)
+      "have Received disposition" in {
+        NoopResponse.disposition must beEqualTo(Received)
       }
       "have application/octet-stream media type" in {
         NoopResponse.mediaType must beEqualTo(MediaTypes.`application/octet-stream`)
@@ -61,14 +58,14 @@ class ResponseSpec extends ScrupalSpecification("Response") {
         checkEnum(NoopResponse.toEnumerator, 0)
       }
       "convert to EnumeratorResponse" in {
-        val er = NoopResponse.toEnumeratorResponse
+        val er = NoopResponse.toEnumeratedResponse
         checkEnum(er.toEnumerator, 0)
       }
     }
     "EnumeratorResponse" should {
       "have reflective content" in {
-        val er = EnumeratorResponse(Enumerator.empty[Array[Byte]], MediaTypes.`text/plain`)
-        er.toEnumerator must beEqualTo(er.content)
+        val er = Response(Enumerator.empty[Array[Byte]], MediaTypes.`text/plain`, Successful)
+        er.toEnumerator must beEqualTo(er.payload.toEnumerator)
       }
     }
 
@@ -80,10 +77,10 @@ class ResponseSpec extends ScrupalSpecification("Response") {
       Await.result(future,1.seconds)
     }
 
-    "EnumeratorsREsponse" should {
+    "EnumeratorsResponse" should {
       "aggregate enumerators" in {
         val enums = Seq(Enumerator(Array[Byte](3,4)),Enumerator(Array[Byte](1,2)))
-        val er = EnumeratorsResponse(enums, MediaTypes.`application/octet-stream`)
+        val er = Response(enums, MediaTypes.`application/octet-stream`, Successful)
         val expected = Enumerator(Array[Byte](3,4,1,2))
         checkEnum(er.toEnumerator, 10)
       }
@@ -92,7 +89,7 @@ class ResponseSpec extends ScrupalSpecification("Response") {
     "StreamResponse" should {
       "read a stream" in {
         val stream = new ByteArrayInputStream(Array[Byte](0,1,2,3,4))
-        val sr = StreamResponse(stream, MediaTypes.`application/octet-stream`)
+        val sr = Response(stream, MediaTypes.`application/octet-stream`, Successful)
         checkEnum(sr.toEnumerator, 10)
       }
     }
@@ -100,7 +97,7 @@ class ResponseSpec extends ScrupalSpecification("Response") {
     "OctetsResponse" should {
       "read octest" in {
         val octets = Array[Byte](1,2,3,4,5)
-        val or = OctetsResponse(octets, MediaTypes.`application/octet-stream`)
+        val or = Response(octets, MediaTypes.`application/octet-stream`, Successful)
         checkEnum(or.toEnumerator, 15)
       }
     }
@@ -110,7 +107,7 @@ class ResponseSpec extends ScrupalSpecification("Response") {
     "StringResponse" should {
       "read string" in {
         val str = "This is a string of no significance."
-        val sr = StringResponse(str)
+        val sr = Response(str, Successful)
         checkEnum(sr.toEnumerator, strSum(str))
       }
     }
@@ -119,7 +116,7 @@ class ResponseSpec extends ScrupalSpecification("Response") {
       "read HTML" in {
         val htmlStr = "<html><body></body></html>"
         val html = Html(htmlStr)
-        val sr = HtmlResponse(html)
+        val sr = Response(html, Successful)
         checkEnum(sr.toEnumerator, strSum(htmlStr))
       }
     }
@@ -128,7 +125,7 @@ class ResponseSpec extends ScrupalSpecification("Response") {
       "read JSON" in {
         val json = Json.parse("""{ "foo" : 3 }""")
         val js_as_string = json.toString()
-        val jr = JsonResponse(json)
+        val jr = Response(json, Successful)
         checkEnum(jr.toEnumerator, strSum(js_as_string))
       }
     }
@@ -136,28 +133,18 @@ class ResponseSpec extends ScrupalSpecification("Response") {
     "ExceptionResponse" should {
       "handle an Exception" in {
         val exception = new Exception("fake")
-        val er = ExceptionResponse(exception)
-        er.toText.contains("fake")
-        checkEnum(er.toEnumerator, strSum(er.toText))
+        val er = Response(exception)
+        er.payload.toTxt.body.contains("fake")
+        checkEnum(er.toEnumerator, strSum(er.payload.toHtml.body))
       }
     }
 
     "ErrorResponse" should {
       "read an error" in {
         val error = "This is a string of no significance."
-        val er = ErrorResponse(error)
-        val error_str = er.formatted
+        val er = Response(error, Unspecified)
+        val error_str = er.payload.content
         checkEnum(er.toEnumerator, strSum(error_str))
-      }
-    }
-
-    "JsonExceptionResponse" should {
-      "generate JSON response" in {
-        val exception = new Exception("fake")
-        val er = JsonExceptionResponse(exception)
-        val result = er.toJsonResponse.content.toString
-        result.contains("fake") must beTrue
-        checkEnum(er.toEnumerator, strSum(result))
       }
     }
 
@@ -168,6 +155,7 @@ class ResponseSpec extends ScrupalSpecification("Response") {
         val expected = ur.formatted
         checkEnum(ur.toEnumerator, strSum(expected))
       }
+
       "have plain/text media type" in {
         val ur = UnimplementedResponse("something")
         ur.mediaType must beEqualTo(MediaTypes.`text/plain`)

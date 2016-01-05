@@ -16,6 +16,8 @@
 import play.routes.compiler.InjectedRoutesGenerator
 import play.sbt.{PlayScala, PlayLayoutPlugin}
 import play.sbt.routes.RoutesKeys._
+import play.twirl.sbt.Import.TwirlKeys
+import play.twirl.sbt.SbtTwirl
 import sbt.Keys._
 import sbt._
 import sbtbuildinfo.BuildInfoKeys._
@@ -40,7 +42,7 @@ object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
 
   lazy val root = Project("scrupal-core", file("."))
     .disablePlugins(PlayLayoutPlugin)
-    .enablePlugins(PlayScala, BuildInfoPlugin, ScrupalPlugin, ScoverageSbtPlugin)
+    .enablePlugins(PlayScala, BuildInfoPlugin, ScrupalPlugin, ScoverageSbtPlugin, SbtTwirl)
     // .settings(sbt_web_settings)
     .settings(pipeline_settings)
     .settings(less_settings)
@@ -54,10 +56,11 @@ object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
       resolvers ++= all_resolvers,
       libraryDependencies ++= core_dependencies,
       routesGenerator := InjectedRoutesGenerator,
+      TwirlKeys.templateImports += "scrupal.core._",
       namespaceReverseRouter := true,
       coverageFailOnMinimum := true,
       coverageExcludedPackages := classesIgnoredByScoverage,
-      coverageMinimum := 70,
+      coverageMinimum := 80,
       coverallsToken := Some("uoZrsbhbC0E2289tvwp3ISntZLH2yjwqX"),
       buildInfoObject := "ScrupalBuildInfo",
       buildInfoPackage := "scrupal.core",

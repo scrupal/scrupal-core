@@ -75,10 +75,9 @@ trait Dependencies
   // Fundamental Libraries
   val shapeless               = "com.chuusai"               %% "shapeless"                % "2.2.1"
   val scala_arm               = "com.jsuereth"              %% "scala-arm"                % "1.4"
-  val reactific_helpers       = "com.reactific"             %% "helpers"                  % "0.3.0"
 
   // Database, Caches, Serialization, Data Storage stuff
-  val slickery                = "com.reactific"             %% "slickery"                 % "0.3.1-SNAPSHOT"
+  val slickery                = "com.reactific"             %% "slickery"                 % "0.3.5"
 
   // WebJars We Use
   val webjars_play            = "org.webjars"               %% "webjars-play"             % "2.4.0-2"
@@ -117,7 +116,7 @@ trait Dependencies
 
   val core_dependencies : Seq[ModuleID] = Seq(
     pbkdf2, bcrypt, scrypt,
-    commons_lang3, config, shapeless, scala_arm, slickery, reactific_helpers,
+    commons_lang3, config, shapeless, scala_arm, slickery,
     akka_actor, akka_http, akka_slf4j,
     play_json, play_iteratees, play_plugins_mailer, play_plugins_redis, play_slick, play_slick_evols,
     play_silhouette, play_bootstrap, play_html_compressor, // play_geolocation,

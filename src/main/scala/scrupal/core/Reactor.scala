@@ -30,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   * @see [[scrupal.core.Reactor]]
   */
-trait Reaction extends ((Stimulus) ⇒ Future[Response])
+trait Reaction extends ((Stimulus) ⇒ Future[Response[_]])
 
 /** An Named, Described Reaction
   *
@@ -50,12 +50,12 @@ trait Reactor extends Reaction with Nameable with Describable {
 
   final val name : String = this.getClass.getSimpleName
 
-  def apply(stimulus: Stimulus) : Future[Response]
+  def apply(stimulus: Stimulus) : Future[Response[_]]
 
   def resultFrom(context: Context, request : Request[AnyContent]) : Future[Result] = {
     context.withExecutionContext { implicit ec: ExecutionContext ⇒
       val stimulus: Stimulus = Stimulus(context, request)
-      apply(stimulus) map { response : Response ⇒
+      apply(stimulus) map { response : Response[_] ⇒
         val d = response.disposition
         val status = d.toStatusCode.intValue()
         val reason = Some(s"HTTP($status): ${d.id.name}(${d.code}): ${d.msg}")
@@ -69,8 +69,10 @@ trait Reactor extends Reaction with Nameable with Describable {
 case class UnimplementedReactor(what: String, oid : Option[Long] = None) extends Reactor {
   val description = "A Reactor that returns a not-implemented response"
 
-  def apply(stimulus: Stimulus): Future[Response] = {
-    Future.successful {UnimplementedResponse(what)}
+  def apply(stimulus: Stimulus): Future[Response[_]] = {
+    Future.successful {
+      UnimplementedResponse(what)
+    }
   }
 }
 

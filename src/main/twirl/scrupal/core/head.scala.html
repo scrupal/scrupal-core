@@ -1,9 +1,9 @@
-@(context: scrupal.core.Context, head: scrupal.core.PageHeadTags)
+@(head: scrupal.core.PageHeadTags)
 <head>
   <title>@head.title</title>
   @for(base <- head.base){<base href="@base.href" target="@base.target">}
-  @scrupal.core.html.meta(context, head.meta)
-  @scrupal.core.html.link(context, head.links)
+  @scrupal.core.html.meta(head.meta)
+  @scrupal.core.html.link(head.links)
   @for(js <- head.javascript){<script>@js</script>}
   @for(sty <- head.style){<style>@head.style</style>}
 </head>

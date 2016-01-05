@@ -31,18 +31,20 @@ trait Context {
   // Scrupal Related things
   implicit def scrupal : Scrupal
 
+  def pageHeadTags : PageHeadTags = PageHeadTags()
+
   // Site related things
-  val site : Option[Site] = None
+  def site : Option[Site] = None
 //  val application : Option[Application] = None
 //  val principal : Option[Principal] = None
 
   def siteName : String = "<NoSite>"
 
-  val favicon: String = "scrupal.ico"
-  val themeProvider : String = "bootswatch"
-  val themeName : String = "Default"
-  val description : String = ""
-  val user : String = "guest"
+  def favicon: String = "scrupal.ico"
+  def themeProvider : String = "bootswatch"
+  def themeName : String = "Default"
+  def description : String = ""
+  def user : String = "guest"
 
   def withConfiguration[T](f : (Configuration) ⇒ T) : T = { scrupal.withConfiguration(f) }
 

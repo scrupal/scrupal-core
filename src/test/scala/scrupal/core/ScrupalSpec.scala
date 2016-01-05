@@ -33,7 +33,7 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
       scrupal.withActorExec { (as, ec, to) ⇒
         scrupal.actorSystem must beEqualTo(as)
         scrupal.executionContext must beEqualTo(ec)
-        scrupal.timeout must beEqualTo(to)
+        scrupal.akkaTimeout must beEqualTo(to)
       }
     }
 

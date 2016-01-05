@@ -1,0 +1,29 @@
+@(xcptn: Throwable, context: Option[String] = None)
+@import com.reactific.helpers.ThrowableWithComponent
+@import java.io.{StringWriter,PrintWriter}
+<dl class="dl-horizontal">
+  @for(ctxt ← context){<dt>Context:</dt><dd>@ctxt</dd>}
+  <dt>Exception:</dt><dd>@xcptn.getClass.getCanonicalName</dd>
+  @if(xcptn.isInstanceOf[ThrowableWithComponent]){
+    <dt>Message:</dt><dd>@xcptn.getLocalizedMessage</dd>
+    <dt>Location:</dt><dd>@xcptn.asInstanceOf[ThrowableWithComponent].getLocation</dd>
+  } else {
+    <dt>Message:</dt><dd>@xcptn.getMessage</dd>
+  }
+  <dt>Root Cause:</dt>
+  <dd><pre class="text-muted">
+    @{
+      var sw: StringWriter = null
+      var pw: PrintWriter = null
+      try {
+        sw = new StringWriter()
+        pw = new PrintWriter(sw)
+        org.apache.commons.lang3.exception.ExceptionUtils.printRootCauseStackTrace(xcptn, pw)
+        sw.toString
+      } finally {
+        if(pw != null)  pw.close()
+        if(sw != null)  sw.close()
+      }
+    }
+  </pre><br/></dd>
+</dl>

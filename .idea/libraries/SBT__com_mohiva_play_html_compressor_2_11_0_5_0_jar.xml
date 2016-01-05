@@ -3,9 +3,7 @@
     <CLASSES>
       <root url="jar://$USER_HOME$/.ivy2/cache/com.mohiva/play-html-compressor_2.11/jars/play-html-compressor_2.11-0.5.0.jar!/" />
     </CLASSES>
-    <JAVADOC>
-      <root url="jar://$USER_HOME$/.ivy2/cache/com.mohiva/play-html-compressor_2.11/docs/play-html-compressor_2.11-0.5.0-javadoc.jar!/" />
-    </JAVADOC>
+    <JAVADOC />
     <SOURCES>
       <root url="jar://$USER_HOME$/.ivy2/cache/com.mohiva/play-html-compressor_2.11/srcs/play-html-compressor_2.11-0.5.0-sources.jar!/" />
     </SOURCES>

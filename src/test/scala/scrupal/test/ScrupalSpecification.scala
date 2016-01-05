@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext
 abstract class ScrupalSpecification(
   val specName : String,
   val additionalConfig : Map[String,AnyRef] = Map.empty[String,AnyRef],
-  val timeout : FiniteDuration = Duration(5, "seconds")
+  override val timeout : FiniteDuration = Duration(5, "seconds")
 ) extends PlaySpecification with ScrupalComponent {
 
   // WARNING: Do NOT put anything but def and lazy val because of DelayedInit or app startup will get invoked twice

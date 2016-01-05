@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="SBT: com.reactific:helpers_2.11:0.3.2:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.reactific/helpers_2.11/jars/helpers_2.11-0.3.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.reactific/helpers_2.11/srcs/helpers_2.11-0.3.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -2,6 +2,8 @@ package scrupal.core
 
 import java.time.Instant
 
+import com.reactific.helpers.LoggingHelper
+import com.reactific.slickery.H2Driver
 import com.typesafe.config.{ConfigFactory, Config}
 import scrupal.test.{SchemaFixture, ScrupalSpecification}
 import scala.concurrent.ExecutionContext
@@ -16,24 +18,26 @@ class CoreSchemaSpec extends ScrupalSpecification("CoreSchema") {
   final val baseDir = "./target/testdb"
 
   log.setToDebug()
+  LoggingHelper.setToDebug("com.reactific.slickery")
   log.debug("Starting CoreSchema test")
 
-  def testDbConfig(name : String) : Option[Config] = {
-    Some(ConfigFactory.parseString(
+  def testDbConfig(name : String) : Config = {
+    ConfigFactory.parseString(
       s"""$name {
-         |  driver = "slick.driver.H2Driver$$"
+         |  driver = "com.reactific.slickery.H2Driver$$"
          |  db {
          |    connectionPool = disabled
          |    driver = "org.h2.Driver"
          |    url = "jdbc:h2:$baseDir/$name"
          |  }
-         |}""".stripMargin))
+         |}""".stripMargin)
   }
 
-  case class CoreSchemaFixture() extends SchemaFixture( () ⇒ new CoreSchema(testDbConfig("core")))
+  log.debug(s"Config=${testDbConfig("core").toString}")
+  case class CoreSchemaFixture() extends SchemaFixture[CoreSchema[_]]( CoreSchema(testDbConfig("core")))
 
   "CoreSchema" should {
-    "CRUD SiteData" in CoreSchemaFixture() { schema : CoreSchema ⇒
+    "CRUD SiteData" in CoreSchemaFixture() { schema : CoreSchema[_] ⇒
       val future = scrupal.withExecutionContext { implicit ec: ExecutionContext ⇒
         log.debug("withExecutionContext")
         schema.create().flatMap { u ⇒

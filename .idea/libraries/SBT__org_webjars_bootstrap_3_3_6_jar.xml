@@ -3,9 +3,7 @@
     <CLASSES>
       <root url="jar://$USER_HOME$/.ivy2/cache/org.webjars/bootstrap/jars/bootstrap-3.3.6.jar!/" />
     </CLASSES>
-    <JAVADOC>
-      <root url="jar://$USER_HOME$/.ivy2/cache/org.webjars/bootstrap/docs/bootstrap-3.3.6-javadoc.jar!/" />
-    </JAVADOC>
+    <JAVADOC />
     <SOURCES>
       <root url="jar://$USER_HOME$/.ivy2/cache/org.webjars/bootstrap/srcs/bootstrap-3.3.6-sources.jar!/" />
     </SOURCES>

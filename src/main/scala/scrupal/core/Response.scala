@@ -15,256 +15,183 @@
 
 package scrupal.core
 
+import akka.http.scaladsl.model.MediaType
+
 import java.io.InputStream
 
-import akka.http.scaladsl.model.{MediaType, MediaTypes}
-import org.apache.commons.lang3.exception.ExceptionUtils
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json._
 import play.twirl.api.Html
 
 import scala.concurrent.ExecutionContext
 
-/** Encapsulation of an Action's Result
+/** Encapsulation of an Action's Response
   *
-  * Results are generated from an action processing a request. They encapsulate a payload and a disposition. The
+  * Responses are generated from an action processing a request. They encapsulate a payload and a disposition. The
   * disposition provides a quick summary of the result while the payload provides access to the actual resulting
   * information.
+  *
+  * @tparam PT The Payload Type
   */
-trait Response {
-  /** Disposition of a Result
+sealed trait Response[PT <: Content[_]] {
+  /** The payload content of the response
     *
-    * This provides a basic summary of the result using the Disposition enumeration. There are several ways to be
-    * successful in responding to a request and several ways to fail. Each of these basic ways of responding are
-    * encoded into the disposition as a simple enumeration value. This allows the receiver of the Result[P] to
-    * quickly asses what should be done with the result.
-    * @return The Disposition of the result
+    * @return a Content[_] object that provides the payload of the response
     */
-  def disposition : Disposition
+  def payload : PT
+
+  /** The disposition of the response
+    *
+    * @return A Disposition that indicates the way in which the action succeeded or failed
+    */
+  def disposition: Disposition
 
   /** Type Of Media Returned.
     *
-    * This is a ContentType value form Akka-Http. It indicates what kind of media and character encoding is being
-    * returned by the payload.
-    * @return A ContentType corresponding to the content type of `content`
-    */
-  def mediaType : MediaType
-
-  /** Convert Content of to Enumerator
+    * This is a ContentType value from Akka-Http. It indicates what kind of media and character encoding is being
+    * returned by the payload. It is extracted, by default, directly from the payload
     *
-    * This allows the content of type RT to be converted into a standardized type for serialization to a stream.
+    * @return A ContentType corresponding to the content type of `payload`
+    */
+  def mediaType : MediaType = payload.mediaType
+
+  /** Convert Payload to Enumerator
+    *
+    * This allows the payload of type PT to be converted into a standardized type for serialization to a stream.
     * It converts the content into an Enumerator of Array[Byte].
+    *
     * @return The content as an Enumerated byte array
     */
-  def toEnumerator(implicit ec: ExecutionContext) : Enumerator[Array[Byte]]
+  def toEnumerator(implicit ec: ExecutionContext) : Enumerator[Array[Byte]] = payload.toEnumerator(ec)
 
-  def toEnumeratorResponse(implicit ec: ExecutionContext) : EnumeratorResponse = {
-    EnumeratorResponse(toEnumerator, mediaType, disposition)
+  /** Convert Payload To EnumeratedResponse
+    * This allows for there to be a common ground in all responses. An EnumeratedResponse can be converted
+    * directly to a Play Result
+    * @param ec The execution context to use in generating the response
+    * @return
+    */
+  def toEnumeratedResponse(implicit ec: ExecutionContext) : EnumeratedResponse = {
+    Response(payload.toEnumerator(ec), payload.mediaType, disposition)
   }
 }
 
+/** Companion Object For Response
+  * This provides a variety of ways to construct Response objects
+  */
 object Response {
-  def safely( f: () ⇒ Response ) : Response = {
+  def apply[C <: Content[_]](theContent: C, theDisposition : Disposition = Successful) : Response[C] = {
+    new Response[C] { val payload : C = theContent ; val disposition : Disposition = theDisposition }
+  }
+  def apply(content: Enumerator[Array[Byte]], mediaType : MediaType,
+            disposition: Disposition) : EnumeratedResponse = {
+    new EnumeratedResponse(EnumeratedContent(content, mediaType), disposition)
+  }
+  def apply(content: Seq[Enumerator[Array[Byte]]], mediaType : MediaType,
+            disposition : Disposition) : Response[EnumeratorsContent] = {
+    apply(EnumeratorsContent(content, mediaType), disposition)
+  }
+  def apply(content : InputStream, mediaType : MediaType,
+            disposition : Disposition) : Response[StreamContent] = {
+    apply(StreamContent(content, mediaType), disposition)
+  }
+  def apply(content : Array[Byte], mediaType : MediaType,
+            disposition : Disposition) : Response[OctetsContent] = {
+    apply(OctetsContent(content, mediaType), disposition)
+  }
+
+  /** Response with a simple text string payload.
+    *
+    * This kind of Response just encapsulates a String and defaults its ContentType to text/plain(UTF-8).
+    *
+    * @param content The string content of the response
+    * @param disposition The disposition of the response.
+    * @return The Response
+    */
+  def apply(content : String, disposition : Disposition) : Response[TextContent] = {
+    apply(TextContent(content), disposition)
+  }
+
+  /** Response with an HTMLFormat payload.
+    *
+    * This kind of response just encapsulates a Twirl Html value and defaults its ContentType to text/html.
+    *
+    * @param content The Html payload of the response.
+    * @param disposition The disposition of the response.
+    * @return The Response
+    */
+  def apply(content : Html, disposition : Disposition) : Response[HtmlContent] = {
+    apply(HtmlContent(content), disposition)
+  }
+
+  /** Response with JSON payload.
+    *
+    * This kind of response encapsulates a JSON value and defaults it ContentType to application/json.
+    *
+    * @param content The JsValue payload of the response.
+    * @param disposition The disposition of the response.
+    * @return The Response
+    */
+  def apply(content : JsValue, disposition : Disposition) : Response[JsonContent] = {
+    apply(JsonContent(content), disposition)
+  }
+
+  /** Response with a Throwable payload.
+    *
+    * This kind of response just encapsulates an error embodied by a Throwable. This is how hard errors are returned from
+    * a result. Note that the Disposition is always an Exception
+    *
+    * @param content The error that occurred
+    */
+  def apply(content: Throwable) : Response[ThrowableContent]= {
+    apply(ThrowableContent(content), Exception)
+  }
+
+  /** Generate a response safely, handling exceptions
+    *
+    * This function takes a by-name argument that produces a Response and returns it. If the argument is a
+    * function that could fail with an exception, then an Exception response is returned with a ThrowableContent
+    * wrapping the exception
+    *
+    * @param f A by-name argument that produces a Response
+    * @return The Response, even if there's an exception
+    */
+  def safely[PT <: Content[_]]( f: ⇒ Response[PT] ) : Response[_] = {
     try {
-      f()
+      f
     } catch {
       case x : Throwable ⇒
-        ExceptionResponse(x)
+        Response(ThrowableContent(x), Exception)
     }
   }
 }
 
-object NoopResponse extends Response {
-  def disposition = Unimplemented
-  def toEnumerator(implicit ec: ExecutionContext) = Enumerator.empty[Array[Byte]]
-  def mediaType = MediaTypes.`application/octet-stream`
+/** No-operation Response
+  * A case object for returning nothing as a response
+  */
+case object NoopResponse extends Response[EmptyContent] {
+  lazy val payload = EmptyContent()
+  val disposition = Received
 }
 
+/** Response For Unimplemented Functionality
+  *
+  * @param what The thing that is not imnplemented
+  */
+case class UnimplementedResponse(what: String) extends Response[TextContent] {
+  val payload = TextContent(what)
+  def disposition = Unimplemented
+  def formatted = s"${disposition.id.name}: $what"
+  override def toEnumerator(implicit ec: ExecutionContext) = Enumerator(formatted.getBytes(utf8))
+}
 
 /** Response With An Enumerator
+  * This is used to capture responses of arbitrary type as a single type since all Reponses can be
+  * converted into this kind of response
   *
+  * @param payload the EnumeratedContent of the response
+  * @param disposition the Disposition of the response
   */
-case class EnumeratorResponse(
-  content : Enumerator[Array[Byte]],
-  mediaType : MediaType,
-  disposition : Disposition = Successful
-) extends Response {
-  def toEnumerator(implicit ec: ExecutionContext) = content
-}
-
-case class EnumeratorsResponse(
-  content : Seq[Enumerator[Array[Byte]]],
-  mediaType : MediaType,
-  disposition : Disposition = Successful
-) extends Response {
-  def toEnumerator(implicit ec: ExecutionContext) = {
-    content.foldLeft(Enumerator.empty[Array[Byte]]) { case (combined,next) ⇒ combined.andThen(next) }
-  }
-}
-
-/** Result with an InputStream.
-  *
-  * This kind of Result contains an InputStream for its payload that the client of the StreamResult can use to read
-  * data. This is often a more convenient result than EnumeratorResult because Enumerator.fromStream(x) can be used to
-  * turn the stream into an Enumerator; or, the client can just read the stream directly (and block!).
-  * @param content The InputStream to be read
-  * @param mediaType The ContentType of the InputStream
-  * @param disposition The disposition of the result.
-  */
-case class StreamResponse(
-  content : InputStream,
-  mediaType : MediaType,
-  disposition : Disposition = Successful) extends Response {
-  def toEnumerator(implicit ec: ExecutionContext) = Enumerator.fromStream(content, 64 * 1024)
-}
-
-/** Result with an Array of Bytes.
-  *
-  * This kind of Result contains an array of data that the client of the OctetsResult can use.
-  *
-  * @param content The data of the result
-  * @param mediaType The ContentType of the data
-  * @param disposition The disposition of the result.
-  */
-case class OctetsResponse(
-  content : Array[Byte],
-  mediaType : MediaType,
-  disposition : Disposition = Successful) extends Response {
-  def toEnumerator(implicit ec: ExecutionContext) = Enumerator(content)
-}
-
-/** Result with a simple text string.
-  *
-  * This kind of result just encapsulates a String and defaults its ContentType to text/plain(UTF-8). That ContentType
-  * should not be changed unless there is a significant need to as using UTF-8 as the base character encoding is
-  * standard across Scrupal
-  *
-  * @param content The string content of the response
-  * @param disposition The disposition of the result.
-  */
-case class StringResponse(
-  content : String,
-  disposition : Disposition = Successful) extends Response {
-  val mediaType : MediaType = MediaTypes.`text/plain`
-  def toEnumerator(implicit ec: ExecutionContext) = Enumerator(content.getBytes(utf8))
-}
-
-/** Result with an HTMLFormat payload.
-  *
-  * This kind of result just encapsulates a Scalatags Html result and defaults its ContentType to text/html.
-  *
-  * @param content The Html payload of the result.
-  * @param disposition The disposition of the result.
-  */
-case class HtmlResponse(
-  content : Html,
-  disposition : Disposition = Successful) extends Response {
-  val mediaType : MediaType = MediaTypes.`text/html`
-  def toEnumerator(implicit ec: ExecutionContext) = {
-    Enumerator(content.body.getBytes(utf8))
-  }
-}
-
-
-/** Result with a BSONDocument payload.
-  *
-  * This kind of result just encapsulates a MongoDB BSONDocument result. Note that the ContentType is not modifiable
-  * here as it is hard coded to ScrupalMediaTypes.bson. BSON is not a "standard" media type so we invent our own.
-  *
-  * @param content The JsValue payload of the result.
-  * @param disposition The disposition of the result.
-  */
-case class JsonResponse(
-  content : JsValue,
-  disposition : Disposition = Successful) extends Response {
-  val mediaType : MediaType = MediaTypes.`application/json`
-  def toEnumerator(implicit ec: ExecutionContext) = {
-    Enumerator(Json.stringify(content).getBytes(utf8))
-  }
-}
-
-/** Result with an Throwable payload.
-  *
-  * This kind of result just encapsulates an error embodied by a Throwable. This is how hard errors are returned from
-  * a result. Note that the Disposition is always an Exception
-  *
-  * @param content The error that occurred
-  */
-case class ExceptionResponse(
-  content : Throwable) extends Response {
-  val disposition : Disposition = Exception
-  val mediaType : MediaType = MediaTypes.`text/plain`
-  def toText : String = {
-    val bldr = new StringBuilder()
-    bldr.append(ExceptionUtils.getMessage(content)).append(":\n")
-    bldr.append(ExceptionUtils.getStackTrace(content)).append("caused by: ")
-    bldr.append(ExceptionUtils.getRootCauseMessage(content)).append(":\n")
-    bldr.append("\tat ").append(ExceptionUtils.getRootCauseStackTrace(content).mkString("\n\tat "))
-    bldr.toString()
-  }
-  def toEnumerator(implicit ec: ExecutionContext) = {
-    Enumerator(toText.getBytes(utf8))
-  }
-}
-
-case class JsonExceptionResponse(content : Throwable) extends Response {
-  val disposition : Disposition = Exception
-  val mediaType = MediaTypes.`application/json`
-  def toJson : JsObject = {
-    JsObject(Seq(
-      "$error" → JsString(ExceptionUtils.getMessage(content)),
-      "$stack" → JsArray(content.getStackTrace.map { elem ⇒ JsString(elem.toString) })
-    ))
-  }
-
-  def toJsonResponse : JsonResponse = {
-    JsonResponse(toJson, disposition)
-  }
-
-  def toEnumerator(implicit ec: ExecutionContext) = {
-    Enumerator(Json.stringify(toJson).getBytes(utf8))
-  }
-}
-
-/** Result with a simple error payload.
-  *
-  * This can be used when an error is detected that does not warrant an exception being thrown. Instead, just return
-  * the ErrorResult. Note that Disposition is "Unspecified" but this is unlikely what you want so you should always
-  * set the Disposition with an ErrorResult.
- *
-  * @param content The error message
-  * @param disposition The disposition of the result
-  */
-case class ErrorResponse(
-  content : String,
-  disposition : Disposition = Unspecified) extends Response {
-  val mediaType = MediaTypes.`text/plain`
-  def formatted = s"Error: ${disposition.id.name}: $content"
-  def toEnumerator(implicit ec: ExecutionContext) = {
-    Enumerator(formatted.getBytes(utf8))
-  }
-}
-
-import scala.language.existentials
-
-/*
-case class FormErrorResponse(
-  content : Results[_],
-  disposition : Disposition = Unacceptable) extends Response {
-  val mediaType : MediaType = MediaTypes.`application/json`
-  def toEnumerator(implicit ec: ExecutionContext) = {
-    Enumerator(Json.stringify(content.jsonMessage).getBytes(utf8))
-  }
-  def formatted : String = content.msgBldr.toString()
-}
-*/
-
-case class UnimplementedResponse(what: String) extends Response {
-  def disposition = Unimplemented
-
-  def formatted = s"${disposition.id.name}: $what"
-
-  def toEnumerator(implicit ec: ExecutionContext) = Enumerator(formatted.getBytes(utf8))
-
-  def mediaType = MediaTypes.`text/plain`
-}
+case class EnumeratedResponse(
+ payload : EnumeratedContent,
+ disposition : Disposition = Successful
+) extends Response[EnumeratedContent]

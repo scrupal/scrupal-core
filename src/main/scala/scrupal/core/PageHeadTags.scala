@@ -19,15 +19,15 @@ trait HtmlGenerator extends ((Context) ⇒ Html)
   * @param javascript Additional JavaScript program text
   */
 case class PageHeadTags(
-    title: String,
+    title: String = "Scrupal",
     base: Option[BaseTag] = None,
     meta: MetaTags = MetaTags(),
     links: LinkTags = LinkTags(),
     style: Option[Txt] = None,
     javascript: Option[JavaScript] = None
 ) extends HtmlGenerator {
-  def appy(context: Context) : Html = {
-    scrupal.core.html.head(context, this)
+  def apply(context: Context) : Html = {
+    scrupal.core.html.head(this)
   }
 }
 
@@ -55,12 +55,12 @@ case class MetaTags(
     refresh: Int = 0
 ) extends HtmlGenerator {
   def apply(context : Context) : Html = {
-    scrupal.core.html.meta(context, this)
+    scrupal.core.html.meta(this)
   }
 }
 
 /** Representation For An Icon Link tag */
-case class IconLinkTag(url: URL, x: Int, y: Int, typ: String)
+case class IconLinkTag(url: String, x: Int, y: Int, typ: String)
 
 /** HTML Link Tags
   * Represents the HTML {{{<link}}} elements in the head of a page and generates HTML
@@ -72,14 +72,14 @@ case class IconLinkTag(url: URL, x: Int, y: Int, typ: String)
   * @param stylesheets Links to CSS style sheets
   */
 case class LinkTags(
-    alternate: Option[URL] = None,
-    author: Option[URL] = None,
-    license: Option[URL] = None,
+    alternate: Option[String] = None,
+    author: Option[String] = None,
+    license: Option[String] = None,
     icon : Option[IconLinkTag] = None,
     scriptLinks: Seq[String] = Seq.empty[String],
     stylesheets: Seq[String] = Seq.empty[String]
 ) extends HtmlGenerator {
   def apply(context: Context) : Html = {
-    scrupal.core.html.link(context, this)
+    scrupal.core.html.link(this)
   }
 }

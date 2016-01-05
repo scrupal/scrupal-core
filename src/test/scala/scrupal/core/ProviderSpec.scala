@@ -38,7 +38,7 @@ class ProviderSpec extends ScrupalSpecification("Provider") {
   case object NullReactor extends Reactor {
     val description = "The Null Reactor"
     val oid : Option[Long] = None
-    def apply(request: Stimulus): Future[Response] = Future.successful {NoopResponse}
+    def apply(request: Stimulus): Future[NoopResponse.type] = Future.successful {NoopResponse}
   }
 
   "Provider" should {
@@ -61,7 +61,7 @@ class ProviderSpec extends ScrupalSpecification("Provider") {
         maybe_reaction.isDefined must beTrue
         val reaction = maybe_reaction.get
         reaction must beEqualTo(NullReactor)
-        val future = reaction(Stimulus.empty).map { resp ⇒ resp.disposition must beEqualTo(Unimplemented) }
+        val future = reaction(Stimulus.empty).map { resp ⇒ resp.disposition must beEqualTo(Received) }
         Await.result(future, 1.seconds)
       }
     }
@@ -73,7 +73,7 @@ class ProviderSpec extends ScrupalSpecification("Provider") {
         maybe_reaction.isDefined must beTrue
         val reaction = maybe_reaction.get
         reaction must beEqualTo(NullReactor)
-        val future = reaction(Stimulus.empty).map { resp ⇒ resp.disposition must beEqualTo(Unimplemented) }
+        val future = reaction(Stimulus.empty).map { resp ⇒ resp.disposition must beEqualTo(Received) }
         Await.result(future, 1.seconds)
       }
     }
@@ -114,7 +114,7 @@ class ProviderSpec extends ScrupalSpecification("Provider") {
       ep.enable(e_root)
       ep.enable(e_root_1)
       ep.disable(e_root_2)
-      val future = ep.provide(request)(stimulus).map { resp : Response ⇒
+      val future = ep.provide(request)(stimulus).map { resp : Response[_] ⇒
         resp.disposition must beEqualTo(Unimplemented)
         resp.asInstanceOf[UnimplementedResponse].formatted must beEqualTo("Unimplemented: single")
       }
@@ -148,7 +148,7 @@ class ProviderSpec extends ScrupalSpecification("Provider") {
     "provides reactor appropriately" in {
       val request = FakeRequest("GET", "/foot-")
       val stimulus = Stimulus(SimpleContext(scrupal), request)
-      val future = sp.provide(request)(stimulus).map { resp: Response ⇒
+      val future = sp.provide(request)(stimulus).map { resp: Response[_] ⇒
         resp.disposition must beEqualTo(Unimplemented)
         resp.asInstanceOf[UnimplementedResponse].formatted must beEqualTo("Unimplemented: single")
       }
@@ -181,7 +181,7 @@ class ProviderSpec extends ScrupalSpecification("Provider") {
     "provides reactor appropriate for plurality of request" in {
       val singleRequest = FakeRequest("GET", "/foot")
       val singleStimulus = Stimulus(SimpleContext(scrupal), singleRequest)
-      val singleFuture = sp.provide(singleRequest)(singleStimulus).map { resp: Response ⇒
+      val singleFuture = sp.provide(singleRequest)(singleStimulus).map { resp: Response[_] ⇒
         resp.disposition must beEqualTo(Unimplemented)
         resp.isInstanceOf[UnimplementedResponse]
         val ur = resp.asInstanceOf[UnimplementedResponse]
@@ -189,7 +189,7 @@ class ProviderSpec extends ScrupalSpecification("Provider") {
       }
       val pluralRequest = FakeRequest("GET", "/feet")
       val pluralStimulus = Stimulus(SimpleContext(scrupal), pluralRequest)
-      val pluralFuture = sp.provide(pluralRequest)(pluralStimulus).map { resp: Response ⇒
+      val pluralFuture = sp.provide(pluralRequest)(pluralStimulus).map { resp: Response[_] ⇒
         resp.disposition must beEqualTo(Unimplemented)
         resp.isInstanceOf[UnimplementedResponse]
         val ur = resp.asInstanceOf[UnimplementedResponse]

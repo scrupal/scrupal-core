@@ -15,12 +15,12 @@
 
 package scrupal.utils
 
-import com.reactific.helpers.{FutureHelper, ThrowingHelper, LoggingHelper}
+import com.reactific.helpers.HelperComponent
 
 /** A Scrupal Component
   * This trait just provides logging and exception throwing support. Mix it in to a Scrupal class to obtain
   * these facilities. Other functionality may be added in the future.
   */
-trait ScrupalComponent extends LoggingHelper with ThrowingHelper with FutureHelper {
+trait ScrupalComponent extends HelperComponent {
 
 }

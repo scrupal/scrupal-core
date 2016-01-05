@@ -10,6 +10,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/scala-2.11" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/routes/main" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/src_managed/main" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../target/scala-2.11/twirl/main" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/test/scala" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/test/scala-2.11" isTestSource="true" />
@@ -21,11 +22,11 @@
       <excludeFolder url="file://$MODULE_DIR$/../../target/scala-2.11/coverage-report" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/scala-2.11/scoverage-data" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/scala-2.11/scoverage-report" />
-      <excludeFolder url="file://$MODULE_DIR$/../../target/scala-2.11/twirl/main" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/scala-2.11/twirl/test" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/specs2-reports" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/streams" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/test-reports" />
+      <excludeFolder url="file://$MODULE_DIR$/../../target/testdb" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/web" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -96,7 +97,6 @@
     <orderEntry type="library" name="SBT: com.typesafe.play.modules:play-modules-redis_2.11:2.4.1:jar" level="project" />
     <orderEntry type="library" name="SBT: com.typesafe.scala-logging:scala-logging_2.11:3.1.0:jar" level="project" />
     <orderEntry type="library" name="SBT: com.typesafe.slick:slick-hikaricp_2.11:3.1.0:jar" level="project" />
-    <orderEntry type="library" name="SBT: com.typesafe.slick:slick_2.11:3.1.0:jar" level="project" />
     <orderEntry type="library" name="SBT: com.zaxxer:HikariCP-java6:2.3.7:jar" level="project" />
     <orderEntry type="library" name="SBT: commons-codec:commons-codec:1.10:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: commons-collections:commons-collections:3.2.1:jar" level="project" />
@@ -197,9 +197,19 @@
     <orderEntry type="library" scope="TEST" name="SBT: xalan:xalan:2.7.1:jar" level="project" />
     <orderEntry type="library" name="SBT: xerces:xercesImpl:2.11.0:jar" level="project" />
     <orderEntry type="library" name="SBT: xml-apis:xml-apis:1.4.01:jar" level="project" />
-    <orderEntry type="library" name="SBT: com.reactific:helpers_2.11:0.3.0:jar" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="SBT: org.scoverage:scalac-scoverage-plugin_2.11:1.0.1:jar" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="SBT: org.scoverage:scalac-scoverage-runtime_2.11:1.0.1:jar" level="project" />
-    <orderEntry type="library" name="SBT: com.reactific:slickery_2.11:0.3.1-SNAPSHOT:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.github.tminglei:slick-pg_2.11:0.10.2:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.github.tminglei:slick-pg_core_2.11:0.10.2:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.github.tminglei:slick-pg_date2_2.11:0.10.2:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.github.tminglei:slick-pg_jts_2.11:0.10.2:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.github.tminglei:slick-pg_play-json_2.11:0.10.2:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.typesafe.slick:slick_2.11:3.1.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.vividsolutions:jts:1.13:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.postgresql:postgresql:9.4-1201-jdbc41:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.reactific:helpers_2.11:0.3.2:jar" level="project" />
+    <orderEntry type="library" name="SBT: mysql:mysql-connector-java:5.1.38:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.xerial:sqlite-jdbc:3.8.11.2:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.reactific:slickery_2.11:0.3.5:jar" level="project" />
   </component>
 </module>

@@ -15,9 +15,10 @@
 
 package scrupal.test
 
-import com.reactific.slickery.Schema
+import com.reactific.slickery.{SlickeryDriver, Schema}
 import org.specs2.execute.{Result, AsResult}
 import org.specs2.specification.Fixture
+import scrupal.core.CoreSchema
 
 /** Testing Fixture for an arbitrary class */
 class ClassFixture[CLASS](create : ⇒ CLASS) extends Fixture[CLASS] {
@@ -45,13 +46,13 @@ class CaseClassFixture[T <: CaseClassFixture[T]] extends Fixture[T] {
   }
 }
 
-class SchemaFixture[T <: Schema](create: () ⇒ T) extends Fixture[T] {
+class SchemaFixture[T <: CoreSchema[_]](create: ⇒ T) extends Fixture[T] {
   def apply[R](f : T ⇒ R)(implicit evidence : AsResult[R]) : Result = {
-    val fixture = create()
+    val fixture = create
     try {
       AsResult(f(fixture))
     } finally {
-      fixture.close()
+      fixture.drop()
     }
   }
 }

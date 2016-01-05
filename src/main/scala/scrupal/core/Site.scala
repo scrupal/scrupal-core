@@ -19,7 +19,6 @@ import java.time.Instant
 
 import com.reactific.helpers.{MemoryCache, Registrable, Registry}
 import com.reactific.slickery._
-import play.api.http.Status
 
 import play.api.mvc.{Results, Result, Handler, RequestHeader}
 
@@ -33,7 +32,7 @@ case class SiteData(
   modified: Instant = Instant.EPOCH,
   created : Instant = Instant.EPOCH,
   oid : Option[Long] = None
-) extends Useable {
+) extends Slickery {
   def forHost(hostName: String) : Boolean = { hostName.endsWith(domainName) }
 }
 
