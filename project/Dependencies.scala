@@ -77,7 +77,7 @@ trait Dependencies
   val scala_arm               = "com.jsuereth"              %% "scala-arm"                % "1.4"
 
   // Database, Caches, Serialization, Data Storage stuff
-  val slickery                = "com.reactific"             %% "slickery"                 % "0.3.5"
+  val slickery                = "com.reactific"             %% "slickery"                 % "0.3.6"
 
   // WebJars We Use
   val webjars_play            = "org.webjars"               %% "webjars-play"             % "2.4.0-2"
