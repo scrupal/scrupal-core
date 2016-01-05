@@ -168,8 +168,8 @@ object Response {
 /** No-operation Response
   * A case object for returning nothing as a response
   */
-case object NoopResponse extends Response[EmptyContent] {
-  lazy val payload = EmptyContent()
+case object NoopResponse extends Response[EmptyContent.type] {
+  lazy val payload = EmptyContent
   val disposition = Received
 }
 

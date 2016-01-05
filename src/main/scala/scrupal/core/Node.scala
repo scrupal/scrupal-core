@@ -45,7 +45,7 @@ trait ContentGenerator[CT <: Content[_]] extends ((Context) => Future[CT])
 trait Node[CT <: Content[_]] extends ContentGenerator[CT]
 
 object Node {
-  object Empty extends StaticNode[EmptyContent] { val content = EmptyContent() }
+  object Empty extends StaticNode[EmptyContent.type] { val content = EmptyContent }
 }
 
 /** A Node With Static Content

@@ -17,7 +17,7 @@ package scrupal.core
 
 import java.io.ByteArrayInputStream
 
-import akka.http.scaladsl.model.{MediaTypes, MediaType}
+import akka.http.scaladsl.model.MediaTypes
 import org.specs2.matcher.MatchResult
 import play.api.libs.iteratee.{Iteratee, Enumerator}
 import play.api.libs.json.Json
@@ -41,7 +41,7 @@ class ResponseSpec extends ScrupalSpecification("Response") {
       "generate ExceptionResponse for exceptions thrown in Response.safely" in {
         val good = Response.safely { NoopResponse }
         val bad = Response.safely { throw new Exception("oops") }
-        good.payload must beEqualTo(EmptyContent())
+        good.payload must beEqualTo(EmptyContent)
         bad.isInstanceOf[Response[_]] must beTrue
         val payload = bad.asInstanceOf[Response[_]].payload.asInstanceOf[ThrowableContent].content
         payload.getMessage must beEqualTo("oops")

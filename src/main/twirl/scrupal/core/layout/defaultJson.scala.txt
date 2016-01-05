@@ -1,0 +1,5 @@
+@(context : scrupal.core.Context, args: Map[String,scrupal.core.JsonContent])
+{
+  "message" : "This is the default JSON Layout"
+  @for((key, frag) ← args){"@Txt(key)" : "@frag"  }
+}

@@ -1,9 +1,9 @@
 package scrupal.core
 
+import play.api.libs.json.JsString
 import play.twirl.api.Html
 import scrupal.test.{HTML5Validator, ScrupalSpecification}
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -12,7 +12,7 @@ class LayoutSpec extends ScrupalSpecification("Layout") {
   "DefaultHtmlLayout" should {
     "generate valid HTML" in {
       val future = DefaultHtmlLayout(context, Map("one" → HtmlContent(Html("one")))).map { html ⇒
-        HTML5Validator.validateDocument(html.body) must beTrue
+        HTML5Validator.validate(html.body).isEmpty must beTrue
       }
       await(future)
     }
@@ -36,6 +36,21 @@ class LayoutSpec extends ScrupalSpecification("Layout") {
     }
   }
 
+  "DefaultJsonLayout" should {
+    "generate valid text content" in {
+      val future = DefaultJsonLayout(context, Map("one" → JsonContent(JsString("mapped-from-one")))).map { text ⇒
+        text.body.contains("mapped-from-one") must beTrue
+      }
+      await(future)
+    }
+    "have sane members" in {
+      DefaultJsonLayout.id must beEqualTo('DefaultJsonLayout)
+      DefaultJsonLayout.arrangementDescription.nonEmpty must beTrue
+      DefaultJsonLayout.description.nonEmpty must beTrue
+    }
+
+  }
+
   "StandardThreeColumnLayout" should {
     "generate valid text content" in {
       val future = StandardThreeColumnLayout(context, Map(
@@ -47,7 +62,7 @@ class LayoutSpec extends ScrupalSpecification("Layout") {
         "content" → HtmlContent(Html("<p>content-value</p>")),
         "footer" → HtmlContent(Html("<p>footer-value</p>"))
       )).map { html ⇒
-        HTML5Validator.validateDocument(html.body) must beTrue
+        HTML5Validator.validate(html.body).isEmpty must beTrue
         html.body.contains("navheader-value") must beTrue
         html.body.contains("navbar-value") must beTrue
         html.body.contains("header-value") must beTrue

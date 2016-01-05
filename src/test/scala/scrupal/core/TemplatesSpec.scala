@@ -1,5 +1,6 @@
 package scrupal.core
 
+import org.specs2.matcher.MatchResult
 import play.twirl.api.{JavaScript, Txt, Html}
 
 import scrupal.core.default.html.unauthorized
@@ -30,16 +31,29 @@ case class PageHeadContext(ctxt: Context) extends Context {
 
 class TemplatesSpec extends ScrupalSpecification("master") {
 
+  def doValidation(name: String, doc : String, context: String = "") : Seq[Throwable] = {
+    val errors = if (context.isEmpty) HTML5Validator.validate(doc) else HTML5Validator.validateFragment(doc, context)
+    if (errors.nonEmpty)
+      log.debug(s"Validation errors for $name: \n$doc\n${errors.mkString("\n")}")
+    errors
+  }
+
+  "HTML5Validtator" should {
+    "reject invalid html" in {
+      doValidation("invalid html", "<head").isEmpty must beFalse
+    }
+  }
+
   "master" should {
     "generate a properly formed HTML5 page" in {
       val html = master(context.pageHeadTags)(Html("<p>Foo</p>"))
       html.contentType must beEqualTo("text/html")
-      HTML5Validator.validateDocument(html.body) must beTrue
+      doValidation("master1", html.body).isEmpty must beTrue
     }
     "generate head elements with proper content" in {
       val ctxt = PageHeadContext(context)
       val html = master(ctxt.pageHeadTags)(Html("<p>Foo</p>"))
-      HTML5Validator.validateDocument(html.body) must beTrue
+      doValidation("master2", html.body).isEmpty must beTrue
       // html.body.replaceAll("^\\s*$","") must beEqualTo(expected)
     }
   }
@@ -75,13 +89,40 @@ class TemplatesSpec extends ScrupalSpecification("master") {
     "format an exception properly" in {
       val xcptn = new IllegalArgumentException("foo")
       val html = throwable(xcptn)
-      HTML5Validator.validateFragment(html.body) must beTrue
+      doValidation("throwable", html.body, "div").isEmpty must beTrue
+    }
+  }
+  "unauthorized" should {
+    "lay out content properly" in {
+      val html = unauthorized("this page")
+      doValidation("unauthorized", html.body, "body").isEmpty must beTrue
+    }
+  }
+  "PageHeadTags" should {
+    "construct valid HTML5 from a context" in {
+      val ctxt = PageHeadContext(context)
+      val html = ctxt.pageHeadTags(ctxt)
+      doValidation("PageHeadTags", html.body, "html").isEmpty must beTrue
+    }
+  }
+  "MetaTags" should {
+    "construct valid HTML5 from a context" in {
+      val ctxt = PageHeadContext(context)
+      val html = ctxt.pageHeadTags.meta(ctxt)
+      doValidation("MeatTags", html.body,"head").isEmpty must beTrue
+    }
+  }
+  "LinkTags" should {
+    "construct valid HTML5 from a context" in {
+      val ctxt = PageHeadContext(context)
+      val html = ctxt.pageHeadTags.links(ctxt)
+      doValidation("LinkTags", html.body, "head").isEmpty must beTrue
     }
   }
   "defaultHtml Layout" should {
     "lay out content properly" in {
       val html = defaultHtml(context, Map("one" → HtmlContent(Html("<p>foo</p>"))))
-      HTML5Validator.validateFragment(html.body) must beTrue
+      doValidation("defaultHtml", html.body).isEmpty must beTrue
     }
   }
   "standardThreeColumn Layout" should {
@@ -95,14 +136,7 @@ class TemplatesSpec extends ScrupalSpecification("master") {
         "content" → HtmlContent(Html("<p>content</p>")),
         "footer" → HtmlContent(Html("<p>footer</p>"))
       ))
-      HTML5Validator.validateDocument(html.body) must beTrue
-    }
-  }
-  "unauthorized" should {
-    "lay out content properly" in {
-      val html = unauthorized("this page")
-      HTML5Validator.validateFragment(html.body) must beTrue
-
+      doValidation("standardThreeColumn", html.body).isEmpty must beTrue
     }
   }
 }

@@ -24,7 +24,7 @@ trait Content[T] {
 /** Empty Content
   * Generates an empty enumerator of byte array with octet-stream media type
   */
-case class EmptyContent() extends Content[Unit] {
+case object EmptyContent extends Content[Unit] {
   def content: Unit = ()
   def mediaType: MediaType = MediaTypes.`application/octet-stream`
   def toEnumerator(implicit ec: ExecutionContext): Enumerator[Array[Byte]] = Enumerator.empty[Array[Byte]]

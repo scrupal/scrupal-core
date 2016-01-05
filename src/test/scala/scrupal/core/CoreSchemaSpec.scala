@@ -3,12 +3,14 @@ package scrupal.core
 import java.time.Instant
 
 import com.reactific.helpers.LoggingHelper
-import com.reactific.slickery.H2Driver
-import com.typesafe.config.{ConfigFactory, Config}
+import com.typesafe.config.ConfigFactory
+
+import play.api.Configuration
+
 import scrupal.test.{SchemaFixture, ScrupalSpecification}
+
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
 
 /** Test Case For CoreSchema */
 class CoreSchemaSpec extends ScrupalSpecification("CoreSchema") {
@@ -21,9 +23,9 @@ class CoreSchemaSpec extends ScrupalSpecification("CoreSchema") {
   LoggingHelper.setToDebug("com.reactific.slickery")
   log.debug("Starting CoreSchema test")
 
-  def testDbConfig(name : String) : Config = {
-    ConfigFactory.parseString(
-      s"""$name {
+  def testDbConfig(name : String) : Configuration = {
+    Configuration(ConfigFactory.parseString(
+      s"""scrupal.database.$name {
          |  driver = "com.reactific.slickery.H2Driver$$"
          |  db {
          |    connectionPool = disabled
@@ -31,9 +33,11 @@ class CoreSchemaSpec extends ScrupalSpecification("CoreSchema") {
          |    url = "jdbc:h2:$baseDir/$name"
          |  }
          |}""".stripMargin)
+    )
   }
 
   log.debug(s"Config=${testDbConfig("core").toString}")
+
   case class CoreSchemaFixture() extends SchemaFixture[CoreSchema[_]]( CoreSchema(testDbConfig("core")))
 
   "CoreSchema" should {

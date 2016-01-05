@@ -15,66 +15,99 @@
 
 package scrupal.test
 
-import java.io.{ByteArrayInputStream, InputStream}
+import java.io.{ByteArrayOutputStream, ByteArrayInputStream, InputStream}
 import java.nio.charset.StandardCharsets
 
-import nu.validator.htmlparser.dom.HtmlDocumentBuilder
-import org.xml.sax.InputSource
+import nu.validator.messages.{MessageEmitterAdapter, TextMessageEmitter}
+import nu.validator.servlet.imagereview.ImageCollector
+import nu.validator.source.SourceCode
+import nu.validator.validation.SimpleDocumentValidator
+import nu.validator.xml.SystemErrErrorHandler
+import org.xml.sax.{SAXParseException, ErrorHandler, InputSource}
 import scrupal.utils.ScrupalComponent
 
 import scala.util.{Failure, Success, Try}
+import scala.collection.mutable
+
+class CollectingErrorHandler extends ErrorHandler {
+  val warnings = mutable.MutableList[SAXParseException]()
+  val errors = mutable.MutableList[SAXParseException]()
+  val fatals = mutable.MutableList[SAXParseException]()
+
+  def warning(e: SAXParseException ) = {
+    warnings += e
+  }
+
+  def error(e: SAXParseException) = {
+    errors += e
+  }
+
+  def fatalError(e : SAXParseException) {
+    fatals += e
+  }
+
+  def errorCount : Int = errors.size + fatals.size
+  def warningCount : Int = warnings.size
+
+  def isClean : Boolean = errors.isEmpty && fatals.isEmpty && warnings.isEmpty
+
+  def collectAll : List[SAXParseException] = fatals.toList ++ errors.toList ++ warnings.toList
+}
 
 object HTML5Validator extends ScrupalComponent {
 
-  def validateFragment(document : String, contextElement : String = "div") : Boolean = {
+  def withValidator[T](document: String, context: String = "")(f : (InputSource,CollectingErrorHandler) ⇒ T) : Try[T] = {
     Try {
-      val stream : InputStream = new ByteArrayInputStream(document.getBytes(StandardCharsets.UTF_8))
+      val doc = context match {
+        case "html" ⇒
+          s"<!DOCTYPE html><html>$document</html>"
+        case "head" ⇒
+          s"<!DOCTYPE html><html><head><title>foo</title>$document</head><body></body></html>"
+        case "body" ⇒
+          s"<!DOCTYPE html><html><head><title>foo</title></head><body>$document</body></html>"
+        case "div" ⇒
+          s"<!DOCTYPE html><html><head><title>foo</title></head><body><div>$document</div></body></html>"
+        case "" ⇒
+          document
+        case s: String ⇒
+          s"<!DOCTYPE html><html><head><title>foo</title></head><body><$s>$document</$s></body></html>"
+      }
+      val stream : InputStream = new ByteArrayInputStream(doc.getBytes(StandardCharsets.UTF_8))
       try {
-        val builder = new HtmlDocumentBuilder()
         val is = new InputSource(stream)
-        val doc = builder.parseFragment(is, contextElement)
-        doc.hasChildNodes
+        val validator = new SimpleDocumentValidator()
+        val errorHandler = new CollectingErrorHandler
+        validator.setUpMainSchema( "http://s.validator.nu/html5-all.rnc", new SystemErrErrorHandler())
+        validator.setUpValidatorAndParsers(errorHandler, true, false)
+        validator.checkHtmlInputSource( is )
+        f(is,errorHandler)
       } finally {
         stream.close()
       }
-    } match {
-      case Success(x) ⇒ x
-      case Failure(x) ⇒
-        log.warn("HTML5 validation failed:", x)
-        false
     }
   }
 
-  def validateDocument(document : String) : Boolean = {
-    Try {
-      val stream : InputStream = new ByteArrayInputStream(document.getBytes(StandardCharsets.UTF_8))
-      try {
-        val builder = new HtmlDocumentBuilder()
-        val is = new InputSource(stream)
-        val doc = builder.parse(is)
-        doc.hasChildNodes
-      } finally {
-        stream.close()
-      }
+  def validate(document : String) : List[SAXParseException] = {
+    withValidator(document) { (is, errorHandler) ⇒
+      errorHandler.collectAll
     } match {
-      case Success(x) ⇒ x
+      case Success(x) ⇒
+        x
       case Failure(x) ⇒
         log.warn("HTML5 validation failed:", x)
-        false
+        List.empty[SAXParseException]
     }
   }
 
-  // def validate(document : TagContent) : Boolean = validateFragment(document.render)
-
-  // def validate(document : Page, context : Context) : Boolean = validateDocument(document.render(context))
-
-  /*
-  val request = WS.url("http://html5.validator.nu/").
-    withQueryString("out" -> "json").
-    withHeaders(CONTENT_TYPE -> ContentTypes.HTML(Codec.utf_8))
-
-  val response = Await.result(request.post(html), Duration.Inf)
-  val messages = (response.json \ "messages").asOpt[JsArray]
-  messages must beSome.which(_.value must haveSize(0))
-*/
+  def validateFragment(document : String, contextElement : String = "div") : List[SAXParseException] = {
+    withValidator(document, contextElement) { (is, errorHandler) ⇒
+      errorHandler.collectAll
+    } match {
+      case Success(x) ⇒
+        x
+      case Failure(x) ⇒
+        log.warn("HTML5 validation failed:", x)
+        List.empty[SAXParseException]
+    }
+  }
 }

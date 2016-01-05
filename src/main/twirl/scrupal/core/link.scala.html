@@ -1,7 +1,7 @@
 @(link: scrupal.core.LinkTags)
-@for(alt <- link.alternate){  <link rel="alternate" href="@alt." type="text/html">"}
+@for(alt <- link.alternate){  <link rel="alternate" href="@alt." type="text/html">}
 @for(auth <- link.author){  <link rel="author" href="@auth" type="text/html">}
 @for(lic <- link.license){  <link rel="license" href="@lic" type="text/html">}
-@for(icon <- link.icon){  <link rel="icon" href="@icon.url" type="@icon.typ" sizes="@{icon.x}x@{icon.y}" >}
+@for(icon <- link.icon){  <link rel="icon" href="@icon.url" type="@icon.typ" sizes="@{icon.x}x@{icon.y}">}
 @for(url <- link.stylesheets){  <link rel="stylesheet" type="text/css" href="@url" media="screen">}
 @for(script ← link.scriptLinks){  <script src="@script" type="text/javascript"></script>}

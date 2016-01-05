@@ -89,6 +89,17 @@ case object DefaultTextLayout extends TextLayout {
   }
 }
 
+case object DefaultJsonLayout extends JsonLayout {
+  def id : Identifier = 'DefaultJsonLayout
+  val description : String = "Default layout for JSON that is used when the expected layout could not be found"
+  def arrangementDescription = Map(
+    "arguments" → "This template accepts all JsonContent arguments"
+  )
+  def apply(context : Context, args : Layout.Arrangement[JsonContent]) : Future[Txt] = {
+    Future.successful { layout.txt.defaultJson(context, args)}
+  }
+}
+
 case object StandardThreeColumnLayout extends HtmlLayout {
   def id : Identifier = 'StandardThreeColumnLayout
   val description: String = "A Bootstrap 3 page in three columns with Header, Navigation and Footer"
