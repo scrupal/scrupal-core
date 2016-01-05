@@ -17,19 +17,14 @@
 <configuration>
     <logger name="ch.qos.logback" level="WARN"/>
     <logger name="javax.management" level="WARN"/>
-    <logger name="com.gargoylesoftware.htmlunit" level="WARN"/>
-    <logger name="com.ning" level="WARN"/>
     <logger name="play" level="WARN" />
-    <logger name="application" level="DEBUG" />
-    <logger name="controllers" level="DEBUG" />
     <logger name="scrupal" level="DEBUG"/>
     <logger name="org.apache" level="WARN" />
-    <logger name="reactivemongo" level="INFO" />
     <jmxConfigurator/>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${logs_dir:-logs}/j9Accelerators.log</file>
+        <file>${logs_dir:-logs}/scrupal.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>${logs_dir:-logs}/j9Accelerators.%i.log.zip</fileNamePattern>
+            <fileNamePattern>${logs_dir:-logs}/scrupal.%i.log.zip</fileNamePattern>
             <minIndex>1</minIndex>
             <maxIndex>20</maxIndex>
         </rollingPolicy>
