@@ -1,10 +1,10 @@
 package scrupal.core
 
-import java.net.URL
-
 import play.twirl.api.{JavaScript, Txt, Html}
+
+import scrupal.core.default.html.unauthorized
 import scrupal.core.html.{throwable, master}
-import scrupal.core.layout.html.defaultHtml
+import scrupal.core.layout.html.{standardThreeColumn, defaultHtml}
 import scrupal.test.{HTML5Validator, ScrupalSpecification}
 
 case class PageHeadContext(ctxt: Context) extends Context {
@@ -27,17 +27,18 @@ case class PageHeadContext(ctxt: Context) extends Context {
     javascript = Some(JavaScript("function foo(){return 0;}"))
   )
 }
+
 class TemplatesSpec extends ScrupalSpecification("master") {
 
   "master" should {
     "generate a properly formed HTML5 page" in {
-      val html = master(context)(Html("<p>Foo</p>"))
+      val html = master(context.pageHeadTags)(Html("<p>Foo</p>"))
       html.contentType must beEqualTo("text/html")
       HTML5Validator.validateDocument(html.body) must beTrue
     }
     "generate head elements with proper content" in {
       val ctxt = PageHeadContext(context)
-      val html = master(ctxt)(Html("<p>Foo</p>"))
+      val html = master(ctxt.pageHeadTags)(Html("<p>Foo</p>"))
       HTML5Validator.validateDocument(html.body) must beTrue
       // html.body.replaceAll("^\\s*$","") must beEqualTo(expected)
     }
@@ -81,6 +82,27 @@ class TemplatesSpec extends ScrupalSpecification("master") {
     "lay out content properly" in {
       val html = defaultHtml(context, Map("one" → HtmlContent(Html("<p>foo</p>"))))
       HTML5Validator.validateFragment(html.body) must beTrue
+    }
+  }
+  "standardThreeColumn Layout" should {
+    "lay out content properly" in {
+      val html = standardThreeColumn(context, context.pageHeadTags, args = Map(
+        "navheader" → HtmlContent(Html("<p>navheader</p>")),
+        "navbar" → HtmlContent(Html("<p>navbar</p>")),
+        "header" → HtmlContent(Html("<p>header</p>")),
+        "left" → HtmlContent(Html("<p>left</p>")),
+        "right" → HtmlContent(Html("<p>right</p>")),
+        "content" → HtmlContent(Html("<p>content</p>")),
+        "footer" → HtmlContent(Html("<p>footer</p>"))
+      ))
+      HTML5Validator.validateDocument(html.body) must beTrue
+    }
+  }
+  "unauthorized" should {
+    "lay out content properly" in {
+      val html = unauthorized("this page")
+      HTML5Validator.validateFragment(html.body) must beTrue
+
     }
   }
 }

@@ -18,7 +18,8 @@ package scrupal.core
 import akka.http.scaladsl.model.MediaTypes
 import akka.http.scaladsl.model.MediaType
 import com.reactific.helpers.{Registry, Registrable}
-import play.twirl.api.{BufferedContent, Txt, Format, Html}
+import play.twirl.api.{BufferedContent, Txt, Html}
+import scrupal.utils.ScrupalComponent
 
 import scala.concurrent.Future
 
@@ -29,63 +30,106 @@ import scala.concurrent.Future
   * can be used to perform the arranging.
   *
   */
-trait Arranger[CT <: Content[_], FT <: BufferedContent[_]] extends ((Context, Map[String,CT]) ⇒ Future[FT])
+trait Arranger[CT <: Content[_], FT <: BufferedContent[_]] extends ((Context, Layout.Arrangement[CT]) ⇒ Future[FT])
 
 /** Abstract Layout
   *
   * A layout is a memory only function object. It
   */
-trait Layout[CT <: Content[_], FT <: BufferedContent[_]] extends Registrable[Layout[_,_]] with Arranger[CT,FT] {
+trait Layout[CT <: Content[_], FT <: BufferedContent[_]]
+  extends ScrupalComponent with Registrable[Layout[_,_]] with Arranger[CT,FT] {
   def registry = Layout
   def description : String
+  def arrangementDescription: Map[String,String]
   def mediaType : MediaType
-}
-
-abstract class HtmlLayout extends Layout[HtmlContent,Html] {
-  final val mediaType = MediaTypes.`text/html`
-}
-
-abstract class TextLayout extends Layout[TextContent,Txt] {
-  final val mediaType = MediaTypes.`text/plain`
-}
-
-abstract class JsonLayout extends Layout[JsonContent,Txt] {
-  final val mediaType = MediaTypes.`application/json`
-}
-
-case object DefaultHtmlLayout extends HtmlLayout {
-  def id: Identifier = 'DefaultHtmlLayout
-  val description: String = "Default layout page used when the expected layout could not be found"
-  def apply(context: Context, args : Map[String,HtmlContent]) : Future[Html] = {
-    Future.successful { layout.html.defaultHtml(context, args) }
+  def validateArgs(args : Layout.Arrangement[CT]) : Iterable[Throwable] = {
+    for ((key,value) ← arrangementDescription if !args.contains(key)) yield {
+      new IllegalArgumentException(s"Arrangement key '$key' is missing")
+    }
   }
 }
 
 object Layout extends Registry[Layout[_,_]] {
   val registryName = "Layouts"
   val registrantsName = "layout"
-/*
-  object DefaultLayoutTemplate extends Html.Template('DefaultLayoutTemplate) {
-    def description =
-    def apply(context : Context, args : ContentsArgs) : Contents = {
-      Seq(
-        p(
-          """A page defaultLayout was not selected for this information. As a result you are seeing the basic defaultLayout
-            |which just lists the tag content down the page. This probably isn't what you want, but it's what you've got
-            |until you create a defaultLayout for your pages.
-          """.stripMargin),
-        for ((key, frag) ← args) {
-          frag match {
-            case t : Html.Template ⇒
-              Seq(h1("Template: ", key, " - ", t.id.name, " - ", t.description), div(t.generate(context, args)))
-            case x : Html.Generator ⇒
-              Seq(h1("Generator"), div(x.generate(context, args)))
-          }
-        }
+  type Arrangement[CT <: Content[_]] = Map[String,CT]
+}
+
+trait HtmlLayout extends Layout[HtmlContent,Html] {
+  final val mediaType = MediaTypes.`text/html`
+}
+
+trait TextLayout extends Layout[TextContent,Txt] {
+  final val mediaType = MediaTypes.`text/plain`
+}
+
+trait JsonLayout extends Layout[JsonContent,Txt] {
+  final val mediaType = MediaTypes.`application/json`
+}
+
+case object DefaultHtmlLayout extends HtmlLayout {
+  def id: Identifier = 'DefaultHtmlLayout
+  val description: String = "Default layout page used when the expected layout could not be found"
+  def arrangementDescription = Map(
+    "arguments" → "This template accepts all HtmlContent arguments"
+  )
+  def apply(context: Context, arrangement: Layout.Arrangement[HtmlContent]) : Future[Html] = {
+    Future.successful { layout.html.defaultHtml(context, arrangement) }
+  }
+}
+
+case object DefaultTextLayout extends TextLayout {
+  def id: Identifier = 'DefaultTextLayout
+  val description: String = "Default layout text used when the expected layout could not be found"
+  def arrangementDescription = Map(
+    "arguments" → "This template accepts all TextContent arguments"
+  )
+  def apply(context: Context, args : Layout.Arrangement[TextContent]) : Future[Txt] = {
+    Future.successful { layout.txt.defaultText(context, args) }
+  }
+}
+
+case object StandardThreeColumnLayout extends HtmlLayout {
+  def id : Identifier = 'StandardThreeColumnLayout
+  val description: String = "A Bootstrap 3 page in three columns with Header, Navigation and Footer"
+  def arrangementDescription = Map(
+    "navheader" → "Navigation header",
+    "navbar" → "Navigation bar content: a full width strip across the top of every page",
+    "header" → "A centered, full width, header section to describe the main content",
+    "left" → "A left side bar 1/6th of the width",
+    "right" → "A right side bar 1/6th of the width",
+    "content" → "The main content area for the page, 2/3 of the width",
+    "footer" → "A footer area below the content and side bars"
+  )
+  def apply(context: Context, args : Layout.Arrangement[HtmlContent]) : Future[Html] = {
+    validateArgs(args).map { arg ⇒ throw arg }
+    Future.successful {
+      val cpht = context.pageHeadTags
+      val assets = router.scrupal.routes.Assets
+      val links = cpht.links.copy(
+        scriptLinks = cpht.links.scriptLinks ++ Seq(
+          assets.webjar("jquery", "jquery.min.js").url,
+          assets.webjar("boostrap", "js/bootstrap.min.js" ).url,
+          assets.webjar("bootswatch", "api/3.json").url,
+          assets.webjar("marked", "marked.js").url,
+          assets.webjar("modernizr", "modernizr.min.js").url
+        ),
+        stylesheets = cpht.links.stylesheets ++ Seq(
+          assets.theme(context.themeName).url,
+          assets.webjar("font-awesome", "css/font-awesome.min.css").url,
+          assets.css("scrupal").url
+        )
       )
+      val pht = PageHeadTags(
+        title = cpht.title,
+        base = cpht.base,
+        meta = cpht.meta,
+        links = links,
+        style = cpht.style,
+        javascript = cpht.javascript
+      )
+      layout.html.standardThreeColumn(context, pht, args)
     }
   }
-
-  lazy val default = HtmlLayout('default, "Default Layout", DefaultLayoutTemplate)
-*/
 }
+

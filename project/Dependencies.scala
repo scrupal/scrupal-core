@@ -86,6 +86,7 @@ trait Dependencies
   val wj_font_awesome         = "org.webjars"               % "font-awesome"              % Ver.font_awesome
   val wj_requirejs            = "org.webjars"               % "requirejs"                 % "2.1.18"
   val wj_requirejs_domready   = "org.webjars"               % "requirejs-domready"        % "2.0.1-2"
+  val wj_modernizr            = "org.webjars"               % "modernizr"                 % "2.8.3"
 
   // Hashing Algorithms
   val pbkdf2                  = "io.github.nremond"         %% "pbkdf2-scala"             % "0.4"
@@ -120,7 +121,7 @@ trait Dependencies
     akka_actor, akka_http, akka_slf4j,
     play_json, play_iteratees, play_plugins_mailer, play_plugins_redis, play_slick, play_slick_evols,
     play_silhouette, play_bootstrap, play_html_compressor, // play_geolocation,
-    webjars_play, wj_bootswatch, wj_marked, wj_font_awesome,
+    webjars_play, wj_bootswatch, wj_marked, wj_font_awesome, wj_modernizr,
     // kamon_core, kamon_scala, kamon_akka, kamon_log_reporter, kamon_play, kamon_system_metrics, kamon_annotation,
     Test.akka, Test.commons_io, Test.nu_validator, Test.silhouette
   )

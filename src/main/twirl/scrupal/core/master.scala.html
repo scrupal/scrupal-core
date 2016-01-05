@@ -1,7 +1,7 @@
-@(context: scrupal.core.Context)(content: Html)
+@(pht: scrupal.core.PageHeadTags)(content: Html)
 <!DOCTYPE html>
 <html>
-@scrupal.core.html.head(context.pageHeadTags)
+@scrupal.core.html.head(pht)
 <body>
 @content
 </body>

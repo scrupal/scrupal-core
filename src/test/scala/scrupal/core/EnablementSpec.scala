@@ -18,6 +18,7 @@ package scrupal.core
 import com.reactific.helpers.{TossedException, Registrable, Registry}
 import org.specs2.mutable.Specification
 import scrupal.test.ClassFixture
+import scrupal.utils.ScrupalException
 
 class Scenario extends AutoCloseable {
   object TSRegistry extends Registry[TestScope] { val registryName = "TestScopes"; val registrantsName = "test scopes" }
@@ -110,9 +111,9 @@ class EnablementSpec extends Specification {
     }
 
     "not allow enabling of a parent scope" in scenario { s ⇒
-      s.root_1.enable(s.e_root_1, s.root) must throwA[TossedException]
-      s.root_1.disable(s.e_root_1, s.root) must throwA[TossedException]
-      s.root_1.isEnabled(s.e_root_1, s.root) must throwA[TossedException]
+      s.root_1.enable(s.e_root_1, s.root) must throwA[ScrupalException]
+      s.root_1.disable(s.e_root_1, s.root) must throwA[ScrupalException]
+      s.root_1.isEnabled(s.e_root_1, s.root) must throwA[ScrupalException]
     }
 
     "allow enabling with an Option" in scenario { s ⇒

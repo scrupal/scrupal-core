@@ -15,12 +15,18 @@
 
 package scrupal.utils
 
-import com.reactific.helpers.HelperComponent
+import com.reactific.helpers.{ThrowableWithComponent, HelperComponent}
 
 /** A Scrupal Component
   * This trait just provides logging and exception throwing support. Mix it in to a Scrupal class to obtain
   * these facilities. Other functionality may be added in the future.
   */
 trait ScrupalComponent extends HelperComponent {
-
+  override protected def mkThrowable(msg: String, cause : Option[Throwable] = None) : ThrowableWithComponent = {
+    new ScrupalException(this, msg, cause)
+  }
 }
+
+
+class ScrupalException(val component : ScrupalComponent, msg : String, cause: Option[Throwable] = None)
+  extends Exception(msg,cause.orNull) with ThrowableWithComponent

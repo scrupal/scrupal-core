@@ -1,0 +1,13 @@
+@(context : scrupal.core.Context, args: Map[String,scrupal.core.TextContent])
+Layout Missing
+==============
+
+You are seeing this page because the requested layout was not found. As a result you are seeing this
+basic default layout which just lists the content down the page. This probably isn't what you want, but it's
+what you've got until you specify the layout for your pages.
+
+@for((key, frag) ← args) {
+  @Txt(key)
+  @frag
+
+}

@@ -211,5 +211,6 @@
     <orderEntry type="library" name="SBT: mysql:mysql-connector-java:5.1.38:jar" level="project" />
     <orderEntry type="library" name="SBT: org.xerial:sqlite-jdbc:3.8.11.2:jar" level="project" />
     <orderEntry type="library" name="SBT: com.reactific:slickery_2.11:0.3.5:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.webjars:modernizr:2.8.3:jar" level="project" />
   </component>
 </module>
