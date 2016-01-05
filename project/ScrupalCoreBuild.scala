@@ -73,7 +73,7 @@ object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
         "font_awesome_version" -> Ver.font_awesome,
         "marked_version" -> Ver.marked
       ),
-
+      unmanagedJars in sbt.Test <<= baseDirectory map { base => (base / "libs" ** "*.jar").classpath },
       maxErrors := 50
     )
 

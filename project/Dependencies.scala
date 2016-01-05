@@ -111,8 +111,9 @@ trait Dependencies
   object Test {
     val akka             = "com.typesafe.akka"        %% "akka-testkit"             % Ver.akka        % "test"
     val commons_io       = "commons-io"                % "commons-io"               % "2.4"           % "test"
-    val nu_validator     = "nu.validator.htmlparser"   % "htmlparser"               % "1.4"           % "test"
     val silhouette       = "com.mohiva"               %% "play-silhouette-testkit"  % Ver.silhouette  % "test"
+    //val nu_validator     = ("nu.validator" % "validator" % "16.1.1" % "test").exclude("org.eclipse.jetty", "*")
+    //val rhino            = "org.mozilla" % "rhino" % "1.7.7"
   }
 
   val core_dependencies : Seq[ModuleID] = Seq(
@@ -123,6 +124,6 @@ trait Dependencies
     play_silhouette, play_bootstrap, play_html_compressor, // play_geolocation,
     webjars_play, wj_bootswatch, wj_marked, wj_font_awesome, wj_modernizr,
     // kamon_core, kamon_scala, kamon_akka, kamon_log_reporter, kamon_play, kamon_system_metrics, kamon_annotation,
-    Test.akka, Test.commons_io, Test.nu_validator, Test.silhouette
+    Test.akka, Test.commons_io, Test.silhouette
   )
 }
