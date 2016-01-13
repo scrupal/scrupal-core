@@ -23,15 +23,19 @@ import org.webjars.WebJarAssetLocator
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, RequestHeader}
-import play.api.{Configuration, Environment}
+import play.api.{Mode, Application, Configuration, Environment}
 import scrupal.core.ScrupalBuildInfo
 import scrupal.utils.ScrupalComponent
 
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class Assets @Inject() (errorHandler: HttpErrorHandler, configuration: Configuration, environment: Environment)
-  extends WebJarAssets(errorHandler, configuration, environment) with ScrupalComponent {
+class Assets @Inject() (
+    application: Application,
+    errorHandler: HttpErrorHandler,
+    configuration: Configuration,
+    environment: Environment
+) extends WebJarAssets(errorHandler, configuration, environment) with ScrupalComponent {
 
   import Assets.{webJarPrefix, webPrefix}
 
@@ -51,8 +55,13 @@ class Assets @Inject() (errorHandler: HttpErrorHandler, configuration: Configura
   def theme(theme: String) : Action[AnyContent] = {
     Assets.themes.get(theme) match {
       case Some(thm) ⇒
-        val path = webJarPrefix("bootswatch", theme.toLowerCase)
-        super.at(path, "bootstrap.min.css", aggressiveCaching=true)
+        if (application.mode == Mode.Prod)
+          Action { MovedPermanently(thm.cssCdn) }
+        else {
+          val themedir = if (theme.toLowerCase == "default" ) "flatly" else theme.toLowerCase
+          val path = webJarPrefix("bootswatch", themedir)
+          super.at(path, "bootstrap.min.css", aggressiveCaching = true)
+        }
       case None ⇒
         Action { req: RequestHeader ⇒ NotFound(s"Theme '$theme'") }
     }
@@ -72,7 +81,9 @@ object Assets extends LoggingHelper {
     "bootstrap"  -> ScrupalBuildInfo.bootstrap_version,
     "bootswatch" -> ScrupalBuildInfo.bootswatch_version,
     "font-awesome" -> ScrupalBuildInfo.font_awesome_version,
-    "marked" -> ScrupalBuildInfo.marked_version
+    "marked" -> ScrupalBuildInfo.marked_version,
+    "jquery" → ScrupalBuildInfo.jquery_version,
+    "modernizr" → ScrupalBuildInfo.modernizr_version
   )
 
   final val webjar_prefix = s"/${WebJarAssetLocator.WEBJARS_PATH_PREFIX}"

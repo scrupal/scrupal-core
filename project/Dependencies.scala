@@ -22,17 +22,16 @@ import sbt._
 trait Dependencies
 {
   // val scrupal_org_releases    = "Scrupal.org Releases" at "http://scrupal.github.org/mvn/releases"
-  val google_sedis    = "Google Sedis" at "http://pk11-scratch.googlecode.com/svn/trunk/"
-  val jcenter_repo    = "JCenter" at "http://jcenter.bintray.com/"
-  val atlassian       = "Atlassian Releases" at "https://maven.atlassian.com/public/"
-  val edulify         =  Resolver.url("Edulify Repository", url("https://edulify.github.io/modules/releases/"))(Resolver.ivyStylePatterns)
-
-
-  //val scala_lang              = "Scala Language" at "http://mvnrepository.com/artifact/org.scala-lang/"
-//val geolocation             = "geolocation repository" at "http://blabluble.github.com/modules/releases/"
+  val sonatype_snapshots = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+  val google_sedis       = "Google Sedis" at "http://pk11-scratch.googlecode.com/svn/trunk/"
+  val atlassian          = "Atlassian Releases" at "https://maven.atlassian.com/public/"
+  val edulify            =
+    Resolver.url("Edulify Repository", url("https://edulify.github.io/modules/releases/"))(Resolver.ivyStylePatterns)
+//val scala_lang         = "Scala Language" at "http://mvnrepository.com/artifact/org.scala-lang/"
+//val geolocation        = "geolocation repository" at "http://blabluble.github.com/modules/releases/"
 
   val all_resolvers : Seq[Resolver] = Seq (
-    google_sedis, jcenter_repo, atlassian, edulify
+    sonatype_snapshots, google_sedis, atlassian, edulify
   )
 
   object Ver {
@@ -46,6 +45,8 @@ trait Dependencies
     val font_awesome = "4.3.0-3"
     val marked = "0.3.2-1"
     val jquery = "2.1.4"
+    val modernizr = "2.8.3"
+    val slickery = "0.3.7"
   }
 
   // Things we borrow from Play Framework
@@ -77,7 +78,7 @@ trait Dependencies
   val scala_arm               = "com.jsuereth"              %% "scala-arm"                % "1.4"
 
   // Database, Caches, Serialization, Data Storage stuff
-  val slickery                = "com.reactific"             %% "slickery"                 % "0.3.6"
+  val slickery                = "com.reactific"             %% "slickery"                 % Ver.slickery
 
   // WebJars We Use
   val webjars_play            = "org.webjars"               %% "webjars-play"             % "2.4.0-2"
@@ -86,7 +87,7 @@ trait Dependencies
   val wj_font_awesome         = "org.webjars"               % "font-awesome"              % Ver.font_awesome
   val wj_requirejs            = "org.webjars"               % "requirejs"                 % "2.1.18"
   val wj_requirejs_domready   = "org.webjars"               % "requirejs-domready"        % "2.0.1-2"
-  val wj_modernizr            = "org.webjars"               % "modernizr"                 % "2.8.3"
+  val wj_modernizr            = "org.webjars"               % "modernizr"                 % Ver.modernizr
 
   // Hashing Algorithms
   val pbkdf2                  = "io.github.nremond"         %% "pbkdf2-scala"             % "0.4"
@@ -112,6 +113,7 @@ trait Dependencies
     val akka             = "com.typesafe.akka"        %% "akka-testkit"             % Ver.akka        % "test"
     val commons_io       = "commons-io"                % "commons-io"               % "2.4"           % "test"
     val silhouette       = "com.mohiva"               %% "play-silhouette-testkit"  % Ver.silhouette  % "test"
+    val slickery         = "com.reactific"            %% "slickery-testkit"         % Ver.slickery    % "test"
     //val nu_validator     = ("nu.validator" % "validator" % "16.1.1" % "test").exclude("org.eclipse.jetty", "*")
     //val rhino            = "org.mozilla" % "rhino" % "1.7.7"
   }
@@ -124,6 +126,6 @@ trait Dependencies
     play_silhouette, play_bootstrap, play_html_compressor, // play_geolocation,
     webjars_play, wj_bootswatch, wj_marked, wj_font_awesome, wj_modernizr,
     // kamon_core, kamon_scala, kamon_akka, kamon_log_reporter, kamon_play, kamon_system_metrics, kamon_annotation,
-    Test.akka, Test.commons_io, Test.silhouette
+    Test.akka, Test.commons_io, Test.silhouette, Test.slickery
   )
 }

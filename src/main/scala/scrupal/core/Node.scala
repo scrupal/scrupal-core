@@ -17,6 +17,7 @@ package scrupal.core
 
 import java.time.Instant
 
+import akka.http.scaladsl.model.MediaType
 import com.reactific.slickery.Storable.OIDType
 import com.reactific.slickery.Slickery
 
@@ -42,14 +43,18 @@ trait ContentGenerator[CT <: Content[_]] extends ((Context) => Future[CT])
   * are possible to use with Scrupal. Note that Node instances are stored in the database and can be
   * very numerous. For that reason, they are not registered in an object registry.
   */
-trait Node[CT <: Content[_]] extends ContentGenerator[CT]
+trait Node[CT <: Content[_]] extends ContentGenerator[CT] {
+}
 
 object Node {
-  object Empty extends StaticNode[EmptyContent.type] { val content = EmptyContent }
+  object Empty extends StaticNode[EmptyContent.type] {
+    val content = EmptyContent
+  }
 }
 
 /** A Node With Static Content
   * StaticNodes encapsulate a Content[_] which is then returned when asked for. This is the simplest kind of node
+ *
   * @tparam CT
   */
 trait StaticNode[CT <: Content[_]] extends Node[CT] {
@@ -59,25 +64,42 @@ trait StaticNode[CT <: Content[_]] extends Node[CT] {
   }
 }
 
-trait StoredNode[CT <: Content[_]] extends StaticNode[CT] with Slickery
-
-case class StoredHtmlNode(
+/** A Node That Is Stored In The Database
+  * Nodes are stored as the raw bytes and a mediaType which are both used to create the content object on demand
+  * @param name The name of the node
+  * @param description A description of the content of the node
+  * @param payload The raw content of the node in bytes
+  * @param mediaType The kind of media the node provides
+  * @param created The date at which the node was created
+  * @param modified The data at which the node was modified
+  * @param oid The objet identifier for this node
+  */
+case class StoredNode(
   name : String,
   description : String,
-  content : HtmlContent,
-  created : Instant = Instant.EPOCH,
-  modified : Instant = Instant.EPOCH,
+  payload : Array[Byte],
+  mediaType : MediaType,
+  created : Instant = Instant.now,
+  modified : Instant = Instant.now,
   oid : Option[OIDType] = None
-) extends StoredNode[HtmlContent]
+) extends StaticNode[Content[_]] with Slickery {
+  def content : Content[_] = Content(payload, mediaType)
+}
 
-case class StoredJsonNode(
-    name : String,
-    description : String,
-    content : JsonContent,
-    created : Instant = Instant.EPOCH,
-    modified : Instant = Instant.EPOCH,
-    oid : Option[OIDType] = None
-) extends StoredNode[JsonContent]
+object StoredNode {
+  def fromContent(
+      name : String,
+      description: String,
+      content: Content[_],
+      created : Instant = Instant.now,
+      modified : Instant = Instant.now,
+      oid : Option[OIDType] = None
+  )(implicit ec : ExecutionContext) : Future[StoredNode] = {
+    content.toBytes.map { bytes ⇒
+      new StoredNode(name, description, bytes, content.mediaType, created, modified, oid)
+    }
+  }
+}
 
 /*
 abstract class CompoundNode extends Node {

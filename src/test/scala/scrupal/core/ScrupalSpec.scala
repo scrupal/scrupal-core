@@ -1,12 +1,9 @@
 package scrupal.core
 
-import org.specs2.mutable.Specification
-import play.api.{Configuration, Application}
-import play.api.mvc.Handler
 import scrupal.test.{ScrupalSpecification, ScrupalCache}
 import scrupal.utils.ScrupalComponent
 
-import scala.concurrent.{ExecutionContextExecutorService, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContextExecutor, ExecutionContextExecutorService, ExecutionContext, Future}
 
 /** Test Case For Scrupal Application */
 class ScrupalSpec extends ScrupalSpecification("Scrupal") {
@@ -64,11 +61,11 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
         ec.isInstanceOf[ExecutionContextExecutorService] must beTrue
         Future { Thread.sleep(1) ; "s3" }
       }
-      val s4 = ScrupalCache("s3", additionalConfiguration = Map(
+      val s4 = ScrupalCache("s4", additionalConfiguration = Map(
         "scrupal.executor.type" → "akka"
       ))
       val f4 = s4.withExecutionContext { implicit ec : ExecutionContext ⇒
-        ec.isInstanceOf[ExecutionContextExecutorService] must beTrue
+        ec.isInstanceOf[ExecutionContextExecutor] must beTrue
         Future { Thread.sleep(1) ; "s4" }
       }
       import scala.concurrent.ExecutionContext.Implicits.global

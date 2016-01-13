@@ -1,5 +1,6 @@
 package scrupal.core
 
+import akka.http.scaladsl.model.{MediaTypes, MediaType}
 import com.reactific.slickery._
 import com.typesafe.config.Config
 import play.api.Configuration
@@ -12,43 +13,58 @@ import scala.reflect.ClassTag
   * Description of thing
   */
 abstract class CoreSchema[DRVR <: SlickeryDriver](
-    supportedDB: SupportedDB[DRVR],
+    configPath : String,
     config : Config
 )(implicit scrupal : Scrupal, ct : ClassTag[DRVR])
-  extends Schema[DRVR]("scrupal", supportedDB, "core", config)(scrupal.executionContext, ct) {
+  extends Schema[DRVR]("ScrupalCore", configPath, config)(scrupal.executionContext, ct) {
 
   import driver.api._
 
   class SiteRow(tag : Tag) extends SlickeryRow[SiteData](tag, "sites") {
-
-    def domainName = column[String]("domainName")
-    def requireHttps = column[Boolean]("requireHttps")
-
+    def domainName = column[String](nm("domainName"))
+    def requireHttps = column[Boolean](nm("requireHttps"))
     override def * = (name, domainName, description, requireHttps, modified, created, oid.?) <>
       ((SiteData.apply _).tupled, SiteData.unapply )
   }
 
   object sites extends SlickeryQuery[SiteData,SiteRow]( new SiteRow(_) )
 
-  def schemas = Map("sites" → sites.schema)
+  implicit lazy val mediaTypeMapper = MappedColumnType.base[MediaType,String] (
+    { mt => s"${mt.mainType}/${mt.subType}" },
+    { s =>
+      val parts = s.toLowerCase().split('/')
+      require(parts.length == 2, "Invalid media type in database")
+      MediaTypes.getForKey(parts(0) → parts(1)).getOrElse(MediaTypes.`application/octet-stream`) }
+  )
+
+  class NodeRow(tag : Tag) extends SlickeryRow[StoredNode](tag, "nodes") {
+    def payload = column[Array[Byte]](nm("payload"))
+    def mediaType = column[MediaType](nm("mediatype"))
+    override def * = (name, description, payload, mediaType, modified, created, oid.?) <>
+      ((StoredNode.apply _).tupled, StoredNode.unapply )
+  }
+
+  object nodes extends SlickeryQuery[StoredNode,NodeRow]( new NodeRow(_) )
+
+  def schemas = Map("sites" → sites.schema, "nodes" → nodes.schema)
 
 }
 
-case class CoreSchema_PostgresQL(config : Config)(implicit scrupal : Scrupal)
-  extends CoreSchema[PostgresDriver](PostgresQL, config)(scrupal, ClassTag(classOf[PostgresDriver]))
+case class CoreSchema_PG(configPath: String, config : Config)(implicit scrupal : Scrupal)
+  extends CoreSchema[PostgresDriver](configPath, config)(scrupal, ClassTag(classOf[PostgresDriver]))
 
-case class CoreSchema_H2(config : Config)(implicit scrupal : Scrupal)
-  extends CoreSchema[H2Driver](H2, config)(scrupal, ClassTag(classOf[H2Driver]))
+case class CoreSchema_H2(configPath : String, config : Config)(implicit scrupal : Scrupal)
+  extends CoreSchema[H2Driver](configPath, config)(scrupal, ClassTag(classOf[H2Driver]))
 
 object CoreSchema extends ScrupalComponent {
-  def apply(config : Config)(implicit scrupal : Scrupal) : CoreSchema[_] = {
-    SupportedDB.forConfig(config, "core") match {
+  def apply(configPath : String, config : Config)(implicit scrupal : Scrupal) : CoreSchema[_] = {
+    SupportedDB.forConfig(configPath, config) match {
       case Some(db) ⇒
         db match {
           case PostgresQL ⇒
-            CoreSchema_PostgresQL(config)
+            CoreSchema_PG(configPath, config)
           case H2 ⇒
-            CoreSchema_H2(config)
+            CoreSchema_H2(configPath, config)
           case _ ⇒
             toss(s"Unsupported database type: ${db.kindName} while opening Scrupal Core DB")
         }
@@ -56,10 +72,10 @@ object CoreSchema extends ScrupalComponent {
         toss(s"Configuration path 'core' not found")
     }
   }
-  def apply(configuration : Configuration)(implicit scrupal: Scrupal) : CoreSchema[_] = {
+  def apply(configPath : String, configuration : Configuration)(implicit scrupal: Scrupal) : CoreSchema[_] = {
     configuration.getConfig("scrupal.database") match {
       case Some(config) ⇒
-        apply(config.underlying)
+        apply(configPath, config.underlying)
       case None ⇒
         toss(s"Configuration path 'scrupal.database' not found")
     }

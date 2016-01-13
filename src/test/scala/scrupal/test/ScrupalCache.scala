@@ -38,8 +38,9 @@ object ScrupalCache extends MemoryCache[String,Scrupal] {
       val injector = builder.injector()
       val application : Application = builder.build()
       val applicationLifecycle = injector.instanceOf(classOf[DefaultApplicationLifecycle])
+      val actors = if (application.mode == Mode.Test) Some(application.actorSystem) else None
 
-      new Scrupal(name, environment, configuration, applicationLifecycle, injector, application)
+      new Scrupal(name, environment, configuration, applicationLifecycle, injector, application, actors)
     }
   }
 }

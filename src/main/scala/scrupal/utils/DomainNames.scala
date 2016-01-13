@@ -58,18 +58,20 @@ object DomainNames {
     */
   def matchDomainName(dn: String) : (Option[String],Option[String]) = {
     dn match {
-      case simpleDomainName(top,tld) =>
-        Some(top) -> None
-      case domainName(sub, top, tld) =>
-        Some(top) -> Some(sub.dropRight(1))
-      case "127.0.0.1" =>
-        Some("localhost") -> None
-      case "::1" =>
-        Some("localhost") -> None
-      case "fe80::1%lo0" =>
-        Some("localhost") -> None
-      case _ =>
-        None -> None
+      case simpleDomainName(top,tld) ⇒
+        Some(top) → None
+      case domainName(sub, top, tld) ⇒
+        Some(top) → Some(sub.dropRight(1))
+      case "localhost" ⇒
+        Some("localhost") → None
+      case "127.0.0.1" ⇒
+        Some("localhost") → None
+      case "::1" ⇒
+        Some("localhost") → None
+      case "fe80::1%lo0" ⇒
+        Some("localhost") → None
+      case _ ⇒
+        None → None
     }
   }
 }

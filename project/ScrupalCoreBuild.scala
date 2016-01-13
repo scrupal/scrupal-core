@@ -71,7 +71,9 @@ object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
         "bootstrap_version" -> Ver.bootstrap,
         "bootswatch_version" -> Ver.bootswatch,
         "font_awesome_version" -> Ver.font_awesome,
-        "marked_version" -> Ver.marked
+        "marked_version" -> Ver.marked,
+        "jquery_version" → Ver.jquery,
+        "modernizr_version" → Ver.modernizr
       ),
       unmanagedJars in sbt.Test <<= baseDirectory map { base => (base / "libs" ** "*.jar").classpath },
       maxErrors := 50

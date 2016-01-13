@@ -20,16 +20,19 @@ import akka.util.Timeout
 
 import com.reactific.helpers._
 
-// import com.reactific.slickery.Authorable
-
 import java.lang.Thread.UncaughtExceptionHandler
 import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicInteger
-import javax.inject.Inject
+import javax.inject.{Inject,Singleton}
 
+import com.reactific.slickery.Storable.OIDType
 import play.api._
 import play.api.inject.{Injector, DefaultApplicationLifecycle}
 import play.api.mvc.RequestHeader
+import play.api.mvc._
+import play.api.routing._
+import play.api.routing.sird._
+import play.twirl.api.Html
 
 import scala.concurrent.{ExecutionContextExecutorService, ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -41,6 +44,7 @@ trait ScrupalUser {
   def scrupal : Scrupal
 }
 
+@Singleton
 case class Scrupal @Inject() (
   name: String = "Scrupal",
   environment : Environment,
@@ -57,13 +61,41 @@ case class Scrupal @Inject() (
   val copyright = "© 2013-2015 Reactific Software LLC. All Rights Reserved."
   val license = OSSLicense.ApacheV2
 
-  implicit val executionContext: ExecutionContext = getExecutionContext
-
   implicit val actorSystem: ActorSystem = getActorSystem
+
+  implicit val executionContext: ExecutionContext = getExecutionContext
 
   implicit val akkaTimeout = getTimeout
 
   val sites : SitesRegistry = SitesRegistry()
+
+  val DefaultLocalHostSite = new Site(SiteData("localhost"))(this) {
+    object helpprovider extends Provider with Enablee {
+      def id = 'HelpProvider
+      def provide: ReactionRoutes = {
+        case GET(p"/") ⇒
+          new Reactor {
+            val description = "Help Page Reactor"
+            def oid : Option[OIDType] = None
+            def apply(stimulus: Stimulus) : Future[Response[_]] = {
+              val args = Map(
+                "navheader" → HtmlContent(Html("navheader")),
+                "navbar" → HtmlContent(Html("navbar")),
+                "header" → HtmlContent(Html("header")),
+                "left" → HtmlContent(Html("left")),
+                "right" → HtmlContent(Html("right")),
+                "content" → HtmlContent(help.html.index()),
+                "footer" → HtmlContent(Html("footer"))
+              )
+              StandardThreeColumnLayout(stimulus.context, args).map { html ⇒
+                Response(HtmlContent(html))
+              }
+            }
+          }
+      }
+    }
+    enable(helpprovider)
+  }
 
   applicationLifecycle.addStopHook { () ⇒
     Future.successful {
@@ -141,7 +173,6 @@ case class Scrupal @Inject() (
       configuration.getMilliseconds("scrupal.timeout.response").getOrElse(8000L), TimeUnit.MILLISECONDS
     )
   }
-
 
   /** Scrupal Thread Factory
     * This thread factory just names and numbers the threads created so we have a monotonically increasing number of

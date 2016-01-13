@@ -31,6 +31,9 @@ import scala.concurrent.Future
   *
   */
 trait Arranger[CT <: Content[_], FT <: BufferedContent[_]] extends ((Context, Layout.Arrangement[CT]) ⇒ Future[FT])
+trait HtmlArranger extends Arranger[HtmlContent,Html]
+trait TxtArranger extends Arranger[TextContent,Txt]
+trait JsonArranger extends Arranger[JsonContent,Txt]
 
 /** Abstract Layout
   *
@@ -121,7 +124,6 @@ case object StandardThreeColumnLayout extends HtmlLayout {
         scriptLinks = cpht.links.scriptLinks ++ Seq(
           assets.webjar("jquery", "jquery.min.js").url,
           assets.webjar("boostrap", "js/bootstrap.min.js" ).url,
-          assets.webjar("bootswatch", "api/3.json").url,
           assets.webjar("marked", "marked.js").url,
           assets.webjar("modernizr", "modernizr.min.js").url
         ),

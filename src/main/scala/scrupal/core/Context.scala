@@ -42,7 +42,7 @@ trait Context {
 
   def favicon: String = "scrupal.ico"
   def themeProvider : String = "bootswatch"
-  def themeName : String = "Default"
+  def themeName : String = "Flatly"
   def description : String = ""
   def user : String = "guest"
 

@@ -7,8 +7,9 @@ class ScrupalComponentSpec extends Specification {
   case class TestComponent() extends ScrupalComponent
 
   "ScrupalComponent" should {
-    "have some tests" in {
-      pending("no functionality")
+    "toss ScrupalException" in {
+      val comp = TestComponent() ;
+      { comp.toss("test exception") ; 3 }  must throwA[ScrupalException]
     }
   }
 

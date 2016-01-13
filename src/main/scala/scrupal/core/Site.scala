@@ -20,7 +20,7 @@ import java.time.Instant
 import com.reactific.helpers.{MemoryCache, Registrable, Registry}
 import com.reactific.slickery._
 
-import play.api.mvc.{Results, Result, Handler, RequestHeader}
+import play.api.mvc.{Results, Result, RequestHeader}
 
 import scala.concurrent.Future
 
@@ -43,11 +43,6 @@ case class Site(data: SiteData)(implicit val scrupal : Scrupal) extends {
 
   def reactorFor(request: RequestHeader, subdomain: String) : Option[Reactor] = {
     reactorFor(request)
-  }
-
-  /** Get The Handler For The Request */
-  def handlerForRequest(request: RequestHeader) : (RequestHeader, Handler) = {
-    request -> null
   }
 
   def isChildScope(e : Enablement[_]) : Boolean = delegates.exists { x ⇒ x == e }

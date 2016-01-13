@@ -15,15 +15,42 @@
 
 package scrupal.core
 
-
+import akka.http.scaladsl.model.MediaTypes
+import com.reactific.slickery.testkit.SlickerySpecification
 import scrupal.test.ScrupalSpecification
 
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class NodeSpec extends ScrupalSpecification("Node") {
+class NodeSpec extends ScrupalSpecification("Node") with SlickerySpecification {
 
-  "NodeSpec" should {
-    "have some test examples" in {
-      pending
+  "Node" should {
+    "produce content" in {
+      val node = new Node[Content[_]] {
+        def apply(v1: Context): Future[Content[_]] = Future.successful { EmptyContent }
+      }
+      val future = node(context)
+      await(future) must beEqualTo(EmptyContent)
+    }
+  }
+
+  "StoredNode" should {
+    "exchange Content for data and mediatype" in {
+      val node = StoredNode("name", "description", Array[Byte](0,1,2), MediaTypes.`application/octet-stream`)
+      node.name must beEqualTo("name")
+      node.description must beEqualTo("description")
+      val future = node(context)
+      val content = await(future)
+      content.mediaType must beEqualTo(MediaTypes.`application/octet-stream`)
+      content.isInstanceOf[OctetsContent] must beTrue
+      content.asInstanceOf[OctetsContent].content must beEqualTo(Array[Byte](0,1,2))
+    }
+    "construct from content" in {
+      val content = TextContent("some text")
+      val future = StoredNode.fromContent("name", "description", content)
+      val node = await(future)
+      node.mediaType must beEqualTo(MediaTypes.`text/plain`)
+      node.payload must beEqualTo("some text".getBytes(utf8))
     }
   }
   /*
