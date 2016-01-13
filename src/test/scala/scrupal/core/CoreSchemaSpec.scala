@@ -6,8 +6,9 @@ import com.reactific.helpers.LoggingHelper
 import com.reactific.slickery.{PostgresDriver, PostgresQL, H2}
 import com.reactific.slickery.testkit.SlickerySpecification
 
-import com.typesafe.config.Config
+import com.typesafe.config.{ConfigFactory, Config}
 import org.specs2.execute.{Result, AsResult}
+import play.api.Configuration
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -112,6 +113,16 @@ class CoreSchemaSpec extends ScrupalSpecification("CoreSchema") with SlickerySpe
         }
         await(future, 1.minute, "CRUD Sites").get
       }
+    }
+    "construct from configuration" in {
+      val config = testH2DbConfig("fromConfig")
+      val configObj = config.getObject("fromConfig")
+      val hashmap = new java.util.HashMap[String,AnyRef]
+      hashmap.put("scrupal.database.fromConfig", configObj)
+      val config2 = ConfigFactory.parseMap( hashmap )
+      val conf = Configuration( config2 )
+      val cs = CoreSchema("fromConfig", conf)
+      cs.schemaName must beEqualTo("ScrupalCore")
     }
   }
 }

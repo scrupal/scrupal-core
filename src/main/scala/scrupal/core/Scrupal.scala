@@ -203,11 +203,6 @@ case class Scrupal @Inject() (
     f(actorSystem, executionContext, akkaTimeout)
   }
 
-  protected def getActorSystem: ActorSystem = {
-    val actSysName = if (name.isEmpty) "Scrupal" else name.replaceAll("[-^0-9A-Za-z_]","-")
-    ActorSystem(actSysName, configuration.underlying)
-  }
-
   protected def getTimeout: Timeout = {
     Timeout(
       configuration.getMilliseconds("scrupal.timeout.response").getOrElse(8000L), TimeUnit.MILLISECONDS
@@ -297,12 +292,10 @@ case class Scrupal @Inject() (
 object Scrupal extends Registry[Scrupal] {
   def registryName = "Scrupalz"
   def registrantsName = "scrupali"
-  /*
 
-  private[scrupal] def findModuleOnClasspath(name : String) : Option[Module] = {
-    None // TODO: Write ClassLoader code to load foreign modules on the classpath - maybe use OSGi ?
+  def mkActorName(name : String) : String = {
+    if (name.isEmpty) "NoName" else name.replaceAll("[^-0-9A-Za-z_.~!@]","-")
   }
-  */
 }
 
 

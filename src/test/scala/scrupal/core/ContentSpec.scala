@@ -1,15 +1,21 @@
 package scrupal.core
 
-import org.apache.commons.lang3.exception.ExceptionUtils
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.JsString
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import scrupal.test.ScrupalSpecification
-import scrupal.utils.ScrupalException
 
 class ContentSpec extends ScrupalSpecification("Content") {
 
   "EmptyContent" should {
     "have Unit content" in {
       EmptyContent.content must beEqualTo(())
+    }
+    "convert to empty bytes" in {
+      val future = EmptyContent.toBytes.map { bytes ⇒
+        bytes.isEmpty must beTrue
+      }
+      await(future)
     }
   }
 
@@ -24,6 +30,25 @@ class ContentSpec extends ScrupalSpecification("Content") {
       val message = (json \ "message").get
       message.isInstanceOf[JsString] must beTrue
       message.asInstanceOf[JsString].value.contains("testing") must beTrue
+    }
+    "convert to Html" in {
+      val tc = ThrowableContent(mkThrowable("testing"))
+      val html = tc.toHtml
+      html.body.contains("testing") must beTrue
+    }
+    "convert to Text" in {
+      val tc = ThrowableContent(mkThrowable("testing"))
+      val text = tc.toTxt
+      text.body.contains("testing") must beTrue
+    }
+    "convert to Bytes" in {
+      val tc = ThrowableContent(mkThrowable("testing"))
+      val future = tc.toBytes.map { bytes ⇒
+        bytes.isEmpty must beFalse
+        val str = new String(bytes, utf8)
+        str.contains("testing") must beTrue
+      }
+      await(future)
     }
   }
 }

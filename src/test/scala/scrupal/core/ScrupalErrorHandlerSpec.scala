@@ -118,5 +118,19 @@ class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler"
       }
       success
     }
+    "handle exception while handling exception" in {
+      val header = setup("ten")
+      val seh = new ScrupalErrorHandler(scrupal) {
+        override def defaultServerError(request : RequestHeader, x : Throwable) = {
+          toss("exception in handling exception")
+        }
+      }
+      val result = seh.onServerError(header, new Exception("foo"))
+      result.isCompleted must beTrue
+      result.value.isDefined must beTrue
+      result.value.get.isSuccess must beTrue
+      val res = result.value.get.get
+      res.header.status must beEqualTo(Status.INTERNAL_SERVER_ERROR)
+    }
   }
 }

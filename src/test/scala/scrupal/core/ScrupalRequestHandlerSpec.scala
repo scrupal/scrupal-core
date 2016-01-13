@@ -15,7 +15,6 @@ class ScrupalRequestHandlerSpec extends ScrupalSpecification("ScrupalRequestHand
       val site1 = new FakeSite(SiteData("one", "one.com"))(scrupal)
       val site2 = new FakeSite(SiteData("two", "two.com"))(scrupal)
       val app = scrupal.application
-      val httpConf = HttpConfiguration.fromConfiguration(app.configuration)
       val srh = new ScrupalRequestHandler(scrupal)
       val orig_request = FakeRequest("GET", "/index.html").withHeaders("Host" -> "one.com:80")
       val (request, handler) = srh.handlerForRequest(orig_request)
@@ -27,8 +26,16 @@ class ScrupalRequestHandlerSpec extends ScrupalSpecification("ScrupalRequestHand
         case Right(c: AnyContent) ⇒ c.asText.getOrElse("") must beEqualTo("")
       }
       await(future)
-      val future2 = ra.apply(orig_request).map { result: Result  ⇒ result.header.status must beEqualTo(Status.NOT_IMPLEMENTED) }
+      val future2 = ra.apply(orig_request).map { result: Result  ⇒
+        result.header.status must beEqualTo(Status.NOT_IMPLEMENTED)
+      }
       await(future2)
+    }
+    "defer to default Request Handler" in {
+      val srh = new ScrupalRequestHandler(scrupal)
+      val orig_request = FakeRequest("GET", "/index.html").withHeaders("Host" -> "foo.com:80")
+      val (request, handler) = srh.handlerForRequest(orig_request)
+      handler.isInstanceOf[ReactorAction] must beFalse
     }
   }
 }

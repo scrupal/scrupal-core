@@ -1,9 +1,6 @@
 package scrupal.test
 
-import play.api.inject.DefaultApplicationLifecycle
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api._
-import play.api.mvc.Handler
 
 import com.reactific.helpers.MemoryCache
 import scrupal.core.Scrupal
@@ -17,23 +14,32 @@ import scrupal.core.Scrupal
   */
 object ScrupalCache extends MemoryCache[String,Scrupal] {
 
-  def apply(name: String,
-            path: java.io.File = new java.io.File("."),
-             additionalConfiguration: Map[String, AnyRef] = Map.empty,
-             withRoutes: PartialFunction[(String, String), Handler] = PartialFunction.empty
-           ) : Scrupal = {
+  def makeContext(
+      name : String,
+      path: java.io.File = new java.io.File("."),
+      additionalConfiguration: Map[String, AnyRef] = Map.empty
+  ) : (ApplicationLoader.Context, String) = {
+    val environment: Environment = Environment(path, this.getClass.getClassLoader, Mode.Test)
+    val dbName = Scrupal.mkActorName(name)
+    val config = additionalConfiguration ++ Map(
+      "play.akka.actor-system" → dbName,
+      "app.instance.name" -> dbName,
+      s"db.$dbName.driver" → "org.h2.Driver",
+      s"db.$dbName.url" → s"jdbc:h2:db/./$dbName.db;FILE_LOCK=SOCKET;PAGE_SIZE=8192;AUTO_SERVER=TRUE",
+      s"db.$dbName.username" → "sa",
+      s"db.$dbName.password" → ""
+    )
+    ApplicationLoader.createContext(environment, config) → dbName
+  }
+
+  def apply(
+      name: String,
+      path: java.io.File = new java.io.File("."),
+      additionalConfiguration: Map[String, AnyRef] = Map.empty
+  ) : Scrupal = {
     getOrElse(name) {
-      val environment: Environment = Environment(path, this.getClass.getClassLoader, Mode.Test)
-      val dbName = name.replace(" ", "_")
-      val config = additionalConfiguration ++ Map(
-        "app.instance.name" -> s"$dbName",
-        s"db.$dbName.driver" → "org.h2.Driver",
-        s"db.$dbName.url" → s"jdbc:h2:db/./$dbName.db;FILE_LOCK=SOCKET;PAGE_SIZE=8192;AUTO_SERVER=TRUE",
-        s"db.$dbName.username" → "sa",
-        s"db.$dbName.password" → "Sof1ukS8B$ j9eeTech!"
-      )
-      val context = ApplicationLoader.createContext(environment, config)
-      new Scrupal(context, dbName)
+      val (context, newName) = makeContext(name, path, additionalConfiguration)
+      new Scrupal(context, newName)
     }
   }
 }

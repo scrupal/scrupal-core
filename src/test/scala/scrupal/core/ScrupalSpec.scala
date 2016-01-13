@@ -1,9 +1,11 @@
 package scrupal.core
 
+import play.api.test.FakeRequest
 import scrupal.test.{ScrupalSpecification, ScrupalCache}
 import scrupal.utils.ScrupalComponent
 
 import scala.concurrent.{ExecutionContextExecutor, ExecutionContextExecutorService, ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /** Test Case For Scrupal Application */
 class ScrupalSpec extends ScrupalSpecification("Scrupal") {
@@ -71,6 +73,33 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
       import scala.concurrent.ExecutionContext.Implicits.global
       val future = Future.sequence(Seq(f1, f2, f3, f4))
       await(future) must beEqualTo(Seq("s1", "s2", "s3", "s4"))
+    }
+
+    "provides default site" in {
+      val site = scrupal.DefaultLocalHostSite
+      val req = FakeRequest("GET", "/")
+      site.reactorFor(req) match {
+        case Some(reactor) ⇒
+          val stimulus = Stimulus(context, req)
+          val future = reactor(stimulus).map { response ⇒
+            response.disposition must beEqualTo(Successful)
+            response.payload.isInstanceOf[HtmlContent]
+            val content = response.payload.asInstanceOf[HtmlContent]
+            content.content.body.contains("Welcome to Scrupal") must beTrue
+          }
+          await(future)
+          success
+        case None ⇒
+          failure("DefaultLocalHostSite should have provided Reactor")
+      }
+    }
+  }
+  "ScrupalLoader" should {
+    "load a Scrupal" in {
+      val loader = new ScrupalLoader
+      val (context, name) = ScrupalCache.makeContext("LoadedScrupal")
+      val loaded_scrupal = loader.load(context)
+      loaded_scrupal.actorSystem.name must beEqualTo("LoadedScrupal")
     }
   }
 }

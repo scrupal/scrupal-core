@@ -34,8 +34,6 @@ import scala.util.control.NonFatal
 
 class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler with ScrupalComponent {
 
- lazy val defaultHandler = new DefaultHttpErrorHandler(scrupal.environment, scrupal.configuration, scrupal.sourceMapper)
-
   private def forSiteAndSubdomain(request: RequestHeader)
     (found: (RequestHeader, Site, Option[String]) ⇒ Future[Result])
     (orElse: () ⇒ Future[Result]): Future[Result] = {
@@ -153,7 +151,7 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler w
       }
     } catch {
       case NonFatal(e) =>
-        Logger.error("Error while handling error", e)
+        log.error("Error while handling error =>", e)
         Future.successful(InternalServerError)
     }
   }
