@@ -4,6 +4,7 @@
     <option name="LANGUAGE_IMPORTS">
       <array>
         <option value="play.api.templates.PlayMagic._" />
+        <option value="scrupal.core._" />
       </array>
     </option>
   </component>

@@ -2,6 +2,8 @@
 *.log
 .idea/workspace.xml
 .idea/uiDesigner.xml
+.idea/libraries/
+.idea/modules/
 
 # sbt specific
 .cache

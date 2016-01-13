@@ -10,7 +10,7 @@ import scrupal.core.Scrupal
 
 /** Scrupal Test Cache
   *
-  * In Test Mode we can run tests in parallel and they may need their own instance of Scrupal. This cache
+  * In Test Mode we can run tests in parallel and they need their own instance of Scrupal. This cache
   * associates each test name with a Scrupal instance for the context of that test. Ensuring each test
   * case has its own isolated context means that conflicts between test cases will be eliminated. There
   * is no global data except the Scrupal object.
@@ -32,15 +32,8 @@ object ScrupalCache extends MemoryCache[String,Scrupal] {
         s"db.$dbName.username" → "sa",
         s"db.$dbName.password" → "Sof1ukS8B$ j9eeTech!"
       )
-      val configuration: Configuration = Configuration.load(environment, config)
-
-      val builder = new GuiceApplicationBuilder(environment, configuration, Seq.empty, Seq.empty, Seq.empty)
-      val injector = builder.injector()
-      val application : Application = builder.build()
-      val applicationLifecycle = injector.instanceOf(classOf[DefaultApplicationLifecycle])
-      val actors = if (application.mode == Mode.Test) Some(application.actorSystem) else None
-
-      new Scrupal(name, environment, configuration, applicationLifecycle, injector, application, actors)
+      val context = ApplicationLoader.createContext(environment, config)
+      new Scrupal(context, dbName)
     }
   }
 }

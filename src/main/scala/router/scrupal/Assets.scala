@@ -31,7 +31,6 @@ import scala.util.{Failure, Success, Try}
 
 @Singleton
 class Assets @Inject() (
-    application: Application,
     errorHandler: HttpErrorHandler,
     configuration: Configuration,
     environment: Environment
@@ -55,7 +54,7 @@ class Assets @Inject() (
   def theme(theme: String) : Action[AnyContent] = {
     Assets.themes.get(theme) match {
       case Some(thm) ⇒
-        if (application.mode == Mode.Prod)
+        if (environment.mode == Mode.Prod)
           Action { MovedPermanently(thm.cssCdn) }
         else {
           val themedir = if (theme.toLowerCase == "default" ) "flatly" else theme.toLowerCase

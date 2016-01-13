@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="SBT: org.sedis:sedis_2.11:1.2.2:jar">
-    <CLASSES>
-      <root url="jar://$USER_HOME$/.ivy2/cache/org.sedis/sedis_2.11/jars/sedis_2.11-1.2.2.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

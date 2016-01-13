@@ -24,14 +24,17 @@ import javax.inject.Inject
 
 import play.api._
 import play.api.http.Status._
-import play.api.http.DefaultHttpErrorHandler
+import play.api.http.{HttpErrorHandlerExceptions, HttpErrorHandler, DefaultHttpErrorHandler}
+import play.api.mvc.Results._
 import play.api.mvc.{RequestHeader, Result, Results}
-import play.api.routing.Router
+import scrupal.utils.ScrupalComponent
 
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
-class ScrupalErrorHandler @Inject()(scrupal: Scrupal, router : Router = Router.empty) extends
-  DefaultHttpErrorHandler(scrupal.environment, scrupal.configuration, router=Some(router)) {
+class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler with ScrupalComponent {
+
+ lazy val defaultHandler = new DefaultHttpErrorHandler(scrupal.environment, scrupal.configuration, scrupal.sourceMapper)
 
   private def forSiteAndSubdomain(request: RequestHeader)
     (found: (RequestHeader, Site, Option[String]) ⇒ Future[Result])
@@ -46,35 +49,64 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal, router : Router = Router.e
     }
   }
 
-  override protected def onBadRequest(request: RequestHeader, message: String): Future[Result] = {
+  /**
+    * Invoked when a client error occurs, that is, an error in the 4xx series.
+    *
+    * @param request The request that caused the client error.
+    * @param statusCode The error status code.  Must be greater or equal to 400, and less than 500.
+    * @param message The error message.
+    */
+  def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
+    statusCode match {
+      case BAD_REQUEST =>
+        onBadRequest(request, message)
+      case FORBIDDEN =>
+        onForbidden(request, message)
+      case NOT_FOUND =>
+        onNotFound(request, message)
+      case UNAUTHORIZED ⇒
+        onUnauthorized(request, message)
+      case clientError if statusCode >= 400 && statusCode < 500 =>
+        onGenericClientError(request, statusCode, message)
+      case nonClientError =>
+        throw new IllegalArgumentException(s"onClientError invoked with non client error status code $statusCode: $message")
+    }
+  }
+
+  def onBadRequest(request: RequestHeader, message: String): Future[Result] = {
     forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
       site.onBadRequest(request, message, subDomain)
     } { () ⇒
-      super.onBadRequest(request, message)
+      Future.successful(BadRequest(views.html.defaultpages.badRequest(request.method, request.uri, message)))
     }
   }
 
-  override protected def onForbidden(request: RequestHeader, message: String): Future[Result] = {
+  def onForbidden(request: RequestHeader, message: String): Future[Result] = {
     forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
       site.onForbidden(request, message, subDomain)
     } { () ⇒
-      super.onForbidden(request, message)
+      Future.successful(Forbidden(views.html.defaultpages.unauthorized()))
     }
   }
 
-  override protected def onNotFound(request: RequestHeader, message: String): Future[Result] = {
+  def onNotFound(request: RequestHeader, message: String): Future[Result] = {
     forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
       site.onNotFound(request, message, subDomain)
     } { () ⇒
-      super.onNotFound(request, message)
+      Future.successful(play.api.mvc.Results.NotFound(scrupal.environment.mode match {
+        case Mode.Prod =>
+          views.html.defaultpages.notFound(request.method, request.uri)
+        case _ =>
+          views.html.defaultpages.devNotFound(request.method, request.uri, Some(scrupal.router))
+      }))
     }
   }
 
-  protected def onUnauthorized(request: RequestHeader, message: String): Future[Result] = {
+  def onUnauthorized(request: RequestHeader, message: String): Future[Result] = {
     forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
       site.onUnauthorized(request, message, subDomain)
     } { () ⇒
-      super.onOtherClientError(request, UNAUTHORIZED, message)
+      Future.successful(play.api.mvc.Results.Unauthorized(views.html.defaultpages.unauthorized()))
     }
   }
 
@@ -91,29 +123,98 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal, router : Router = Router.e
   }
 
   /**
-    * Invoked when a client error occurs, that is, an error in the 4xx series, which is not handled by any of
-    * the other methods in this class already.
+    * Invoked when a server error occurs.
     *
-    * @param request The request that caused the client error.
-    * @param status  The error status code.  Must be greater or equal to 400, and less than 500.
-    * @param message The error message.
+    * By default, the implementation of this method delegates to [[onProdServerError()]] when in prod mode, and
+    * [[onDevServerError()]] in dev mode.  It is recommended, if you want Play's debug info on the error page in dev
+    * mode, that you override [[onProdServerError()]] instead of this method.
+    *
+    * @param request The request that triggered the server error.
+    * @param exception The server error.
     */
-  override protected def onOtherClientError(request: RequestHeader, status: Int, message: String): Future[Result] = {
-    status match {
-      case BAD_REQUEST ⇒
-        onBadRequest(request, message)
-      case UNAUTHORIZED ⇒
-        onUnauthorized(request, message)
-      case FORBIDDEN ⇒
-        onForbidden(request, message)
-      case NOT_FOUND ⇒
-        onNotFound(request, message)
-      case clientError if status >= 400 && status < 500 =>
-        onGenericClientError(request, status, message)
-      case nonClientError =>
-        throw new IllegalArgumentException(
-          s"onClientError invoked with non client error status code $status: $message"
-        )
+  def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
+    try {
+      exception match {
+        case x: NotImplementedError ⇒
+          this.onNotImplemented(request, x)
+        case x: NotImplementedException ⇒
+          onNotImplemented(request, x)
+        case x: TimeoutException ⇒
+          onServiceUnavailable(request, x)
+        case x: InterruptedException ⇒
+          onServiceUnavailable(request, x)
+        case x: SQLTimeoutException ⇒
+          onServiceUnavailable(request, x)
+        case x: InterruptedIOException ⇒
+          onServiceUnavailable(request, x)
+        case x : Throwable ⇒ {
+          defaultServerError(request, x)
+        }
+      }
+    } catch {
+      case NonFatal(e) =>
+        Logger.error("Error while handling error", e)
+        Future.successful(InternalServerError)
+    }
+  }
+
+  def defaultServerError(request : RequestHeader, exception: Throwable) : Future[Result] = {
+    val usefulException = HttpErrorHandlerExceptions.throwableToUsefulException(scrupal.sourceMapper,
+      scrupal.environment.mode == Mode.Prod, exception)
+    logServerError(request, usefulException)
+    scrupal.environment.mode match {
+      case Mode.Prod =>
+        onProdServerError(request, usefulException)
+      case _ =>
+        onDevServerError(request, usefulException)
+    }
+  }
+
+
+  /**
+    * Responsible for logging server errors.
+    *
+    * This can be overridden to add additional logging information, eg. the id of the authenticated user.
+    *
+    * @param request The request that triggered the server error.
+    * @param usefulException The server error.
+    */
+  protected def logServerError(request: RequestHeader, usefulException: UsefulException) {
+    log.error(s"! @${usefulException.id} - Internal server error, for (${request.method}) [${request.uri}] ->",
+      usefulException
+    )
+  }
+
+  private lazy val playEditor = scrupal.configuration.getString("play.editor")
+
+  /**
+    * Invoked in dev mode when a server error occurs.
+    *
+    * @param request The request that triggered the error.
+    * @param exception The exception.
+    */
+  def onDevServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
+    forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
+      site.onServerError(request, exception, subDomain)
+    } { () ⇒
+      Future.successful(InternalServerError(views.html.defaultpages.devError(playEditor, exception)))
+    }
+  }
+
+  /**
+    * Invoked in prod mode when a server error occurs.
+    *
+    * Override this rather than [[onServerError()]] if you don't want to change Play's debug output when logging errors
+    * in dev mode.
+    *
+    * @param request The request that triggered the error.
+    * @param exception The exception.
+    */
+  def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
+    forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
+      site.onServerError(request, exception, subDomain)
+    } { () ⇒
+      Future.successful(InternalServerError(views.html.defaultpages.error(exception)))
     }
   }
 
@@ -121,7 +222,7 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal, router : Router = Router.e
     forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
       site.onNotImplemented(request, exception.getMessage, subDomain)
     } { () ⇒
-      super.onServerError(request, exception)
+      defaultServerError(request, exception)
     }
   }
 
@@ -129,37 +230,8 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal, router : Router = Router.e
     forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
       site.onServiceUnavailable(request, exception.getMessage, subDomain)
     } { () ⇒
-      super.onServerError(request, exception)
+      defaultServerError(request, exception)
     }
   }
-
-  override def onServerError(request: RequestHeader, exception: Throwable) : Future[Result] = {
-    exception match {
-      case x: NotImplementedError ⇒
-        onNotImplemented(request, x)
-      case x: NotImplementedException ⇒
-        onNotImplemented(request, x)
-      case x: TimeoutException ⇒
-        onServiceUnavailable(request, x)
-      case x: InterruptedException ⇒
-        onServiceUnavailable(request, x)
-      case x: SQLTimeoutException ⇒
-        onServiceUnavailable(request, x)
-      case x: InterruptedIOException ⇒
-        onServiceUnavailable(request, x)
-      case x: Throwable ⇒
-        super.onServerError(request, exception)
-    }
-  }
-
-  override protected def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
-    forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
-      site.onServerError(request, exception, subDomain)
-    } { () ⇒
-      super.onProdServerError(request, exception)
-    }
-  }
-
-
 }
 

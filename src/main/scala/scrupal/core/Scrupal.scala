@@ -19,20 +19,24 @@ import akka.actor.ActorSystem
 import akka.util.Timeout
 
 import com.reactific.helpers._
+import com.reactific.slickery.Storable.OIDType
 
 import java.lang.Thread.UncaughtExceptionHandler
 import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicInteger
-import javax.inject.{Inject,Singleton}
+import javax.inject.Inject
 
-import com.reactific.slickery.Storable.OIDType
 import play.api._
-import play.api.inject.{Injector, DefaultApplicationLifecycle}
-import play.api.mvc.RequestHeader
-import play.api.mvc._
-import play.api.routing._
+import play.api.http._
+import play.api.inject.{NewInstanceInjector, SimpleInjector, Injector, DefaultApplicationLifecycle}
+import play.api.libs.Files.{DefaultTemporaryFileCreator, TemporaryFileCreator}
+import play.api.libs.{Crypto, CryptoConfigParser, CryptoConfig}
+import play.api.libs.concurrent.ActorSystemProvider
+import play.api.mvc.{EssentialFilter, RequestHeader}
+import play.api.routing.Router
 import play.api.routing.sird._
 import play.twirl.api.Html
+import router.scrupal.Assets
 
 import scala.concurrent.{ExecutionContextExecutorService, ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -44,24 +48,59 @@ trait ScrupalUser {
   def scrupal : Scrupal
 }
 
-@Singleton
+class ScrupalLoader extends ApplicationLoader {
+  def load(context: ApplicationLoader.Context) : Application = {
+    new Scrupal(context).application
+  }
+}
+
 case class Scrupal @Inject() (
-  name: String = "Scrupal",
-  environment : Environment,
-  configuration : Configuration,
-  applicationLifecycle : DefaultApplicationLifecycle,
-  injector: Injector,
-  application: Application
+  context : ApplicationLoader.Context,
+  name : String = "Scrupal"
 ) extends {
   final val id: Symbol = Symbol(name)
   final val registry = Scrupal
 } with ScrupalComponent with AutoCloseable  with Registrable[Scrupal] {
 
+
+  val applicationLifecycle: DefaultApplicationLifecycle = new DefaultApplicationLifecycle
+
+  val httpFilters: Seq[EssentialFilter] = Seq.empty[EssentialFilter]
+
+  val httpRequestHandler : HttpRequestHandler = new ScrupalRequestHandler(this)
+
+  val httpErrorHandler: HttpErrorHandler = new ScrupalErrorHandler(this)
+
+  val tempFileCreator: TemporaryFileCreator = new DefaultTemporaryFileCreator(applicationLifecycle)
+
+  val configuration = context.initialConfiguration
+
+  val environment = context.environment
+
+  val sourceMapper = context.sourceMapper
+
+  val webCommands = context.webCommands
+
+  val httpConfiguration: HttpConfiguration = HttpConfiguration.fromConfiguration(configuration)
+
+  val assets = new Assets(httpErrorHandler, configuration, environment)
+
+  val cryptoConfig: CryptoConfig = new CryptoConfigParser(environment, configuration).get
+
+  val crypto: Crypto = new Crypto(cryptoConfig)
+
+  val router : Router = new _root_.router.Routes(httpErrorHandler, assets, "/")
+
+  val actorSystem: ActorSystem = new ActorSystemProvider(environment, configuration, applicationLifecycle).get
+
+  val injector: Injector = new SimpleInjector(NewInstanceInjector) + router + crypto + httpConfiguration + tempFileCreator
+
+  val application: Application = new DefaultApplication(environment, applicationLifecycle, injector,
+    configuration, httpRequestHandler, httpErrorHandler, actorSystem, Plugins.empty)
+
   val author = "Reactific Software LLC"
   val copyright = "© 2013-2015 Reactific Software LLC. All Rights Reserved."
   val license = OSSLicense.ApacheV2
-
-  implicit val actorSystem: ActorSystem = getActorSystem
 
   implicit val executionContext: ExecutionContext = getExecutionContext
 
@@ -165,7 +204,8 @@ case class Scrupal @Inject() (
   }
 
   protected def getActorSystem: ActorSystem = {
-    ActorSystem("Scrupal", configuration.underlying)
+    val actSysName = if (name.isEmpty) "Scrupal" else name.replaceAll("[-^0-9A-Za-z_]","-")
+    ActorSystem(actSysName, configuration.underlying)
   }
 
   protected def getTimeout: Timeout = {

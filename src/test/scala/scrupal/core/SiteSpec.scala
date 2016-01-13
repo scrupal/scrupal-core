@@ -42,8 +42,9 @@ class SiteRegistrySpec extends ScrupalSpecification("SiteRegistry") {
     "keep track of domain names" in {
       val site1 = FakeSite(SiteData("foo","foo.com"))(scrupal)
       val site2 = FakeSite(SiteData("bar", "bar.com"))(scrupal)
+      scrupal.sites.size must beEqualTo(3) // DefaultLocalHostSite is always registered
       scrupal.sites.unregister(site2)
-      scrupal.sites.size must beEqualTo(1)
+      scrupal.sites.size must beEqualTo(2)
       scrupal.sites.registryName must beEqualTo("Sites")
       scrupal.sites.registrantsName must beEqualTo("site")
       scrupal.sites.forHost("bar.com") must beEqualTo(None)

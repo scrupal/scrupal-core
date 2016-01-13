@@ -17,7 +17,7 @@ package scrupal.core
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.http.{HttpConfiguration, HttpFilters, HttpErrorHandler, DefaultHttpRequestHandler}
+import play.api.http._
 import play.api.mvc._
 import play.api.routing.Router
 
@@ -37,13 +37,10 @@ case class ReactorAction(context: Context, reactor: Reactor) extends Action[AnyC
   * Play will invoke this handler to dispatch HTTP Requests as they come in. It's job is
   */
 @Singleton()
-class ScrupalRequestHandler @Inject() (
-    scrupal: Scrupal,
-    globalRouter : Router,
-    errorHandler : HttpErrorHandler,
-    httpConfiguration : HttpConfiguration,
-    httpFilters : HttpFilters
-) extends DefaultHttpRequestHandler(globalRouter, errorHandler, httpConfiguration, httpFilters) {
+class ScrupalRequestHandler @Inject() (scrupal: Scrupal ) extends HttpRequestHandler {
+
+  lazy val defaultHandler = new DefaultHttpRequestHandler(
+    scrupal.router, scrupal.httpErrorHandler, scrupal.httpConfiguration, scrupal.httpFilters:_* )
 
   def getReactor(header: RequestHeader, site: Site, subDomain: Option[String]) : (RequestHeader, Handler) = {
     subDomain.flatMap {
@@ -55,7 +52,7 @@ class ScrupalRequestHandler @Inject() (
         val context = Context(scrupal, site)
         header → ReactorAction(context, rx)
       case None ⇒
-        super.handlerForRequest(header)
+        defaultHandler.handlerForRequest(header)
     }
   }
 
@@ -66,7 +63,7 @@ class ScrupalRequestHandler @Inject() (
       case (Some(site), None) ⇒
         getReactor(header, site, None)
       case _ =>
-        super.handlerForRequest(header)
+        defaultHandler.handlerForRequest(header)
     }
   }
 }

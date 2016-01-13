@@ -16,7 +16,7 @@ class ScrupalRequestHandlerSpec extends ScrupalSpecification("ScrupalRequestHand
       val site2 = new FakeSite(SiteData("two", "two.com"))(scrupal)
       val app = scrupal.application
       val httpConf = HttpConfiguration.fromConfiguration(app.configuration)
-      val srh = new ScrupalRequestHandler(scrupal, Router.empty, app.errorHandler, httpConf, NoHttpFilters)
+      val srh = new ScrupalRequestHandler(scrupal)
       val orig_request = FakeRequest("GET", "/index.html").withHeaders("Host" -> "one.com:80")
       val (request, handler) = srh.handlerForRequest(orig_request)
       handler.isInstanceOf[ReactorAction] must beTrue
