@@ -13,7 +13,7 @@
   * the specific language governing permissions and limitations under the License.                                     *
   *********************************************************************************************************************/
 
-package router.scrupal
+package router.scrupal.core
 
 import javax.inject.{Inject, Singleton}
 
@@ -23,7 +23,7 @@ import org.webjars.WebJarAssetLocator
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, RequestHeader}
-import play.api.{Mode, Configuration, Environment}
+import play.api.{Configuration, Environment, Mode}
 import scrupal.core.ScrupalBuildInfo
 import scrupal.utils.ScrupalComponent
 

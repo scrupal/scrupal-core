@@ -19,6 +19,8 @@ import java.time.Instant
 
 import com.reactific.helpers.{MemoryCache, Registrable, Registry}
 import com.reactific.slickery._
+import play.api.UsefulException
+import play.api.mvc.Results._
 
 import play.api.mvc.{Results, Result, RequestHeader}
 
@@ -47,8 +49,12 @@ case class Site(data: SiteData)(implicit val scrupal : Scrupal) extends {
 
   def isChildScope(e : Enablement[_]) : Boolean = delegates.exists { x ⇒ x == e }
 
-  def onServerError(request : RequestHeader, exception : Throwable, subDomain: Option[String]) : Future[Result] = {
-    Future.successful ( Results.InternalServerError(s"Requested failed: $request: $exception ($subDomain)") )
+  def onDevServerError(request : RequestHeader, exception : UsefulException, subDomain : Option[String]) : Future[Result] = {
+    Future.successful(InternalServerError(views.html.defaultpages.devError(None, exception)))
+  }
+
+  def onProdServerError(request : RequestHeader, exception : UsefulException, subDomain: Option[String]) : Future[Result] = {
+    Future.successful(InternalServerError(views.html.defaultpages.error(exception)))
   }
 
   def onNotImplemented(request: RequestHeader, what: String, subDomain: Option[String]) : Future[Result] = {

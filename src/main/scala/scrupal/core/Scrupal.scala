@@ -36,7 +36,7 @@ import play.api.mvc.{EssentialFilter, RequestHeader}
 import play.api.routing.Router
 import play.api.routing.sird._
 import play.twirl.api.Html
-import router.scrupal.Assets
+import router.scrupal.core.{AdminController, Assets}
 
 import scala.concurrent.{ExecutionContextExecutorService, ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -81,17 +81,21 @@ case class Scrupal @Inject() (
 
   val webCommands = context.webCommands
 
+  val actorSystem: ActorSystem = new ActorSystemProvider(environment, configuration, applicationLifecycle).get
+
+  implicit val executionContext: ExecutionContext = getExecutionContext
+
   val httpConfiguration: HttpConfiguration = HttpConfiguration.fromConfiguration(configuration)
 
   val assets = new Assets(httpErrorHandler, configuration, environment)
+
+  val adminController = new AdminController(this)
 
   val cryptoConfig: CryptoConfig = new CryptoConfigParser(environment, configuration).get
 
   val crypto: Crypto = new Crypto(cryptoConfig)
 
-  val router : Router = new _root_.router.Routes(httpErrorHandler, assets, "/")
-
-  val actorSystem: ActorSystem = new ActorSystemProvider(environment, configuration, applicationLifecycle).get
+  val router : Router = new _root_.router.Routes(httpErrorHandler, assets, adminController, "/")
 
   val injector: Injector = new SimpleInjector(NewInstanceInjector) + router + crypto + httpConfiguration + tempFileCreator
 
@@ -102,7 +106,6 @@ case class Scrupal @Inject() (
   val copyright = "© 2013-2015 Reactific Software LLC. All Rights Reserved."
   val license = OSSLicense.ApacheV2
 
-  implicit val executionContext: ExecutionContext = getExecutionContext
 
   implicit val akkaTimeout = getTimeout
 

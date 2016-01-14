@@ -1,0 +1,26 @@
+@(site : SiteData)
+<div class="container">
+<!-- Nav tabs -->
+<ul class="nav nav-tabs" role="tablist">
+  <li role="presentation" class="active"><a href="#about" aria-controls="about" role="tab" data-toggle="tab">About</a></li>
+  <li role="presentation"><a href="#config" aria-controls="config" role="tab" data-toggle="tab">Configuration</a></li>
+  <li role="presentation"><a href="#modules" aria-controls="modules" role="tab" data-toggle="tab">Modules</a></li>
+  <li role="presentation"><a href="#usage" aria-controls="usage" role="tab" data-toggle="tab">Usage</a></li>
+</ul>
+<!-- Tab panes -->
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane active" id="about">
+    <h2>Name: @{site.name}</h2>
+    <h2>Description: @{site.description}</h2>
+  </div>
+  <div role="tabpanel" class="tab-pane" id="config">
+    <h2>Configuration</h2>
+  </div>
+  <div role="tabpanel" class="tab-pane" id="modules">
+    <h2>Modules</h2>
+  </div>
+  <div role="tabpanel" class="tab-pane" id="usage">
+    <h2>Usage</h2>
+  </div>
+</div>
+</div>

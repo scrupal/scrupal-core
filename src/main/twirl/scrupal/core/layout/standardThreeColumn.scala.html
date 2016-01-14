@@ -4,14 +4,7 @@
 <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 <![endif]-->
 <nav class="navbar navbar-inverse navbar-fixed-top">
-  <div class="container">
-    <div class="navbar-header">
-    @for(head <- args.get("navheader")){@head.content}
-    </div>
-  </div>
-  <div id="navbar" class="navbar-collapse collapse">
-  @for(bar ← args.get("navbar")){@bar.content}
-  </div>
+@for(nav ← args.get("nav")){@nav.content}
 </nav>
 <div class="col-md-12">
 @for(header ← args.get("header")){@header.content}

@@ -107,19 +107,19 @@ case object StandardThreeColumnLayout extends HtmlLayout {
   def id : Identifier = 'StandardThreeColumnLayout
   val description: String = "A Bootstrap 3 page in three columns with Header, Navigation and Footer"
   def arrangementDescription = Map(
-    "navheader" → "Navigation header",
-    "navbar" → "Navigation bar content: a full width strip across the top of every page",
+    "nav" → "Navigation bar and header",
     "header" → "A centered, full width, header section to describe the main content",
     "left" → "A left side bar 1/6th of the width",
     "right" → "A right side bar 1/6th of the width",
     "content" → "The main content area for the page, 2/3 of the width",
-    "footer" → "A footer area below the content and side bars"
+    "footer" → "A footer area below the content and side bars",
+    "endscripts" → "Scrupts for the bottom of the page"
   )
   def apply(context: Context, args : Layout.Arrangement[HtmlContent]) : Future[Html] = {
-    validateArgs(args).map { arg ⇒ throw arg }
-    Future.successful {
+    Future {
+      validateArgs(args).map { arg ⇒ throw arg }
       val cpht = context.pageHeadTags
-      val assets = router.scrupal.routes.Assets
+      val assets = router.scrupal.core.routes.Assets
       val links = cpht.links.copy(
         scriptLinks = cpht.links.scriptLinks ++ Seq(
           assets.webjar("jquery", "jquery.min.js").url,
@@ -142,7 +142,7 @@ case object StandardThreeColumnLayout extends HtmlLayout {
         javascript = cpht.javascript
       )
       layout.html.standardThreeColumn(context, pht, args)
-    }
+    } (context.scrupal.executionContext)
   }
 }
 

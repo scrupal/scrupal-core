@@ -193,7 +193,7 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler w
     */
   def onDevServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
     forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
-      site.onServerError(request, exception, subDomain)
+      site.onDevServerError(request, exception, subDomain)
     } { () ⇒
       Future.successful(InternalServerError(views.html.defaultpages.devError(playEditor, exception)))
     }
@@ -210,7 +210,7 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler w
     */
   def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
     forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
-      site.onServerError(request, exception, subDomain)
+      site.onProdServerError(request, exception, subDomain)
     } { () ⇒
       Future.successful(InternalServerError(views.html.defaultpages.error(exception)))
     }

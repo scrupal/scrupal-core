@@ -21,6 +21,7 @@ import play.api.http.{DefaultHttpErrorHandler, Status}
 import play.api.mvc.{Action, AnyContent, Request}
 import play.api.test.{FakeRequest, WithApplication}
 import play.api.{Configuration, Environment, Mode}
+import router.scrupal.core.Assets
 import scrupal.core.ScrupalBuildInfo
 import scrupal.test.ScrupalSpecification
 
