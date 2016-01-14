@@ -1,6 +1,6 @@
-GET     /assets/theme/:theme        scrupal.Assets.theme(theme : String)
+GET     /assets/themes/:theme       scrupal.Assets.theme(theme : String)
 GET     /assets/stylesheets/*file   scrupal.Assets.css(file : String)
 GET     /assets/javascripts/*file   scrupal.Assets.js(file : String)
 GET     /assets/images/*file        scrupal.Assets.img(file : String)
 GET     /assets/*file               scrupal.Assets.at(file : String)
-GET     /webjar/:wj/*file           scrupal.Assets.webjar(wj, file)
+GET     /webjars/:wj/*file          scrupal.Assets.webjar(wj, file)

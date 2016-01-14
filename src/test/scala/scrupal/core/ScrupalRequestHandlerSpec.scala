@@ -1,8 +1,7 @@
 package scrupal.core
 
-import play.api.http.{Status, NoHttpFilters, HttpConfiguration}
+import play.api.http.Status
 import play.api.mvc.{Result, AnyContent}
-import play.api.routing.Router
 import play.api.test.FakeRequest
 import scrupal.test.{FakeSite, ScrupalSpecification}
 

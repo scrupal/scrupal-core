@@ -123,7 +123,7 @@ case object StandardThreeColumnLayout extends HtmlLayout {
       val links = cpht.links.copy(
         scriptLinks = cpht.links.scriptLinks ++ Seq(
           assets.webjar("jquery", "jquery.min.js").url,
-          assets.webjar("boostrap", "js/bootstrap.min.js" ).url,
+          assets.webjar("bootstrap", "js/bootstrap.min.js" ).url,
           assets.webjar("marked", "marked.js").url,
           assets.webjar("modernizr", "modernizr.min.js").url
         ),

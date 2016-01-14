@@ -17,7 +17,6 @@ package scrupal.core
 
 import com.reactific.slickery.{Describable, Nameable}
 import play.api.mvc._
-// import scrupal.storage.api.{Collection, Queries, Query, StoreContext}
 
 import scala.concurrent.{ExecutionContext, Future}
 

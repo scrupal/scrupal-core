@@ -8,7 +8,7 @@ import play.api.libs.iteratee.{Iteratee, Enumerator}
 import play.api.libs.json._
 import play.twirl.api.{Html, Txt}
 
-import scala.concurrent.{Future, Await, ExecutionContext}
+import scala.concurrent.{Future, ExecutionContext}
 
 /** Generic Content Representation
   * Content can come in many forms, as defined by the type parameter T. What they all need in common is a

@@ -19,7 +19,6 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.http._
 import play.api.mvc._
-import play.api.routing.Router
 
 import scala.concurrent.Future
 import scala.language.implicitConversions
@@ -30,7 +29,6 @@ case class ReactorAction(context: Context, reactor: Reactor) extends Action[AnyC
     reactor.resultFrom(context, request)
   }
 }
-
 
 /** Scrupal Request Handler
   *

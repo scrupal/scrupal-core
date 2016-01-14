@@ -3,7 +3,7 @@ package scrupal.core
 import java.time.Instant
 
 import com.reactific.helpers.LoggingHelper
-import com.reactific.slickery.{PostgresDriver, PostgresQL, H2}
+import com.reactific.slickery.{PostgresQL, H2}
 import com.reactific.slickery.testkit.SlickerySpecification
 
 import com.typesafe.config.{ConfigFactory, Config}

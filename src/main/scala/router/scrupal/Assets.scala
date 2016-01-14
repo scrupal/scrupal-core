@@ -23,7 +23,7 @@ import org.webjars.WebJarAssetLocator
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, RequestHeader}
-import play.api.{Mode, Application, Configuration, Environment}
+import play.api.{Mode, Configuration, Environment}
 import scrupal.core.ScrupalBuildInfo
 import scrupal.utils.ScrupalComponent
 
@@ -49,7 +49,11 @@ class Assets @Inject() (
 
   def img(file: String) = super.at(webPrefix("images"), file, aggressiveCaching=false)
 
-  def css(file: String) = super.at(webPrefix("stylesheets"), file + ".min.css", aggressiveCaching=true)
+  def css(file: String) = {
+    val prefix = webPrefix("stylesheets")
+    val path = file + ".min.css"
+    super.at(prefix, path, aggressiveCaching=true)
+  }
 
   def theme(theme: String) : Action[AnyContent] = {
     Assets.themes.get(theme) match {
@@ -82,7 +86,8 @@ object Assets extends LoggingHelper {
     "font-awesome" -> ScrupalBuildInfo.font_awesome_version,
     "marked" -> ScrupalBuildInfo.marked_version,
     "jquery" → ScrupalBuildInfo.jquery_version,
-    "modernizr" → ScrupalBuildInfo.modernizr_version
+    "modernizr" → ScrupalBuildInfo.modernizr_version,
+    "scrupal-core" → ScrupalBuildInfo.version
   )
 
   final val webjar_prefix = s"/${WebJarAssetLocator.WEBJARS_PATH_PREFIX}"
@@ -94,7 +99,7 @@ object Assets extends LoggingHelper {
   }
 
   def webPrefix(partialPath: String) = {
-    s"/$web_prefix/$partialPath"
+    s"/public/$partialPath"
   }
 
   /** Template
