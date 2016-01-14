@@ -33,9 +33,9 @@ class CoreSchemaSpec extends ScrupalSpecification("CoreSchema") with SlickerySpe
     log.debug(s"$h2Name: ${h2Config.toString}")
     WithH2Schema[CoreSchema_H2,R](h2Name)( CoreSchema_H2(_, h2Config))(f)
 
-    val pgName = s"${dbName}_pg"
-    val pgConfig = testPGDbConfig(pgName)
-    WithPostgresSchema[CoreSchema_PG,R](pgName)(CoreSchema_PG(_, pgConfig))(f)
+    // val pgName = s"${dbName}_pg"
+    // val pgConfig = testPGDbConfig(pgName)
+    // WithPostgresSchema[CoreSchema_PG,R](pgName)(CoreSchema_PG(_, pgConfig))(f)
   }
 
   "CoreSchema" should {
