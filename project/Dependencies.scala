@@ -46,7 +46,8 @@ trait Dependencies
     val marked = "0.3.2"
     val jquery = "2.1.4"
     val modernizr = "2.8.3"
-    val slickery = "0.3.7"
+    val slickery = "0.3.8-SNAPSHOT"
+    val scalatags = "0.5.4"
   }
 
   // Things we borrow from Play Framework
@@ -76,6 +77,7 @@ trait Dependencies
   // Fundamental Libraries
   val shapeless               = "com.chuusai"               %% "shapeless"                % "2.2.1"
   val scala_arm               = "com.jsuereth"              %% "scala-arm"                % "1.4"
+  val scalatags               = "com.lihaoyi"               %% "scalatags"                % Ver.scalatags
 
   // Database, Caches, Serialization, Data Storage stuff
   val slickery                = "com.reactific"             %% "slickery"                 % Ver.slickery
@@ -121,7 +123,7 @@ trait Dependencies
 
   val core_dependencies : Seq[ModuleID] = Seq(
     pbkdf2, bcrypt, scrypt,
-    commons_lang3, config, shapeless, scala_arm, slickery,
+    commons_lang3, config, shapeless, scala_arm, slickery, scalatags,
     akka_actor, akka_http, akka_slf4j,
     play_json, play_iteratees, play_plugins_mailer, play_plugins_redis, play_slick, play_slick_evols,
     play_silhouette, play_bootstrap, play_html_compressor, // play_geolocation,

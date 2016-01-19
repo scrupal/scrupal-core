@@ -15,11 +15,8 @@
 
 package scrupal.core
 
-import java.net.URL
-
 import akka.actor.ActorSystem
 import play.api.Configuration
-// import scrupal.storage.api.{Schema, StoreContext}
 
 import scala.concurrent.ExecutionContext
 
@@ -30,8 +27,6 @@ import scala.concurrent.ExecutionContext
 trait Context {
   // Scrupal Related things
   implicit def scrupal : Scrupal
-
-  def pageHeadTags : PageHeadTags = PageHeadTags()
 
   // Site related things
   def site : Option[Site] = None
@@ -65,6 +60,7 @@ trait Context {
 /** A Basic context which just mixes the Context trait with the WrappedRequest.
   * This information is generally overridden by subclasses, but this is the minimum we need to render a page. Note that
   * because this is a WrappedRequest[A], all the fields of Request are fields of this class too.
+ *
   * @param scrupal The Scrupal object
   */
 case class SimpleContext(scrupal : Scrupal) extends Context {
@@ -74,6 +70,7 @@ case class SimpleContext(scrupal : Scrupal) extends Context {
 /** A Site context which pulls the information necessary to render something for a site.
   * SiteContext is presumed to be created with a SiteAction from the ContextProvider which will only create on if the
   * conditions are right, otherwise a BasicContext is created and an error returned.
+ *
   * @param theSite The site that this request should be processed by
   */
 class SiteContext(scrupal : Scrupal, theSite : Site) extends SimpleContext(scrupal) {
@@ -88,6 +85,7 @@ class SiteContext(scrupal : Scrupal, theSite : Site) extends SimpleContext(scrup
 
 /** A User context which extends SiteContext by adding specific user information.
   * Details TBD.
+ *
   * @param principal The user that initiated the request.
   * @param site The site that this request should be processed by
 class UserContext(scrupal : Scrupal, site : Site, principal : Principal)

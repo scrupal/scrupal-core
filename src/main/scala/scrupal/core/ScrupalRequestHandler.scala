@@ -15,6 +15,7 @@
 
 package scrupal.core
 
+import java.util.concurrent.atomic.AtomicLong
 import javax.inject.{Inject, Singleton}
 
 import play.api.http._
@@ -54,7 +55,10 @@ class ScrupalRequestHandler @Inject() (scrupal: Scrupal ) extends HttpRequestHan
     }
   }
 
+  val numRequests = new AtomicLong(0)
+
   override def handlerForRequest(header: RequestHeader) : (RequestHeader, Handler) = {
+    numRequests.incrementAndGet()
     scrupal.siteForRequest(header) match {
       case (Some(site),Some(subDomain)) =>
         getReactor(header, site, Some(subDomain))

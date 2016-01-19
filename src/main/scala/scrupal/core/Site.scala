@@ -31,8 +31,8 @@ case class SiteData(
   domainName: String = "localhost",
   description : String = "",
   requireHttps : Boolean = false,
-  modified: Instant = Instant.EPOCH,
-  created : Instant = Instant.EPOCH,
+  modified: Instant = Instant.now,
+  created : Instant = Instant.now,
   oid : Option[Long] = None
 ) extends Slickery {
   def forHost(hostName: String) : Boolean = { hostName.endsWith(domainName) }
@@ -84,6 +84,8 @@ case class Site(data: SiteData)(implicit val scrupal : Scrupal) extends {
   def onGenericClientError(request: RequestHeader, status: Int, msg: String, sub: Option[String]) : Future[Result] = {
     Future.successful ( Results.Status(status)(s"Error($status): $request $msg ($sub)"))
   }
+
+  def debugFooter : Boolean = true // TODO: Implement with Feature
 }
 
 case class SitesRegistry() extends Registry[Site] {

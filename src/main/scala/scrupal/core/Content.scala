@@ -1,14 +1,32 @@
+/**********************************************************************************************************************
+  * This file is part of Scrupal, a Scalable Reactive Web Application Framework for Content Management                 *
+  *                                                                                                                    *
+  * Copyright (c) 2015, Reactific Software LLC. All Rights Reserved.                                                   *
+  *                                                                                                                    *
+  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance     *
+  * with the License. You may obtain a copy of the License at                                                          *
+  *                                                                                                                    *
+  *     http://www.apache.org/licenses/LICENSE-2.0                                                                     *
+  *                                                                                                                    *
+  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed   *
+  * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for  *
+  * the specific language governing permissions and limitations under the License.                                     *
+  **********************************************************************************************************************/
 package scrupal.core
 
-import java.io.InputStream
+import java.io.{StringWriter, PrintWriter, InputStream}
 
 import akka.http.scaladsl.model.{MediaTypes, MediaType}
+import com.reactific.helpers.ThrowableWithComponent
 import org.apache.commons.lang3.exception.ExceptionUtils
 import play.api.libs.iteratee.{Iteratee, Enumerator}
 import play.api.libs.json._
-import play.twirl.api.{Html, Txt}
 
 import scala.concurrent.{Future, ExecutionContext}
+
+import scalatags.Text.all._
+
+import scrupal.html.{HtmlContents, HtmlContentsGenerator, HtmlElement}
 
 /** Generic Content Representation
   * Content can come in many forms, as defined by the type parameter T. What they all need in common is a
@@ -31,7 +49,7 @@ object Content {
       case MediaTypes.`text/plain` ⇒
         TextContent(new String(payload,utf8))
       case MediaTypes.`text/html` ⇒
-        HtmlContent(Html(new String(payload,utf8)))
+        HtmlContent(raw(new String(payload,utf8)))
       case MediaTypes.`application/json` ⇒
         JsonContent(Json.parse(payload))
       case _ ⇒
@@ -137,11 +155,17 @@ case class TextContent(
   * @param content The Html payload of the content.
   */
 case class HtmlContent(
-  content : Html
-) extends Content[Html] {
+  content : HtmlContents
+) extends Content[HtmlContents] with HtmlContentsGenerator {
   val mediaType : MediaType = MediaTypes.`text/html`
-  def toEnumerator(implicit ec: ExecutionContext) = Enumerator(content.body.getBytes(utf8))
-  def toBytes(implicit ec: ExecutionContext) = Future.successful { content.body.getBytes(utf8) }
+  import scrupal.html._
+  def toEnumerator(implicit ec: ExecutionContext) = Enumerator(content.render.getBytes(utf8))
+  def toBytes(implicit ec: ExecutionContext) = Future.successful { content.render.getBytes(utf8) }
+  def apply(context : Context) : HtmlContents = content
+}
+object HtmlContent {
+  def apply(elem : HtmlElement) : HtmlContent = new HtmlContent(Seq(elem))
+  def apply(rawfrag : scalatags.Text.RawFrag) : HtmlContent = new HtmlContent(Seq(rawfrag))
 }
 
 /** Content with a BSONDocument payload.
@@ -170,13 +194,47 @@ case class JsonContent(
   */
 case class ThrowableContent(
   content : Throwable,
+  context : Option[String] = None,
   mediaType : MediaType = MediaTypes.`text/html`
 ) extends Content[Throwable] {
-  def toHtml : Html = {
-    scrupal.core.html.throwable(content)
-  }
-  def toTxt : Txt = {
-    scrupal.core.txt.throwable(content)
+  def toHtml : HtmlElement = {
+    dl(
+      `class` := "dl-horizontal",
+      context match {
+        case Some(ctxt) ⇒
+          dt("Context:")
+          dd(context.get)
+        case None ⇒
+          ""
+      },
+      dt("Exception:"),
+      dd(content.getClass.getCanonicalName),
+      dt("Message:"),
+      content match {
+        case component: ThrowableWithComponent ⇒
+          dd(content.getLocalizedMessage)
+          dt("Location:")
+          dd(component.getLocation)
+        case _ ⇒
+          dd(content.getMessage)
+      },
+      dt("Root Cause:"),
+      dd(
+        pre(`class`:="text-muted", {
+          var sw: StringWriter = null
+          var pw: PrintWriter = null
+          try {
+            sw = new StringWriter()
+            pw = new PrintWriter(sw)
+            org.apache.commons.lang3.exception.ExceptionUtils.printRootCauseStackTrace(content, pw)
+            sw.toString
+          } finally {
+            if(pw != null)  pw.close()
+            if(sw != null)  sw.close()
+          }
+        })
+      )
+    )
   }
   def toJson : JsObject = {
     Json.obj(
@@ -190,9 +248,7 @@ case class ThrowableContent(
   def toEnumerator(implicit ec: ExecutionContext) = {
     mediaType match {
       case MediaTypes.`text/html` ⇒
-        Enumerator(toHtml.body.getBytes(utf8))
-      case MediaTypes.`text/plain` ⇒
-        Enumerator(toTxt.body.getBytes(utf8))
+        Enumerator(toHtml.render.getBytes(utf8))
       case MediaTypes.`application/json` ⇒
         Enumerator(Json.stringify(toJson).getBytes(utf8))
       case _ ⇒
@@ -202,9 +258,7 @@ case class ThrowableContent(
   def toBytes(implicit ec: ExecutionContext) = Future.successful {
     mediaType match {
       case MediaTypes.`text/html` ⇒
-        toHtml.body.getBytes(utf8)
-      case MediaTypes.`text/plain` ⇒
-        toTxt.body.getBytes(utf8)
+        toHtml.render.getBytes(utf8)
       case MediaTypes.`application/json` ⇒
         Json.stringify(toJson).getBytes(utf8)
       case _ ⇒

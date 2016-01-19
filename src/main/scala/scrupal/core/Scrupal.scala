@@ -24,10 +24,10 @@ import com.reactific.slickery.Storable.OIDType
 import java.lang.Thread.UncaughtExceptionHandler
 import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicInteger
-import javax.inject.Inject
 
 import play.api._
 import play.api.http._
+import play.api.i18n.I18nComponents
 import play.api.inject.{NewInstanceInjector, SimpleInjector, Injector, DefaultApplicationLifecycle}
 import play.api.libs.Files.{DefaultTemporaryFileCreator, TemporaryFileCreator}
 import play.api.libs.{Crypto, CryptoConfigParser, CryptoConfig}
@@ -35,8 +35,8 @@ import play.api.libs.concurrent.ActorSystemProvider
 import play.api.mvc.{EssentialFilter, RequestHeader}
 import play.api.routing.Router
 import play.api.routing.sird._
-import play.twirl.api.Html
 import router.scrupal.core.{AdminController, Assets}
+import scrupal.html._
 
 import scala.concurrent.{ExecutionContextExecutorService, ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -54,22 +54,22 @@ class ScrupalLoader extends ApplicationLoader {
   }
 }
 
-case class Scrupal @Inject() (
+case class Scrupal (
   context : ApplicationLoader.Context,
   name : String = "Scrupal"
 ) extends {
   final val id: Symbol = Symbol(name)
   final val registry = Scrupal
-} with ScrupalComponent with AutoCloseable  with Registrable[Scrupal] {
+} with ScrupalComponent with AutoCloseable  with Registrable[Scrupal] with I18nComponents{
 
 
   val applicationLifecycle: DefaultApplicationLifecycle = new DefaultApplicationLifecycle
 
   val httpFilters: Seq[EssentialFilter] = Seq.empty[EssentialFilter]
 
-  val httpRequestHandler : HttpRequestHandler = new ScrupalRequestHandler(this)
+  val httpRequestHandler : ScrupalRequestHandler = new ScrupalRequestHandler(this)
 
-  val httpErrorHandler: HttpErrorHandler = new ScrupalErrorHandler(this)
+  val httpErrorHandler: ScrupalErrorHandler = new ScrupalErrorHandler(this)
 
   val tempFileCreator: TemporaryFileCreator = new DefaultTemporaryFileCreator(applicationLifecycle)
 
@@ -89,7 +89,7 @@ case class Scrupal @Inject() (
 
   val assets = new Assets(httpErrorHandler, configuration, environment)
 
-  val adminController = new AdminController(this)
+  val adminController = new AdminController(this, messagesApi)
 
   val cryptoConfig: CryptoConfig = new CryptoConfigParser(environment, configuration).get
 
@@ -106,10 +106,19 @@ case class Scrupal @Inject() (
   val copyright = "© 2013-2015 Reactific Software LLC. All Rights Reserved."
   val license = OSSLicense.ApacheV2
 
-
   implicit val akkaTimeout = getTimeout
 
   val sites : SitesRegistry = SitesRegistry()
+
+  val layouts : LayoutRegistry = LayoutRegistry()
+
+  val defaultPageLayout = new DefaultPageLayout()(this)
+  val simpleBootstrapLayout = new SimpleBootstrapLayout()(this)
+  val threeColumnBootstrapLayout = new ThreeColumnBootstrapLayout()(this)
+
+  val schema = CoreSchema(name, configuration)(this)
+
+  schema.create()
 
   val DefaultLocalHostSite = new Site(SiteData("localhost"))(this) {
     object helpprovider extends Provider with Enablee {
@@ -120,16 +129,7 @@ case class Scrupal @Inject() (
             val description = "Help Page Reactor"
             def oid : Option[OIDType] = None
             def apply(stimulus: Stimulus) : Future[Response[_]] = {
-              val args = Map(
-                "navheader" → HtmlContent(Html("navheader")),
-                "navbar" → HtmlContent(Html("navbar")),
-                "header" → HtmlContent(Html("header")),
-                "left" → HtmlContent(Html("left")),
-                "right" → HtmlContent(Html("right")),
-                "content" → HtmlContent(help.html.index()),
-                "footer" → HtmlContent(Html("footer"))
-              )
-              StandardThreeColumnLayout(stimulus.context, args).map { html ⇒
+              Help.page(stimulus).map { html ⇒
                 Response(HtmlContent(html))
               }
             }

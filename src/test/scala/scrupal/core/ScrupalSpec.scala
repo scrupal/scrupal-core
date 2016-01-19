@@ -1,3 +1,17 @@
+/**********************************************************************************************************************
+  * This file is part of Scrupal, a Scalable Reactive Web Application Framework for Content Management                 *
+  *                                                                                                                    *
+  * Copyright (c) 2015, Reactific Software LLC. All Rights Reserved.                                                   *
+  *                                                                                                                    *
+  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance     *
+  * with the License. You may obtain a copy of the License at                                                          *
+  *                                                                                                                    *
+  *     http://www.apache.org/licenses/LICENSE-2.0                                                                     *
+  *                                                                                                                    *
+  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed   *
+  * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for  *
+  * the specific language governing permissions and limitations under the License.                                     *
+  **********************************************************************************************************************/
 package scrupal.core
 
 import play.api.test.FakeRequest
@@ -5,7 +19,8 @@ import scrupal.test.{ScrupalSpecification, ScrupalCache}
 import scrupal.utils.ScrupalComponent
 
 import scala.concurrent.{ExecutionContextExecutor, ExecutionContextExecutorService, ExecutionContext, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
+
+import scrupal.html._
 
 /** Test Case For Scrupal Application */
 class ScrupalSpec extends ScrupalSpecification("Scrupal") {
@@ -85,8 +100,8 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
             response.disposition must beEqualTo(Successful)
             response.payload.isInstanceOf[HtmlContent]
             val content = response.payload.asInstanceOf[HtmlContent]
-            content.content.body.contains("Welcome to Scrupal") must beTrue
-          }
+            content.content.render.contains("Welcome to Scrupal") must beTrue
+          }(scrupal.executionContext)
           await(future)
           success
         case None ⇒

@@ -55,6 +55,12 @@ class Assets @Inject() (
     super.at(prefix, path, aggressiveCaching=true)
   }
 
+  def themeFromProvider(provider : String, name: String) : Action[AnyContent] = {
+    provider match {
+      case "bootswatch" ⇒ theme(name)
+      case x ⇒ Action { NotFound(s"Theme $name in theme provider $provider") }
+    }
+  }
   def theme(theme: String) : Action[AnyContent] = {
     Assets.themes.get(theme) match {
       case Some(thm) ⇒

@@ -1,6 +1,0 @@
-@(xcptn: Throwable, context: Option[String] = None)
-@import com.reactific.helpers.ThrowableWithComponent
-@import org.apache.commons.lang3.exception.ExceptionUtils
-@{ExceptionUtils.getMessage(xcptn)}:
-@{ExceptionUtils.getStackTrace(xcptn)}caused by: @{ExceptionUtils.getRootCauseMessage(xcptn)}:
-    at @{ExceptionUtils.getRootCauseStackTrace(xcptn).mkString("\n\tat ")}

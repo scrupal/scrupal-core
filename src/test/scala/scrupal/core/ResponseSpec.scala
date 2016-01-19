@@ -21,11 +21,12 @@ import akka.http.scaladsl.model.MediaTypes
 import org.specs2.matcher.MatchResult
 import play.api.libs.iteratee.{Iteratee, Enumerator}
 import play.api.libs.json.Json
-import play.twirl.api.Html
 import scrupal.test.ScrupalSpecification
 
 import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
+
+import scalatags.Text.all._
 
 class ResponseSpec extends ScrupalSpecification("Response") {
 
@@ -114,10 +115,9 @@ class ResponseSpec extends ScrupalSpecification("Response") {
 
     "HtmlResponse" should {
       "read HTML" in {
-        val htmlStr = "<html><body></body></html>"
-        val html = Html(htmlStr)
-        val sr = Response(html, Successful)
-        checkEnum(sr.toEnumerator, strSum(htmlStr))
+        val content = html(body())
+        val sr = Response(content, Successful)
+        checkEnum(sr.toEnumerator, strSum(content.render))
       }
     }
 
@@ -134,8 +134,9 @@ class ResponseSpec extends ScrupalSpecification("Response") {
       "handle an Exception" in {
         val exception = new Exception("fake")
         val er = Response(exception)
-        er.payload.toTxt.body.contains("fake")
-        checkEnum(er.toEnumerator, strSum(er.payload.toHtml.body))
+        val body = er.payload.toHtml.render
+        body.contains("fake")
+        checkEnum(er.toEnumerator, strSum(body))
       }
     }
 

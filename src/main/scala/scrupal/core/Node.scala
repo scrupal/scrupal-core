@@ -21,7 +21,7 @@ import akka.http.scaladsl.model.MediaType
 import com.reactific.slickery.Storable.OIDType
 import com.reactific.slickery.Slickery
 
-import play.api.libs.iteratee.Enumerator
+import scrupal.html.scrupal_stats
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.existentials
@@ -66,6 +66,7 @@ trait StaticNode[CT <: Content[_]] extends Node[CT] {
 
 /** A Node That Is Stored In The Database
   * Nodes are stored as the raw bytes and a mediaType which are both used to create the content object on demand
+ *
   * @param name The name of the node
   * @param description A description of the content of the node
   * @param payload The raw content of the node in bytes
@@ -100,6 +101,13 @@ object StoredNode {
     }
   }
 }
+
+trait ScrupalStatsNode extends Node[HtmlContent] {
+  def apply(context : Context) : Future[HtmlContent] = Future {
+    HtmlContent(scrupal_stats(context))
+  }(context.scrupal.executionContext)
+}
+
 
 /*
 abstract class CompoundNode extends Node {

@@ -56,6 +56,7 @@ object ScrupalCoreBuild extends Build with AssetsSettings with Dependencies {
       resolvers ++= all_resolvers,
       libraryDependencies ++= core_dependencies,
       routesGenerator := InjectedRoutesGenerator,
+      ivyLoggingLevel := UpdateLogging.Quiet,
       TwirlKeys.templateImports += "scrupal.core._",
       namespaceReverseRouter := true,
       coverageFailOnMinimum := true,

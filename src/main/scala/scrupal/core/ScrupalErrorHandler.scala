@@ -15,6 +15,8 @@
 
 package scrupal.core
 
+import java.util.concurrent.atomic.AtomicLong
+
 import com.reactific.helpers.NotImplementedException
 
 import java.io.InterruptedIOException
@@ -33,6 +35,9 @@ import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler with ScrupalComponent {
+
+  val clientErrors = new AtomicLong(0)
+  val serverErrors = new AtomicLong(0)
 
   private def forSiteAndSubdomain(request: RequestHeader)
     (found: (RequestHeader, Site, Option[String]) ⇒ Future[Result])
@@ -55,6 +60,7 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler w
     * @param message The error message.
     */
   def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
+    clientErrors.incrementAndGet()
     statusCode match {
       case BAD_REQUEST =>
         onBadRequest(request, message)
@@ -131,6 +137,7 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler w
     * @param exception The server error.
     */
   def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
+    serverErrors.incrementAndGet()
     try {
       exception match {
         case x: NotImplementedError ⇒

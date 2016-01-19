@@ -1,3 +1,17 @@
+/**********************************************************************************************************************
+  * This file is part of Scrupal, a Scalable Reactive Web Application Framework for Content Management                 *
+  *                                                                                                                    *
+  * Copyright (c) 2015, Reactific Software LLC. All Rights Reserved.                                                   *
+  *                                                                                                                    *
+  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance     *
+  * with the License. You may obtain a copy of the License at                                                          *
+  *                                                                                                                    *
+  *     http://www.apache.org/licenses/LICENSE-2.0                                                                     *
+  *                                                                                                                    *
+  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed   *
+  * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for  *
+  * the specific language governing permissions and limitations under the License.                                     *
+  **********************************************************************************************************************/
 package scrupal.core
 
 import java.time.Instant
@@ -61,8 +75,8 @@ class CoreSchemaSpec extends ScrupalSpecification("CoreSchema") with SlickerySpe
               site.name must beEqualTo("testSite")
               site.domainName must beEqualTo( "foo.com")
               site.description must beEqualTo("testing only")
-              site.isCreated must beFalse
-              site.isModified must beFalse
+              site.isCreated must beTrue
+              site.isModified must beTrue
               site.oid.isDefined must beTrue
               site.oid must beEqualTo(Some(id))
               site.modified must beLessThan(Instant.now())

@@ -21,7 +21,7 @@ import java.io.InputStream
 
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json._
-import play.twirl.api.Html
+import scrupal.html.{HtmlElement, HtmlContents}
 
 import scala.concurrent.ExecutionContext
 
@@ -67,6 +67,7 @@ sealed trait Response[PT <: Content[_]] {
   /** Convert Payload To EnumeratedResponse
     * This allows for there to be a common ground in all responses. An EnumeratedResponse can be converted
     * directly to a Play Result
+    *
     * @param ec The execution context to use in generating the response
     * @return
     */
@@ -119,7 +120,11 @@ object Response {
     * @param disposition The disposition of the response.
     * @return The Response
     */
-  def apply(content : Html, disposition : Disposition) : Response[HtmlContent] = {
+  def apply(content : HtmlContents, disposition : Disposition) : Response[HtmlContent] = {
+    apply(HtmlContent(content), disposition)
+  }
+
+  def apply(content : HtmlElement, disposition : Disposition) : Response[HtmlContent] = {
     apply(HtmlContent(content), disposition)
   }
 
