@@ -266,3 +266,306 @@ trait DetailedPageLayout extends PageLayout {
   def sheets(args : Arguments) : Seq[String] = Seq.empty[String]
   def otherLinks(args : Arguments) : Seq[LinkTag] = Seq.empty[LinkTag]
 }
+
+/* OLD Abstractions from pages.scala
+TODO: Use or delete
+trait BasicPageGenerator extends PageGenerator {
+  def headSuffix(context : Context, args : ContentsArgs) : HtmlContents = {
+    implicit val ctxt : Context = context
+    Seq(
+      link(rel := "stylesheet", href := PathOf.webjar("font-awesome", "css/font-awesome.min.css"), media := "screen"),
+      link(rel := "stylesheet", href := PathOf.css("scrupal"), media := "screen"),
+      webjar("marked", "marked.js")
+    )
+  }
+
+  def bodyPrefix(context : Context, args : ContentsArgs) : HtmlContents = { display_alerts(context) }
+
+  def bodySuffix(context : Context, args : ContentsArgs) : HtmlContents = {
+    if (context.scrupal.Features.enabled('DebugFooter, context.scrupal)) {
+      display_context_table(context)
+    } else {
+      Html.emptyContents
+    }
+  }
+}
+
+abstract class BasicPage(
+  override val id : Symbol,
+  override val title : String,
+  override val description : String) extends TemplatePage(id, title, description) with BasicPageGenerator
+
+trait BootstrapPageGenerator extends BasicPageGenerator {
+  override def headSuffix(context : Context, args : ContentsArgs) : Html.Contents = {
+    implicit val ctxt: Context = context
+    Seq(
+      link(rel := "stylesheet", media := "screen", href := PathOf.theme(ctxt.themeName)),
+      webjar("jquery", "jquery.js"),
+      script(`type` := "application/javascript", src := PathOf.bsjs("bootstrap.min.js")),
+      script(`type` := "application/javascript", src := PathOf.bsjs("bootswatch.js"))
+    ) ++ super.headSuffix(context)
+  }
+
+  def body_content(context : Context, args : ContentsArgs) : Contents = {
+    Seq(span(em("OOPS!"), " You forgot to override body_content!"))
+  }
+
+  override def bodyMain(context : Context, args : ContentsArgs) : Contents = {
+    Seq(div(cls := "container", body_content(context, args)))
+  }
+}
+
+class BootstrapPage(
+  override val id : Symbol,
+  override val title : String,
+  override val description : String) extends BasicPage(id, title, description) with BootstrapPageGenerator
+
+trait MarkedPageGenerator extends BootstrapPageGenerator {
+  override def headSuffix(context : Context, args : ContentsArgs) = {
+    super.headSuffix(context, args) ++ Seq(
+      webjar("marked", "marked.js")
+    )
+  }
+
+  override def bodyMain(context : Context, args : ContentsArgs) : Contents = {
+    Seq(div(scalatags.Text.all.id := "marked", body_content(context, args)))
+  }
+
+  override def bodySuffix(context : Context, args : ContentsArgs) : Contents = {
+    Seq(js(
+      """marked.setOptions({
+        |  renderer: new marked.Renderer(),
+        |  gfm: true,
+        |  tables: true,
+        |  breaks: true,
+        |  pedantic: false,
+        |  sanitize: false,
+        |  smartLists: true,
+        |  smartypants: false
+        |});
+        |var elem = document.getElementById('marked');
+        |elem.innerHTML = marked(elem.innerHTML);""".stripMargin
+    ))
+  }
+}
+
+class MarkedPage(
+  override val id : Symbol,
+  override val title : String,
+  override val description : String) extends BootstrapPage(id, title, description) with MarkedPageGenerator
+
+trait ForbiddenPageGenerator extends BasicPageGenerator {
+  def what : String
+  def why : String
+  override val title = "Forbidden - " + what
+  override val description = "Forbidden Error Page"
+
+  def bodyMain(context : Context, args : ContentsArgs) : Html.Contents = {
+    danger(Seq(
+      h1("Nuh Uh! I Can't Do That!"),
+      p(em("Drat!"), s"Because $why, you can't $what. That's just the way it is."),
+      p("You should try one of these options:"),
+      ul(li("Type in another URL, or"), li("Try to get lucky with ",
+        a(href := context.suggestURL.toString, "this suggestion")))
+    ))()
+  }
+}
+
+case class ForbiddenPage(
+  override val id : Symbol,
+  what : String,
+  why : String) extends Html.Template(id) with ForbiddenPageGenerator
+
+trait NotFoundPageGenerator extends BasicPageGenerator {
+  def what : String
+  def causes : Seq[String]
+  def suggestions : Seq[String]
+  def title : String = "Not Found - " + what
+  def description : String = "Not Found Error Page"
+  def bodyMain(context : Context, args : ContentsArgs) : Contents = {
+    warning(Seq(
+      h1("There's A Hole In THe Fabrice Of The InterWebz!"),
+      p(em("Oops!"), "We couldn't find ", what, ". That might be because:"),
+      ul({ for (c ← causes) yield { li(c) } },
+        li("you used an old bookmark for which the resource is no longer available"),
+        li("you mis-typed the web address.")
+      ),
+      p("You can try one of these options:"),
+      ul({ for (s ← suggestions) yield { li(s) } },
+        li("type in another URL, or "),
+        li("Try to get lucky with ", a(href := context.suggestURL.toString, "this suggestion"))
+      )
+    ))()
+  }
+}
+
+case class NotFoundPage(
+  override val id : Symbol,
+  what : String,
+  causes : Seq[String] = Seq(),
+  suggestions : Seq[String] = Seq()) extends Html.Template(id) with NotFoundPageGenerator
+
+trait PlainPageGenerator extends BootstrapPageGenerator {
+  def content(context : Context, args : ContentsArgs) : Html.Contents
+
+  override def body_content(context: Context, args: ContentsArgs): Contents = {
+    content(context, args)
+  }
+}
+
+abstract class GenericPlainPage(_id : Symbol, title : String, description : String)
+  extends BasicPage(_id, title, description) with PlainPageGenerator
+
+case class PlainPage(
+  override val id : Symbol,
+  override val title : String,
+  override val description : String,
+  the_content : Html.Contents) extends GenericPlainPage(id, title, description) {
+  def content(context: Context, args: ContentsArgs): Contents = the_content
+}
+                                       */
+
+/* Old content from HTML.scala
+TODO: Use or delete
+object Html {
+  type HtmlElement = TypedTag[String]
+  type HtmlContents = Seq[Modifier]
+  val emptyContents = Seq.empty[Modifier]
+
+  def js(javascript : String) =
+    script(`type` := "application/javascript", javascript)
+  def jslib(lib : String, path : String) =
+    script(`type` := "application/javascript", src := s"/assets/lib/$lib/$path")
+  def webjar(lib: String, path: String) =
+    script(`type` := "application/javascript", src := s"/webjar/$lib/$path")
+
+  val nbsp = raw("&nbsp;")
+
+  val foo = head()
+  val bar = html()
+
+  object ng {
+    val app = "ng-app".attr
+    val controller = "ng-controller".attr
+    val show = "ng-show".attr
+    val hide = "ng-hide".attr
+  }
+
+  def ng(name : String) = ("ng-" + name).attr
+
+  def renderContents(contents : HtmlContents) : String = {
+    val sb = new StringBuilder(4096)
+    for (tag ← contents) { sb.append(tag.toString) }
+    sb.toString()
+  }
+
+  type ContentsArgs = Map[String, Generator]
+  val EmptyContentsArgs = Map.empty[String, Generator]
+
+  trait Generator {
+    def generate(context : Context, args : ContentsArgs) : HtmlContents
+    def render(context : Context, args : ContentsArgs) : String
+    def tag(tagName : String, context : Context, args : ContentsArgs) : HtmlContents = {
+      args.get(tagName) match {
+        case Some(v) ⇒ v.generate(context, args)
+        case None    ⇒ Seq("")
+      }
+    }
+  }
+
+  trait SimpleGenerator extends Generator with (() ⇒ HtmlContents) {
+    def generate(context : Context, args : ContentsArgs) : HtmlContents = {
+      apply()
+    }
+    def render(context : Context, args : ContentsArgs) : String = {
+      renderContents(apply())
+    }
+    override def toString() : String = renderContents(apply())
+  }
+
+  trait FragmentGenerator extends Generator with ((Context) ⇒ HtmlContents) {
+    def generate(context : Context, args : ContentsArgs) : HtmlContents = {
+      this.apply(context)
+    }
+    def render(context : Context, args : ContentsArgs) : String = {
+      renderContents(apply(context))
+    }
+  }
+
+  trait TemplateGenerator extends Generator with ((Context, ContentsArgs) ⇒ HtmlContents) {
+    def generate(context : Context, args : ContentsArgs) : HtmlContents = {
+      this.apply(context, args)
+    }
+    def render(context : Context, args : ContentsArgs) : String = {
+      renderContents(apply(context, args))
+    }
+  }
+
+  abstract class Template(_i : Symbol) extends {
+    val id : Symbol = _i
+  } with Registrable[Template] with Describable with TemplateGenerator {
+    def registry = Template
+  }
+
+  object Template extends Registry[Template] {
+    def registryName = "Html Templates"
+    def registrantsName = "html template"
+  }
+
+  trait PageGenerator extends Describable with TemplateGenerator {
+    def title : String
+    def headTitle(context : Context, args : ContentsArgs = EmptyContentsArgs) : HtmlElement = {
+      tags2.title(title)
+    }
+    def headDescription(context : Context, args : ContentsArgs = EmptyContentsArgs) : HtmlElement = {
+      meta(name := "description", content := description)
+    }
+    def favIcon(context : Context, args : ContentsArgs = EmptyContentsArgs) : HtmlElement = {
+      link(rel := "shortcut icon", `type` := "image/x-icon", href := PathOf.favicon()(context))
+    }
+    def headSuffix(context : Context, args : ContentsArgs = EmptyContentsArgs) : HtmlContents
+    def headTag(context : Context, args : ContentsArgs = EmptyContentsArgs) : HtmlElement = {
+      head(
+        headTitle(context, args),
+        headDescription(context, args),
+        meta(charset := "UTF-8"),
+        meta(name := "viewport", content := "width=device-width, initial-scale=1.0"),
+        favIcon(context, args),
+        headSuffix(context, args)
+      )
+    }
+    def bodyPrefix(context : Context, args : ContentsArgs = EmptyContentsArgs) : HtmlContents
+    def bodyMain(context : Context, args : ContentsArgs = EmptyContentsArgs) : HtmlContents
+    def bodySuffix(context : Context, args : ContentsArgs = EmptyContentsArgs) : HtmlContents
+    def bodyTag(context : Context, args : ContentsArgs = EmptyContentsArgs) : HtmlElement = {
+      body(
+        bodyPrefix(context, args), bodyMain(context, args), bodySuffix(context, args)
+      )
+    }
+    def apply(context : Context, args : ContentsArgs = EmptyContentsArgs) : HtmlContents = {
+      Seq[HtmlElement](scalatags.Text.all.html(headTag(context, args), bodyTag(context, args)))
+    }
+    override def render(context : Context, args : ContentsArgs = EmptyContentsArgs) : String = {
+      val sb = new StringBuilder(4096)
+      sb.append("<!DOCTYPE html>")
+      for (tag ← generate(context, args)) {
+        sb.append(tag.toString)
+      }
+      sb.toString()
+    }
+  }
+
+  abstract class Page(val title : String, val description : String) extends PageGenerator
+
+  abstract class TemplatePage(_id : Symbol, val title : String, val description : String)
+    extends Template(_id) with PageGenerator
+
+  object Resp {
+    def apply(tag : HtmlElement, disposition : Disposition) = Response(HtmlContent(tag.toString()), disposition)
+    def apply(contents : Html.HtmlContents, disposition : Disposition) = {
+      new HtmlResponse(Html.renderContents(contents), disposition)
+    }
+  }
+}
+
+*/
