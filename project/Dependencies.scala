@@ -46,7 +46,7 @@ trait Dependencies
     val marked = "0.3.2"
     val jquery = "2.1.4"
     val modernizr = "2.8.3"
-    val slickery = "0.3.8-SNAPSHOT"
+    val slickery = "0.3.8"
     val scalatags = "0.5.4"
   }
 

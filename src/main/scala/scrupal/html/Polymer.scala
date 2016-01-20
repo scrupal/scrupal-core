@@ -305,7 +305,6 @@ object polymer extends Text.Cap with PolymerIronTags with PolymerPaperTags with 
 trait PolymerLayout extends DetailedPageLayout {
 
   def arrangementDescription = Map(
-    "nav" → "Navigation bar and header",
     "content" → "The main content area for the page, 2/3 of the width",
     "endscripts" → "Scripts for the bottom of the page"
   )
@@ -343,7 +342,7 @@ trait PolymerLayout extends DetailedPageLayout {
   import polymer._
 
   override def bodyTag(args : Arguments) = {
-    body(unresolved)
+    val params : Seq[Modifier] = Seq(unresolved) ++ args.content.getOrElse("content", emptyContents)
+    body(params:_*)
   }
-
 }

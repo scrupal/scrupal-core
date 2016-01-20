@@ -14,13 +14,113 @@
   **********************************************************************************************************************/
 package scrupal.html
 
-import org.specs2.mutable.Specification
+import scrupal.core.{HtmlContent, Scrupal}
 
-class PolymerSpec extends Specification {
+import scalatags.Text.all._
+import polymer._
+
+class PolymerSpec extends ValidatingSpecification("Polymer") {
+
+  class TestPolymerLayout(name : String)(implicit val scrupal: Scrupal)
+    extends { val id : Symbol = Symbol(name) } with PolymerLayout {
+    def description: String = "Test Polymer Layout"
+  }
 
   "Polymer" should {
-    "have some test examples" in {
-      pending
+    val tpl = new TestPolymerLayout("TestPolymerLayout")
+    "register the TestPolymerLayout" in {
+      scrupal.layouts.contains('TestPolymerLayout) must beTrue
+    }
+
+    "have polymer iron elements" in {
+      val content = div(
+        `iron-a11y-announcer`,
+        `iron-a11y-keys-behavior`,
+        `iron-a11y-keys`,
+        `iron-ajax`,
+        `iron-autogrow-textarea`,
+        `iron-autogrow-textarea`,
+        `iron-behaviors`,
+        `iron-checked-element-behavior`,
+        `iron-collapse`,
+        `iron-component-page`,
+        `iron-demo-helpers`,
+        `iron-doc-viewer`,
+        `iron-dropdown`,
+        `iron-fit-behavior`,
+        `iron-flex-layout`,
+        `iron-form`,
+        `iron-form-element-behavior`,
+        `iron-icon`,
+        `iron-icons`,
+        `iron-iconset`,
+        `iron-iconset-svg`,
+        `iron-image`,
+        `iron-input`,
+        `iron-jsonp-library`,
+        `iron-label`,
+        `iron-list`,
+        `iron-localstorage`,
+        `iron-media-query`,
+        `iron-menu-behavior`,
+        `iron-meta`,
+        `iron-overlay-behavior`,
+        `iron-page-url`,
+        `iron-pages`,
+        `iron-range-behavior`,
+        `iron-resizable-behavior`,
+        `iron-selector`,
+        `iron-signals`,
+        `iron-swipeable-container`,
+        `iron-test-helpers`,
+        `iron-validatable-behavior`,
+        `iron-validator-behavior`
+      )
+      val args = Map("content" → HtmlContent(content), "endscripts" → HtmlContent(emptyContents))
+      val future = tpl.page(context, args)
+      val result = await(future)
+      result.nonEmpty must beTrue // TODO: Nu.Validator doesn't understand web components yet
+    }
+
+    "have polymer paper elements" in {
+      val content = div(
+        `paper-badge`,
+        `paper-behaviors`,
+        `paper-button`,
+        `paper-card`,
+        `paper-checkbox`,
+        `paper-dialog`,
+        `paper-dialog-behavior`,
+        `paper-dialog-scrollable`,
+        `paper-drawer-panel`,
+        `paper-dropdown-menu`,
+        `paper-fab`,
+        `paper-header-panel`,
+        `paper-icon-button`,
+        `paper-input`,
+        `paper-item`,
+        `paper-listbox`,
+        `paper-material`,
+        `paper-menu`,
+        `paper-menu-button`,
+        `paper-progress`,
+        `paper-radio-button`,
+        `paper-radio-group`,
+        `paper-ripple`,
+        `paper-scroll-header-panel`,
+        `paper-slider`,
+        `paper-spinner`,
+        `paper-styles`,
+        `paper-tabs`,
+        `paper-toast`,
+        `paper-toggle-button`,
+        `paper-toolbar`,
+        `paper-tooltip`
+      )
+      val args = Map("content" → HtmlContent(content), "endscripts" → HtmlContent(emptyContents))
+      val future = tpl.page(context, args)
+      val result = await(future)
+      result.nonEmpty must beTrue // TODO: Nu.Validator doesn't undrestand web components yet
     }
   }
 }

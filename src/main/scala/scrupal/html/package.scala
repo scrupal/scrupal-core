@@ -29,8 +29,7 @@ package object html {
   type HtmlElement = scalatags.Text.TypedTag[String]
   type HtmlFragment = scalatags.Text.Frag
   type HtmlContents = Seq[scalatags.Text.Frag]
-  val emptyContents = Seq.empty[scalatags.Text.Modifier]
-  val emptyElement = new HtmlElement("",List.empty[Seq[scalatags.Text.Modifier]],true)
+  val emptyContents : HtmlContents = Seq.empty[scalatags.Text.Frag]
 
   implicit class HtmlContentsExtensions(contents : HtmlContents) {
     def render : String = {
@@ -53,10 +52,10 @@ package object html {
     */
   trait HtmlContentsGenerator extends ( (Context) ⇒ HtmlContents )
 
-  trait HtmlElementGenerator extends ( (Context) ⇒ HtmlElement )
+  trait HtmlElementGenerator extends ( (Context) ⇒ HtmlContents )
 
-  trait SimpleGenerator extends HtmlElementGenerator with (() ⇒ HtmlElement) {
-    def apply(context : Context) : HtmlElement = { apply() }
+  trait SimpleGenerator extends HtmlElementGenerator with (() ⇒ HtmlContents) {
+    def apply(context : Context) : HtmlContents = { apply() }
   }
 
   /** Arranger Function.

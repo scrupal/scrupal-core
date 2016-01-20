@@ -14,13 +14,31 @@
   **********************************************************************************************************************/
 package scrupal.html
 
-import org.specs2.mutable.Specification
+import scrupal.core.SiteData
 
-class AdministrationSpec extends Specification {
+class AdministrationSpec extends ValidatingSpecification("Administration") {
+
+  implicit val ec = scrupal.executionContext
 
   "Administration" should {
-    "have some test examples" in {
-      pending
+    "have an introduction page" in {
+      val future = Administration.page(context, Administration.introduction, Map(1L → "One", 2L → "Two"))
+      val page = await(future)
+      page.contains("<p>Welcome") must beTrue
+      page.contains("Administration Help") must beTrue
+      validate("Admin Introduction", page)
+    }
+    "have a site page" in {
+      val pageContent = Administration.site(SiteData("Site","localhost"))()
+      val future = Administration.page(context, pageContent, Map(1L → "One", 2L → "Two"))
+      val page = await(future)
+      validate("Admin Site", page)
+    }
+    "have a module page" in {
+      val pageContent = Administration.module
+      val future = Administration.page(context, pageContent, Map(1L → "One", 2L → "Two"))
+      val page = await(future)
+      validate("Admin Module", page)
     }
   }
 }

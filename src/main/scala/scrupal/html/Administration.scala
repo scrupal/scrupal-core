@@ -79,7 +79,7 @@ object Administration {
     div(cls:="text-center", reactific_copyright())
   }
 
-  def page(context : Context, contents : HtmlContents, siteMap: Map[Long,String] ) : Future[HtmlElement] = {
+  def page(context : Context, contents : HtmlContents, siteMap: Map[Long,String] ) : Future[String] = {
     val args : Arrangement = Map[String,HtmlContentsGenerator] (
       "nav" → HtmlContent(navbar(siteMap, Map('Core → "Scrupal Core"))),
       "header" → HtmlContent(header),
@@ -87,9 +87,9 @@ object Administration {
       "right" → HtmlContent(right(context)),
       "content" → HtmlContent(contents),
       "footer" → HtmlContent(footer),
-      "endscripts" → HtmlContent(emptyElement)
+      "endscripts" → HtmlContent(emptyContents)
     )
-    context.scrupal.threeColumnBootstrapLayout.apply(context, args)
+    context.scrupal.threeColumnBootstrapLayout.page(context, args)
   }
 
   def introduction = {
@@ -122,7 +122,7 @@ object Administration {
     )
   }
 
-  def site(site : SiteData)(feedback: HtmlElement = emptyElement) = {
+  def site(site : SiteData)(feedback: HtmlContents = emptyContents) : HtmlContents = {
     Seq(
       div(cls:="container",
         ul(cls:="nav nav-tabs",role:="tablist",

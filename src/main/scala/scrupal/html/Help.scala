@@ -31,7 +31,7 @@ object Help {
       "right" → HtmlContent(span("right")),
       "content" → HtmlContent(index),
       "footer" → HtmlContent(span("footer")),
-      "endscripts" → HtmlContent(emptyElement)
+      "endscripts" → HtmlContent(emptyContents)
     )
     stimulus.context.scrupal.threeColumnBootstrapLayout(stimulus.context, args)
   }

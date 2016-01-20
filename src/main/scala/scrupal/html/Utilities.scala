@@ -25,7 +25,7 @@ import scalatags.Text.Modifier
 import scalatags.Text.all._
 
 case class unauthorized(what : String) extends SimpleGenerator {
-  def apply(): HtmlElement = {
+  def apply(): HtmlContents = {
     div(
       cls := "text-warning",
       h1("Unauthorized"),
@@ -35,15 +35,15 @@ case class unauthorized(what : String) extends SimpleGenerator {
 }
 
 case class danger(message : HtmlContents) extends SimpleGenerator {
-  def apply() : HtmlElement = { div(cls := "bg-danger", message) }
+  def apply() : HtmlContents = { div(cls := "bg-danger", message) }
 }
 
 case class warning(message : HtmlContents) extends SimpleGenerator {
-  def apply() : HtmlElement = { div(cls := "bg-warning", message) }
+  def apply() : HtmlContents = { div(cls := "bg-warning", message) }
 }
 
 case class successful(message : HtmlContents) extends SimpleGenerator {
-  def apply() : HtmlElement = { div(cls := "bg-success", message) }
+  def apply() : HtmlContents = { div(cls := "bg-success", message) }
 }
 
 case class throwable(xcptn : Throwable) extends SimpleGenerator {
@@ -73,7 +73,7 @@ case class throwable(xcptn : Throwable) extends SimpleGenerator {
 
 
 case class exception(activity : String, error : Throwable) extends SimpleGenerator {
-  def apply() : HtmlElement = {
+  def apply() : HtmlContents = {
     danger(Seq(
       p(s"While attempting to $activity an exception occurred:"),
       throwable(error)()
@@ -135,10 +135,10 @@ object debug_footer extends HtmlElementGenerator {
         if (site.debugFooter) {
           display_context_table(context)
         } else {
-          emptyElement
+          emptyContents
         }
       case None ⇒
-        emptyElement
+        emptyContents
     }
   }
 }
@@ -189,7 +189,7 @@ trait json_fragment extends SimpleGenerator {
 }
 
 case class json_value(bv : JsValue) extends json_fragment {
-  def apply() : HtmlElement = { span(value(bv)) }
+  def apply() = { span(value(bv)) }
 }
 
 case class json_document_panel(title : String, doc : JsObject) extends json_fragment {
