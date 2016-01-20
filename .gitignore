@@ -9,6 +9,7 @@
 .cache
 .history
 .lib/
+db/
 dist/*
 target/
 lib_managed/
