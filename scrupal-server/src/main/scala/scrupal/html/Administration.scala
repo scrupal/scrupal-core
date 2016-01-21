@@ -85,7 +85,7 @@ object Administration {
       "header" → HtmlContent(header),
       "left" → HtmlContent(left),
       "right" → HtmlContent(right(context)),
-      "content" → HtmlContent(contents),
+      "contents" → HtmlContent(contents),
       "footer" → HtmlContent(footer),
       "endscripts" → HtmlContent(emptyContents)
     )

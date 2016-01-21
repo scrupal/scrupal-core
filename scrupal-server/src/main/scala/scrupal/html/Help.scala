@@ -29,7 +29,7 @@ object Help {
       "header" → HtmlContent(span("header")),
       "left" → HtmlContent(span("left")),
       "right" → HtmlContent(span("right")),
-      "content" → HtmlContent(index),
+      "contents" → HtmlContent(index),
       "footer" → HtmlContent(span("footer")),
       "endscripts" → HtmlContent(emptyContents)
     )

@@ -30,8 +30,6 @@ import scala.language.postfixOps
 trait AssetsSettings {
 
   lazy val sbt_web_settings = Seq[Setting[_]](
-    unmanagedSourceDirectories in Assets := Seq(baseDirectory.value / "assets"),
-    unmanagedSourceDirectories in TestAssets := Seq(baseDirectory.value / "test" / "assets"),
     moduleName in Assets := name.value
   )
 

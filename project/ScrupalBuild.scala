@@ -45,9 +45,11 @@ object ScrupalBuild extends Build {
   lazy val sharedJS = shared.js
 
   lazy val client = Project("scrupal-client", file("scrupal-client"))
-    .settings(Settings.clientSettings)
-    .enablePlugins(ScalaJSPlugin)
-    .dependsOn(sharedJS)
+      .enablePlugins(ScalaJSPlugin)
+      // WARNING: This yields a "These plugins were both included and excluded error"
+      // .disablePlugins(ScoverageSbtPlugin) WARNING:
+      .settings(Settings.clientSettings)
+      .dependsOn(sharedJS)
 
   lazy val clients = Seq(client)
 
@@ -61,7 +63,6 @@ object ScrupalBuild extends Build {
     .settings(Seq(
       scalaJSProjects := clients
     ))
-    .aggregate(client)
     .dependsOn(sharedJVM)
 
   lazy val root = Project("scrupal-core", file("."))

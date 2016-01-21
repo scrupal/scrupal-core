@@ -18,11 +18,20 @@ import scrupal.core.{HtmlContent, Scrupal}
 
 import scalatags.Text.all._
 
-class PolymerSpec extends ValidatingSpecification("Polymer") {
+class PolymerLayoutSpec extends ValidatingSpecification("Polymer") {
 
   class TestPolymerLayout(name : String)(implicit val scrupal: Scrupal)
     extends { val id : Symbol = Symbol(name) } with PolymerLayout {
     def description: String = "Test Polymer Layout"
+  }
+
+  def makePolymerArgs(contents: HtmlContents) = {
+    Map(
+      "header" → HtmlContent(emptyContents),
+      "contents" → HtmlContent(contents),
+      "footer" → HtmlContent(emptyContents),
+      "endscripts" → HtmlContent(emptyContents)
+    )
   }
 
   "Polymer" should {
@@ -76,8 +85,7 @@ class PolymerSpec extends ValidatingSpecification("Polymer") {
         `validatable-behavior`,
         `validator-behavior`
       )
-      val args = Map("content" → HtmlContent(content), "endscripts" → HtmlContent(emptyContents))
-      val future = tpl.page(context, args)
+      val future = tpl.page(context, makePolymerArgs(content))
       val result = await(future)
       result.nonEmpty must beTrue // TODO: Nu.Validator doesn't understand web components yet
     }
@@ -118,8 +126,7 @@ class PolymerSpec extends ValidatingSpecification("Polymer") {
         `toolbar`,
         `tooltip`
       )
-      val args = Map("content" → HtmlContent(content), "endscripts" → HtmlContent(emptyContents))
-      val future = tpl.page(context, args)
+      val future = tpl.page(context, makePolymerArgs(content))
       val result = await(future)
       result.nonEmpty must beTrue // TODO: Nu.Validator doesn't undrestand web components yet
     }

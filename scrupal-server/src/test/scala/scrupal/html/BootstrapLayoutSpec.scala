@@ -18,7 +18,7 @@ import scrupal.core.HtmlContent
 
 import scalatags.Text.all._
 
-class BootstrapSpec extends ValidatingSpecification("Bootstrap") {
+class BootstrapLayoutSpec extends ValidatingSpecification("Bootstrap") {
 
   "BootstrapLayout" should {
     "have some test examples" in {
@@ -39,7 +39,7 @@ class BootstrapSpec extends ValidatingSpecification("Bootstrap") {
         "header" → HtmlContent(span("header-value")),
         "left" → HtmlContent(span("left-value")),
         "right" → HtmlContent(span("right-value")),
-        "content" → HtmlContent(span("content-value")),
+        "contents" → HtmlContent(span("content-value")),
         "footer" → HtmlContent(span("footer-value")),
         "endscripts" → HtmlContent(span("endscripts-value"))
       )

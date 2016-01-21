@@ -317,11 +317,6 @@ object polymer {
 
 trait PolymerLayout extends DetailedPageLayout {
 
-  def arrangementDescription = Map(
-    "content" → "The main content area for the page, 2/3 of the width",
-    "endscripts" → "Scripts for the bottom of the page"
-  )
-
   override def otherMeta(args : Arguments) = {
     Map(
       "theme-color" → "#2E3AA1", // Chrome for Android theme color
@@ -349,13 +344,5 @@ trait PolymerLayout extends DetailedPageLayout {
   override def javascriptLinks(args : Arguments) = {
     super.javascriptLinks(args) ++ Seq("bower_components/webcomponentsjs/webcomponents-lite.js")
 
-  }
-
-  import scalatags.Text.all._
-
-  override def bodyTag(args : Arguments) = {
-    import polymer.text.attrs._
-    val params : Seq[Modifier] = Seq(unresolved) ++ args.content.getOrElse("content", emptyContents)
-    body(params:_*)
   }
 }

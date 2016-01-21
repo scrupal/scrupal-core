@@ -115,6 +115,7 @@ case class Scrupal (
   val defaultPageLayout = new DefaultPageLayout()(this)
   val simpleBootstrapLayout = new SimpleBootstrapLayout()(this)
   val threeColumnBootstrapLayout = new ThreeColumnBootstrapLayout()(this)
+  val scrupalLayout = new ScrupalLayout()(this)
 
   val schema = CoreSchema(name, configuration)(this)
 
@@ -205,6 +206,8 @@ case class Scrupal (
   def withActorExec[T](f: (ActorSystem, ExecutionContext, Timeout) ⇒ T): T = {
     f(actorSystem, executionContext, akkaTimeout)
   }
+
+  def withApplication[T](f : (Application) ⇒ T) : T = { f(application) }
 
   protected def getTimeout: Timeout = {
     Timeout(

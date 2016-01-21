@@ -59,6 +59,7 @@ object Settings extends AssetsSettings {
     skip in packageJSDependencies := false,
     persistLauncher := true,
     persistLauncher in Test := false,
+    coverageExcludedPackages := ".*",
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
 

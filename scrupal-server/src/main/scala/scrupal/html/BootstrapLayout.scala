@@ -20,10 +20,8 @@ import scalatags.Text.all._
 import scalatags.Text.tags2
 
 trait BootstrapLayout extends DetailedPageLayout {
-  def arrangementDescription = Map(
-    "nav" → "Navigation bar and header",
-    "content" → "The main content area for the page, 2/3 of the width",
-    "endscripts" → "Scripts for the bottom of the page"
+  override def arrangementDescription = super.arrangementDescription ++ Map(
+    "nav" → "Navigation bar and header"
   )
 
   override def javascriptLinks(args: Arguments) : Seq[String] = {
@@ -40,11 +38,18 @@ trait BootstrapLayout extends DetailedPageLayout {
     )
   }
 
+  override def header(args: Arguments) : HtmlContents = {
+    Seq(
+      tags2.nav(`class`:="navbar navbar-inverse navbar-fixed-top", args.content.get("nav")),
+      super.header(args)
+    )
+  }
+
   override def bodyTag(args: Arguments) : HtmlElement = {
     body(
-      tags2.nav(`class`:="navbar navbar-inverse navbar-fixed-top", args.content.get("nav")),
-      div(`class`:="container-fluid", args.content.get("content")),
-      args.content.get("endscripts")
+      header(args),
+      div(`class`:="container-fluid", contents(args), footer(args)),
+      endScripts(args)
     )
   }
 }
@@ -54,35 +59,32 @@ class SimpleBootstrapLayout(implicit val scrupal : Scrupal) extends BootstrapLay
   val description: String = "A simple Twitter Bootstrap layout with navigation bar, fluid container, and end scripts"
 }
 
-class ThreeColumnBootstrapLayout(implicit val scrupal : Scrupal) extends BootstrapLayout {
-  def id : Identifier = 'ThreeColumnBootstrapLayout
-  val description: String =
-    "A Bootstrap 3 page in three columns with havigation bar, header, fluid centered content, " +
-      "left and right sidebars, footer and end scripts"
-
+trait ThreeColBootstrapLayout extends BootstrapLayout {
   override def arrangementDescription = super.arrangementDescription ++ Map(
-    "header" → "A centered, full width, header section to describe the main content",
     "left" → "A left side bar 1/6th of the width",
-    "right" → "A right side bar 1/6th of the width",
-    "footer" → "A footer area below the content and side bars"
+    "right" → "A right side bar 1/6th of the width"
   )
 
-  override def bodyTag(args: Arguments) : HtmlElement = {
-    body(
-      tags2.nav(`class`:="navbar navbar-inverse navbar-fixed-top", args.content.get("nav")),
-      div(`class`:="container-fluid",
-        args.content.get("header"),
-        div(`class`:="row",
-          div(`class`:="col-sm-2", args.content.get("left")),
-          div(`class`:="col-sm-8",
-            div(`class`:="container-fluid", args.content.get("content"))
-          ),
-          div(`class`:="col-sm-2", args.content.get("right"))
-        ),
-        hr(),
-        footer( args.content.get("footer") )
+  override def contents(args: Arguments) : HtmlContents = {
+    val left : Seq[HtmlFragment] = args.content.getOrElse("left",emptyContents)
+    val cont : Seq[HtmlFragment] = args.content.getOrElse("contents", emptyContents)
+    val right : Seq[HtmlFragment] = args.content.getOrElse("right",emptyContents)
+    Seq(
+      div(`class`:="row",
+        div(`class`:="col-sm-2", left),
+        div(`class`:="col-sm-8", div(`class`:="container-fluid", cont)),
+        div(`class`:="col-sm-2", right)
       ),
-      args.content.get("endscripts")
+      hr()
     )
   }
 }
+
+class ThreeColumnBootstrapLayout(implicit val scrupal : Scrupal) extends ThreeColBootstrapLayout {
+  def id: Identifier = 'ThreeColumnBootstrapLayout
+
+  val description: String =
+    "A Bootstrap 3 page in three columns with havigation bar, header, fluid centered content, " +
+      "left and right sidebars, footer and end scripts"
+}
+

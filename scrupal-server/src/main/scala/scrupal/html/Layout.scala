@@ -68,6 +68,7 @@ case class LayoutRegistry() extends Registry[Layout] {
 trait PageLayout extends Layout {
 
   /** Generate the page title
+    *
     * @param args the arguments with which to customize the title
     * @return the title of the page for inclusion in the meta tags
     */
@@ -146,6 +147,13 @@ case class LinkTag(relation: String, reference: String, contentType : String = "
 
 trait DetailedPageLayout extends PageLayout {
 
+  def arrangementDescription: Map[String,String] = Map(
+    "header" → "Content that comes above the main content",
+    "contents" → "The main content",
+    "footer" → "Content that comes below the main content",
+    "endscripts" → "Scripts to be loaded at the end of the page"
+  )
+
   /** Generate HTML Head Element
     * Generates the head tag and all content it requires
  *
@@ -153,15 +161,19 @@ trait DetailedPageLayout extends PageLayout {
     * @return The head element
     */
   override def headTag(args: Arguments) : HtmlElement = {
-    val contents : List[HtmlElement] = List(
+    val staticHeads = List[HtmlFragment](
       "title".tag[String](Namespace.htmlNamespaceConfig)(pageTitle(args)),
       meta(name:="viewport",content:="width=device-width, initial-scale=1.0")
-    ) ++ List[Option[HtmlElement]](
+    )
+    val optionalHeads : List[HtmlFragment] = List[Option[HtmlElement]](
       baseTag(args).map { tag ⇒ base(href:=tag.href,target:=tag.target) }
-    ).flatten ++ metas(args) ++ links(args) ++
-      sheets(args).map { s ⇒ "style".tag[String](Namespace.htmlNamespaceConfig)(s) } ++
-      scripts(args).map { s ⇒ script(s) }
-    head(contents)
+    ).flatten
+
+    val styleSheets = sheets(args).map { s ⇒ "style".tag[String](Namespace.htmlNamespaceConfig)(s) }
+
+    val javaScripts = scripts(args).map { s ⇒ script(s) }
+
+    head(staticHeads ++ optionalHeads ++ metas(args) ++ links(args) ++ styleSheets ++ javaScripts )
   }
 
   /** HTML Base Tag
@@ -176,20 +188,19 @@ trait DetailedPageLayout extends PageLayout {
     * @param args The arguments with which to customize the meta tags
     * @return A List of the meta elements for the head
     */
-  def metas(args : Arguments) : List[HtmlElement] = {
-    val result = List[Option[HtmlElement]](
-      Some(meta(charset:="UTF-8")),
+  def metas(args : Arguments) : HtmlContents = {
+    val statics : List[HtmlElement] = List(
+      meta(charset:="UTF-8"),
+      meta(name:="keywords",content:=keywords(args).distinct.mkString(","))
+    )
+    val optionals = List[Option[HtmlElement]](
       description(args).map { desc ⇒ meta(name:="description",content:=desc) },
       authorName(args).map { auth ⇒ meta(name:="author",content:=auth) },
       generator(args).map { gen ⇒ meta(name:="generator",content:=gen) },
-      application(args).map { app ⇒ meta(name:="application",content:=app) }, {
-        val kw = keywords(args).distinct.mkString(",")
-        if (kw.nonEmpty) {Some(meta(name := "keywords", content := kw))} else None
-      }, {
-        val ref = refresh(args)
-        if (ref > 0) { Some(meta(`http-equiv`:="refresh", content := ref)) } else None
-      }) ++ otherMeta(args).map { case (nm,cont) ⇒ Some(meta(name:=nm,content:=cont)) }
-    result.flatten
+      application(args).map { app ⇒ meta(name:="application",content:=app) }
+    )
+    val others = otherMeta(args).map { case (nm,cont) ⇒ meta(name:=nm,content:=cont) }
+    statics ++ optionals.flatten ++ others
   }
 
   /** Generate Page Descriptions
@@ -242,7 +253,7 @@ trait DetailedPageLayout extends PageLayout {
     * @param args The argument which which to customize the link tags
     * @return A list of link tags for the head tag
     */
-  def links(args: Arguments) : List[HtmlElement] = {
+  def links(args: Arguments) : HtmlContents = {
     val imps = imports(args).map { imp ⇒ Some(link(rel:="import",href:=imp,`type`:="text/html")) }
     val css = stylesheetLinks(args).map { sheet ⇒
       Some(link(rel:="stylesheet", href:=sheet, `type`:="text/css", media:="screen"))
@@ -271,6 +282,34 @@ trait DetailedPageLayout extends PageLayout {
   def scripts(args : Arguments) : Seq[String] = Seq.empty[String]
   def sheets(args : Arguments) : Seq[String] = Seq.empty[String]
   def otherLinks(args : Arguments) : Seq[LinkTag] = Seq.empty[LinkTag]
+
+  /** Generate HTML body Tag
+    * The body tag is decomposed into four parts: header, contents, footer and endScripts. They all default to empty
+    * except for contents which provides a warning that a more specific implementation should be chosen.
+    *
+    * @param args Arguments from which the body tag should be derived
+    * @return
+    */
+  override def bodyTag(args : Arguments) : HtmlElement = {
+    body(header(args) ++ contents(args) ++ footer(args) ++ endScripts(args))
+  }
+
+  def header(args: Arguments) : HtmlContents = {
+    args.content.getOrElse("header", emptyContents)
+  }
+
+  def contents(args: Arguments) : HtmlContents = {
+    args.content.getOrElse("contents", span(em("OOPS!"), " You forgot to override contents(args:Arguments)!"))
+  }
+
+  def footer(args: Arguments) : HtmlContents = {
+    args.content.getOrElse("footer", emptyContents)
+  }
+
+  def endScripts(args : Arguments) : HtmlContents = {
+    args.content.getOrElse("endscripts", emptyContents)
+  }
+
 }
 
 /* OLD Abstractions from pages.scala

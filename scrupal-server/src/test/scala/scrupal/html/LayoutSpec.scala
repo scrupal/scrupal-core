@@ -38,7 +38,7 @@ class LayoutSpec extends ValidatingSpecification("Layout") {
   class TestLayout3(implicit val scrupal : Scrupal) extends DetailedPageLayout {
     def id = 'TestLayout3
     def description : String = "Test Layout #3"
-    def arrangementDescription: Map[String,String] = Map("one"→"First Argument")
+    override def arrangementDescription: Map[String,String] = Map("one"→"First Argument")
   }
 
   "Layout" should {
