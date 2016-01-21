@@ -6,7 +6,7 @@
         <entry key="core">
           <value>
             <ProjectSettingsEntry>
-              <option name="sourceDir" value="$PROJECT_DIR$/src/main" />
+              <option name="confDir" value="$PROJECT_DIR$/src/main" />
               <option name="playDistrPath" value="$USER_HOME$/.ivy2/cache/com.typesafe.play/play_2.11/jars/play_2.11-2.4.4.jar" />
               <option name="templateImports">
                 <list>
@@ -83,7 +83,7 @@
         <entry key="sourceDirectory">
           <value>
             <ProjectSettingsEntry>
-              <option name="sourceDir" value="$PROJECT_DIR$/src/main" />
+              <option name="sourceDir" value="$PROJECT_DIR$/scrupal-server/src/main" />
               <option name="confDir" value="$PROJECT_DIR$/scrupal-server/src/main" />
             </ProjectSettingsEntry>
           </value>

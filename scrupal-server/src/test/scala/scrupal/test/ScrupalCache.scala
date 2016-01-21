@@ -40,7 +40,7 @@ object ScrupalCache extends MemoryCache[String,Scrupal] {
       "app.instance.name" -> dbName,
       s"scrupal.database.$dbName.driver" → "com.reactific.slickery.H2Driver$",
       s"scrupal.database.$dbName.db.driver" → "org.h2.Driver",
-      s"scrupal.database.$dbName.db.url" → s"jdbc:h2:db/./$dbName.db;FILE_LOCK=SOCKET;PAGE_SIZE=8192;AUTO_SERVER=TRUE",
+      s"scrupal.database.$dbName.db.url" → s"jdbc:h2:./db/$dbName;FILE_LOCK=SOCKET;PAGE_SIZE=8192;AUTO_SERVER=TRUE",
       s"scrupal.database.$dbName.db.username" → "sa",
       s"scrupal.database.$dbName.db.password" → ""
     )

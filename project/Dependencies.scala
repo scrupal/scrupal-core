@@ -107,8 +107,13 @@ object Dependencies
     val commons_io       = "commons-io"                % "commons-io"               % "2.4"           % "test"
     val silhouette       = "com.mohiva"               %% "play-silhouette-testkit"  % Ver.silhouette  % "test"
     val slickery         = "com.reactific"            %% "slickery-testkit"         % Ver.slickery    % "test"
-    val nu_validator     = ("nu.validator" % "validator" % "16.1.1" % "test").exclude("org.eclipse.jetty", "*")
-    val rhino            = "org.mozilla" % "rhino" % "1.7.7"
+
+    // WARNING: The nu.validator depends on Rhino 1.7 which is built with JDK 1.6 and doesn't work under 1.7 or 1.8.
+    // WARNING: Consequently we have included our own lib/vnu.jar that was built with 1.8 (in totality). At some point
+    // WARNING: we'd like to go back to using the maven loaded version, but only after this issue is resolved.
+    // WARNING: See Issue #206 (https://github.com/validator/validator/issues/206)
+    // val nu_validator     = ("nu.validator" % "validator" % "16.1.1" % "test").exclude("org.eclipse.jetty", "*")
+    // val rhino            = "org.mozilla" % "rhino" % "1.7.7" % "test"
   }
 
   val sharedDependencies = Def.setting(Seq(
@@ -127,7 +132,7 @@ object Dependencies
     play_silhouette, play_bootstrap, play_html_compressor, // play_geolocation,
     webjars_play, wj_bootswatch, wj_marked, wj_font_awesome, wj_modernizr, wj_jquery,
     // kamon_core, kamon_scala, kamon_akka, kamon_log_reporter, kamon_play, kamon_system_metrics, kamon_annotation,
-    Test.akka, Test.commons_io, Test.silhouette, Test.slickery, Test.nu_validator, Test.rhino
+    Test.akka, Test.commons_io, Test.silhouette, Test.slickery //, Test.nu_validator, Test.rhino
 
     // "com.vmunier" %% "play-scalajs-scripts" % Ver.server.playScripts
   )

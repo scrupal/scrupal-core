@@ -15,19 +15,18 @@
 
 package scrupal.test
 
-import java.io.{ByteArrayOutputStream, ByteArrayInputStream, InputStream}
+import java.io.{ByteArrayInputStream, InputStream}
 import java.nio.charset.StandardCharsets
 
-import nu.validator.messages.{MessageEmitterAdapter, TextMessageEmitter}
-import nu.validator.servlet.imagereview.ImageCollector
-import nu.validator.source.SourceCode
 import nu.validator.validation.SimpleDocumentValidator
 import nu.validator.xml.SystemErrErrorHandler
 import org.xml.sax.{SAXParseException, ErrorHandler, InputSource}
-import scrupal.utils.ScrupalComponent
 
 import scala.util.{Failure, Success, Try}
 import scala.collection.mutable
+
+import scrupal.utils.ScrupalComponent
+
 
 class CollectingErrorHandler extends ErrorHandler {
   val warnings = mutable.MutableList[SAXParseException]()
@@ -75,7 +74,7 @@ object HTML5Validator extends ScrupalComponent {
       val stream : InputStream = new ByteArrayInputStream(doc.getBytes(StandardCharsets.UTF_8))
       try {
         val is = new InputSource(stream)
-        val validator = new SimpleDocumentValidator(false)
+        val validator = new SimpleDocumentValidator(true)
         val errorHandler = new CollectingErrorHandler
         validator.setUpMainSchema( "http://s.validator.nu/html5-all.rnc", new SystemErrErrorHandler())
         validator.setUpValidatorAndParsers(errorHandler, true, false)
