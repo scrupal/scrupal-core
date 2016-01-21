@@ -50,24 +50,21 @@ package object html {
   /** Simple functor that generates Html Content.
     * All objects that can generate HTMl Content from a Context should inherit this function type
     */
-  trait HtmlContentsGenerator extends ( (Context) ⇒ HtmlContents )
+  type HtmlContentsGenerator =  (Context) ⇒ HtmlContents
 
-  trait HtmlElementGenerator extends ( (Context) ⇒ HtmlContents )
-
-  trait SimpleGenerator extends HtmlElementGenerator with (() ⇒ HtmlContents) {
-    def apply(context : Context) : HtmlContents = { apply() }
-  }
-
-  /** Arranger Function.
-    *
-    * An arranger is a function that does the essential layout arrangement for a Layout. It takes in a Context and a
-    * tag mapping and produces an `Array[Byte]` result. The Layout trait extends this function so that its apply method
-    * can be used to perform the arranging.
-    *
+  /** Arrangement Of Layout Arguments
+    * This type maps argument names to the HtmlContentsGenerator that will produce the HtmlContents for that argument.
+    * This is used to provide the arrangement data to a Layout.
     */
   type Arrangement = Map[String,HtmlContentsGenerator]
 
-  trait Arranger extends ((Context, Arrangement) ⇒ Future[HtmlElement])
+  /** Arranger Function.
+    * An arranger is a function that does the essential layout arrangement for a Layout. It takes in a Context and a
+    * tag mapping and produces an `Array[Byte]` result. The Layout trait extends this function so that its apply method
+    * can be used to perform the arranging.
+    */
+  type Arranger = (Context, Arrangement) ⇒ Future[HtmlElement]
+
 
   /** Assets Accessor
     * This is just a utility for easier access to the Assets class

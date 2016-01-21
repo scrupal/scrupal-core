@@ -84,7 +84,7 @@
           <value>
             <ProjectSettingsEntry>
               <option name="sourceDir" value="$PROJECT_DIR$/src/main" />
-              <option name="confDir" value="$PROJECT_DIR$/src/main" />
+              <option name="confDir" value="$PROJECT_DIR$/scrupal-server/src/main" />
             </ProjectSettingsEntry>
           </value>
         </entry>
@@ -107,7 +107,6 @@
                   <option value="play.api.templates.PlayMagic._" />
                   <option value="play.api.mvc._" />
                   <option value="play.api.data._" />
-                  <option value="scrupal.core._" />
                 </list>
               </option>
             </ProjectSettingsEntry>
@@ -116,7 +115,7 @@
         <entry key="uri">
           <value>
             <ProjectSettingsEntry>
-              <option name="uri" value="$PROJECT_DIR$" />
+              <option name="uri" value="$PROJECT_DIR$/scrupal-server" />
             </ProjectSettingsEntry>
           </value>
         </entry>

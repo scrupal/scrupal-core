@@ -87,7 +87,7 @@ case class display_throwable_content(xcptn : ThrowableContent) extends SimpleGen
   }
 }
 
-object display_context_table extends HtmlElementGenerator {
+object display_context_table extends HtmlContentsGenerator {
   def apply(context : Context) = {
     div(cls := "span10 row", style := "font-size: 0.75em",
       table(cls := "span10 table table-striped table-bordered table-condensed",
@@ -103,7 +103,7 @@ object display_context_table extends HtmlElementGenerator {
   }
 }
 
-case class display_stimulus_table(stimulus: Stimulus) extends HtmlElementGenerator {
+case class display_stimulus_table(stimulus: Stimulus) extends HtmlContentsGenerator {
   def apply(context : Context) = {
     div(cls := "span10 row", style := "font-size: 0.75em",
       table(cls := "span10 table table-striped table-bordered table-condensed",
@@ -128,7 +128,7 @@ case class display_stimulus_table(stimulus: Stimulus) extends HtmlElementGenerat
   }
 }
 
-object debug_footer extends HtmlElementGenerator {
+object debug_footer extends HtmlContentsGenerator {
   def apply(context : Context) = {
     context.site match {
       case Some(site) ⇒
@@ -211,7 +211,7 @@ object reactific_copyright extends SimpleGenerator {
   }
 }
 
-object scrupal_stats extends HtmlElementGenerator {
+object scrupal_stats extends HtmlContentsGenerator {
   def apply(context: Context) = {
     div(cls:="center-block",
       div(java.time.format.DateTimeFormatter.ISO_INSTANT.format(java.time.Instant.now())),

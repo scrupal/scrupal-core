@@ -19,6 +19,8 @@ import com.typesafe.sbt.rjs.Import._
 import com.typesafe.sbt.less.Import.LessKeys
 import com.typesafe.sbt.web.Import._
 
+import playscalajs.PlayScalaJS.autoImport._
+
 import sbt._
 import sbt.Keys._
 
@@ -37,7 +39,7 @@ trait AssetsSettings {
     RjsKeys.appDir := (resourceManaged in rjs).value,
     RjsKeys.mainModule := name.value,
     DigestKeys.algorithms := Seq("md5"),
-    pipelineStages := Seq(digest, gzip)
+    pipelineStages := Seq(scalaJSProd, digest, gzip)
   )
 
   lazy val less_settings = Seq[Setting[_]](

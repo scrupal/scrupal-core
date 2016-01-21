@@ -9,14 +9,33 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/project" />
+            <option value="$PROJECT_DIR$/scrupal-client" />
+            <option value="$PROJECT_DIR$/scrupal-client/project" />
+            <option value="$PROJECT_DIR$/scrupal-server" />
+            <option value="$PROJECT_DIR$/scrupal-server/project" />
+            <option value="$PROJECT_DIR$/scrupal-shared" />
+            <option value="$PROJECT_DIR$/scrupal-shared/.js" />
+            <option value="$PROJECT_DIR$/scrupal-shared/.js/project" />
+            <option value="$PROJECT_DIR$/scrupal-shared/.jvm" />
+            <option value="$PROJECT_DIR$/scrupal-shared/.jvm/project" />
           </set>
         </option>
+        <option name="resolveJavadocs" value="true" />
         <option name="resolveSbtClassifiers" value="true" />
         <option name="sbtVersion" value="0.13.9" />
         <option name="myModules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/project" />
+            <option value="$PROJECT_DIR$/scrupal-client" />
+            <option value="$PROJECT_DIR$/scrupal-client/project" />
+            <option value="$PROJECT_DIR$/scrupal-server" />
+            <option value="$PROJECT_DIR$/scrupal-server/project" />
+            <option value="$PROJECT_DIR$/scrupal-shared" />
+            <option value="$PROJECT_DIR$/scrupal-shared/.js" />
+            <option value="$PROJECT_DIR$/scrupal-shared/.js/project" />
+            <option value="$PROJECT_DIR$/scrupal-shared/.jvm" />
+            <option value="$PROJECT_DIR$/scrupal-shared/.jvm/project" />
           </set>
         </option>
       </SbtProjectSettings>

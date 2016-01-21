@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ScalaCompilerConfiguration">
-    <profile name="SBT 1" modules="core,scrupal-core">
+    <option name="incrementalityType" value="SBT" />
+    <profile name="SBT 1" modules="core">
       <option name="deprecationWarnings" value="true" />
       <option name="uncheckedWarnings" value="true" />
       <option name="featureWarnings" value="true" />
@@ -9,6 +10,37 @@
         <parameter value="-encoding" />
         <parameter value="utf8" />
         <parameter value="-target:jvm-1.8" />
+      </parameters>
+    </profile>
+    <profile name="SBT 2" modules="root,scrupal-core" />
+    <profile name="SBT 3" modules="client,scrupal-client,sharedJS">
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
+      <parameters>
+        <parameter value="-Xlint" />
+      </parameters>
+      <plugins>
+        <plugin path="$USER_HOME$/.ivy2/cache/org.scala-js/scalajs-compiler_2.11.7/jars/scalajs-compiler_2.11.7-0.6.5.jar" />
+      </plugins>
+    </profile>
+    <profile name="SBT 4" modules="server,scrupal-server">
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
+      <parameters>
+        <parameter value="-encoding" />
+        <parameter value="utf8" />
+        <parameter value="-target:jvm-1.8" />
+        <parameter value="-Xlint" />
+      </parameters>
+    </profile>
+    <profile name="SBT 5" modules="sharedJVM">
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
+      <parameters>
+        <parameter value="-Xlint" />
       </parameters>
     </profile>
   </component>

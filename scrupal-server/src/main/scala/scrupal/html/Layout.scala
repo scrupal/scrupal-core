@@ -24,6 +24,12 @@ import scala.concurrent.Future
 import scalatags.Text.all._
 import scalatags.generic.Namespace
 
+trait SimpleGenerator extends HtmlContentsGenerator with (() ⇒ HtmlContents) {
+  def apply(context : Context) : HtmlContents = { apply() }
+}
+
+
+
 
 /** Abstract Layout
   *

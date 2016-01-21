@@ -101,7 +101,7 @@ class AdminController(val scrupal : Scrupal, val messagesApi : MessagesApi)
           }
         )
       case (None,ec) ⇒
-        makePage(NotFound, Administration.error("Site #$id was not found."))
+        makePage(NotFound, Administration.error(s"Site #$id was not found."))
     }
   }
 

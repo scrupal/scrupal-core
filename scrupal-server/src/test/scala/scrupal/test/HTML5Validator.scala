@@ -75,7 +75,7 @@ object HTML5Validator extends ScrupalComponent {
       val stream : InputStream = new ByteArrayInputStream(doc.getBytes(StandardCharsets.UTF_8))
       try {
         val is = new InputSource(stream)
-        val validator = new SimpleDocumentValidator()
+        val validator = new SimpleDocumentValidator(false)
         val errorHandler = new CollectingErrorHandler
         validator.setUpMainSchema( "http://s.validator.nu/html5-all.rnc", new SystemErrErrorHandler())
         validator.setUpValidatorAndParsers(errorHandler, true, false)

@@ -15,11 +15,13 @@
 
 
 import sbt._
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+
 
 /** Build Dependencies
   * This trait can be mixed in to get all of Scrupal's repository resolvers and dependent libraries.
   */
-trait Dependencies
+object Dependencies
 {
   // val scrupal_org_releases    = "Scrupal.org Releases" at "http://scrupal.github.org/mvn/releases"
   val sonatype_snapshots = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -31,24 +33,8 @@ trait Dependencies
 //val geolocation        = "geolocation repository" at "http://blabluble.github.com/modules/releases/"
 
   val all_resolvers : Seq[Resolver] = Seq (
-    sonatype_snapshots, google_sedis, atlassian, edulify
+    sonatype_snapshots, google_sedis, atlassian, edulify, Resolver.jcenterRepo
   )
-
-  object Ver {
-    val play = "2.4.4"
-    val akka = "2.3.13"
-    val akka_http = "2.0.1"
-    val kamon = "0.4.0"
-    val silhouette = "3.0.4"
-    val bootstrap = "3.3.6" // Note: must match play_bootstrap version
-    val bootswatch = "3.3.5+4"
-    val font_awesome = "4.3.0-3"
-    val marked = "0.3.2"
-    val jquery = "2.1.4"
-    val modernizr = "2.8.3"
-    val slickery = "0.3.8"
-    val scalatags = "0.5.4"
-  }
 
   // Things we borrow from Play Framework
   val play_cache              = "com.typesafe.play"         %% "play-cache"               % Ver.play
@@ -97,6 +83,10 @@ trait Dependencies
   val bcrypt                  = "org.mindrot"               % "jbcrypt"                   % "0.3m"
   val scrypt                  = "com.lambdaworks"           % "scrypt"                    % "1.4.0"
 
+  val macwire_macros = "com.softwaremill.macwire" %% "macros" % Ver.server.macwire % "provided"
+  val macwire_util = "com.softwaremill.macwire" %% "util" % Ver.server.macwire
+  val macwire_proxy = "com.softwaremill.macwire" %% "proxy" % Ver.server.macwire
+
   // Kamon Monitoring
   // TODO: Utilize Kamon Monitoring
   val kamon_core              = "io.kamon"                  %% "kamon-core"                % Ver.kamon
@@ -117,11 +107,19 @@ trait Dependencies
     val commons_io       = "commons-io"                % "commons-io"               % "2.4"           % "test"
     val silhouette       = "com.mohiva"               %% "play-silhouette-testkit"  % Ver.silhouette  % "test"
     val slickery         = "com.reactific"            %% "slickery-testkit"         % Ver.slickery    % "test"
-    //val nu_validator     = ("nu.validator" % "validator" % "16.1.1" % "test").exclude("org.eclipse.jetty", "*")
-    //val rhino            = "org.mozilla" % "rhino" % "1.7.7"
+    val nu_validator     = ("nu.validator" % "validator" % "16.1.1" % "test").exclude("org.eclipse.jetty", "*")
+    val rhino            = "org.mozilla" % "rhino" % "1.7.7"
   }
 
-  val core_dependencies : Seq[ModuleID] = Seq(
+  val sharedDependencies = Def.setting(Seq(
+    "com.lihaoyi" %%% "autowire" % Ver.shared.autowire,
+    "me.chrons"   %%% "boopickle" % Ver.shared.booPickle,
+    "com.lihaoyi" %%% "scalarx" % Ver.shared.scalaRx,
+    "com.lihaoyi" %%% "utest" % Ver.shared.uTest
+  ))
+
+  val serverDependencies = Seq(
+    macwire_macros, macwire_util, macwire_proxy,
     pbkdf2, bcrypt, scrypt,
     commons_lang3, config, shapeless, scala_arm, slickery, scalatags,
     akka_actor, akka_http, akka_slf4j,
@@ -129,6 +127,22 @@ trait Dependencies
     play_silhouette, play_bootstrap, play_html_compressor, // play_geolocation,
     webjars_play, wj_bootswatch, wj_marked, wj_font_awesome, wj_modernizr, wj_jquery,
     // kamon_core, kamon_scala, kamon_akka, kamon_log_reporter, kamon_play, kamon_system_metrics, kamon_annotation,
-    Test.akka, Test.commons_io, Test.silhouette, Test.slickery
+    Test.akka, Test.commons_io, Test.silhouette, Test.slickery, Test.nu_validator, Test.rhino
+
+    // "com.vmunier" %% "play-scalajs-scripts" % Ver.server.playScripts
+  )
+
+  val clientDependencies = Def.setting(Seq(
+    "com.github.japgolly.scalajs-react" %%% "core" % Ver.client.scalajsReact,
+    "com.github.japgolly.scalajs-react" %%% "extra" % Ver.client.scalajsReact,
+    "com.github.japgolly.scalacss" %%% "ext-react" % Ver.client.scalaCSS,
+    "org.scala-js" %%% "scalajs-dom" % Ver.client.scalaDom
+  ))
+
+  val jsDependencies = Seq(
+    "org.webjars.npm" % "react" % Ver.js.react / "react-with-addons.js" minified "react-with-addons.min.js" commonJSName "React",
+    "org.webjars.npm" % "react-dom" % Ver.js.react / "react-dom.js" commonJSName "ReactDOM" minified "react-dom.min.js" dependsOn "react-with-addons.js",
+    "org.webjars" % "jquery" % Ver.js.jQuery / "jquery.js" minified "jquery.min.js",
+    RuntimeDOM % "test"
   )
 }
