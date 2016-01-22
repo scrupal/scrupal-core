@@ -1,3 +1,9 @@
+GET     /api/:entity/$rest<.*>           scrupal.core.APIController.entityAction(entity, rest)
+PUT     /api/:entity/$rest<.*>           scrupal.core.APIController.entityAction(entity, rest)
+POST    /api/:entity/$rest<.*>           scrupal.core.APIController.entityAction(entity, rest)
+HEAD    /api/:entity/$rest<.*>           scrupal.core.APIController.entityAction(entity, rest)
+OPTIONS /api/:entity/$rest<.*>           scrupal.core.APIController.entityAction(entity, rest)
+DELETE  /api/:entity/$rest<.*>           scrupal.core.APIController.entityAction(entity, rest)
 
 GET     /assets/themes/:theme            scrupal.core.Assets.theme(theme : String)
 GET     /assets/themes/:provider/:theme  scrupal.core.Assets.themeFromProvider(provider : String, theme: String)

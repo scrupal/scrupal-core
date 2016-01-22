@@ -13,7 +13,6 @@ class ScrupalLayoutSpec extends ValidatingSpecification("ScrupalLayout") {
       "contents" → HtmlContent(contents),
       "footer" → HtmlContent(emptyContents),
       "endscripts" → HtmlContent(emptyContents)
-
     )
   }
 
@@ -24,7 +23,7 @@ class ScrupalLayoutSpec extends ValidatingSpecification("ScrupalLayout") {
       val result = await(future)
       result.contains("scrupal-client") must beTrue
       // FIXME: nu.validator can't handle HTML Imports yet
-      // validate("ScrupalLayout", result)
+      validate("ScrupalLayout", result)
       result.contains("rel=\"import\"")
     }
   }

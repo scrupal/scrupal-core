@@ -35,7 +35,7 @@ import play.api.libs.concurrent.ActorSystemProvider
 import play.api.mvc.{EssentialFilter, RequestHeader}
 import play.api.routing.Router
 import play.api.routing.sird._
-import router.scrupal.core.{AdminController, Assets}
+import router.scrupal.core.{APIController, AdminController, Assets}
 import scrupal.html._
 
 import scala.concurrent.{ExecutionContextExecutorService, ExecutionContext, Future}
@@ -91,11 +91,13 @@ case class Scrupal (
 
   val adminController = new AdminController(this, messagesApi)
 
+  val apiController = new APIController(this, messagesApi)
+
   val cryptoConfig: CryptoConfig = new CryptoConfigParser(environment, configuration).get
 
   val crypto: Crypto = new Crypto(cryptoConfig)
 
-  val router : Router = new _root_.router.Routes(httpErrorHandler, assets, adminController, "/")
+  val router : Router = new _root_.router.Routes(httpErrorHandler, apiController, assets, adminController, "/")
 
   val injector: Injector = new SimpleInjector(NewInstanceInjector) + router + crypto + httpConfiguration + tempFileCreator
 

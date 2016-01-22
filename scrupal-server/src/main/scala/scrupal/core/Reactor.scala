@@ -47,7 +47,7 @@ trait Reaction extends ((Stimulus) ⇒ Future[Response[_]])
   */
 trait Reactor extends Reaction with Nameable with Describable {
 
-  final val name : String = this.getClass.getSimpleName
+  val name : String = this.getClass.getSimpleName
 
   def apply(stimulus: Stimulus) : Future[Response[_]]
 
@@ -65,14 +65,17 @@ trait Reactor extends Reaction with Nameable with Describable {
   }
 }
 
-case class UnimplementedReactor(what: String, oid : Option[Long] = None) extends Reactor {
-  val description = "A Reactor that returns a not-implemented response"
-
+trait UnimplementedReactorTrait extends Reactor {
+  def what : String
   def apply(stimulus: Stimulus): Future[Response[_]] = {
     Future.successful {
       UnimplementedResponse(what)
     }
   }
+}
+
+case class UnimplementedReactor(what: String, oid : Option[Long] = None) extends UnimplementedReactorTrait {
+  val description = s"A Reactor that returns a not-implemented response for $what"
 }
 
 /** Reactor From A Node
