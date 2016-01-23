@@ -14,6 +14,6 @@ object SinglePageApp extends js.JSApp {
   @JSExport
   override def main(): Unit = {
     // import router.ApplicationRouter._
-    // router() render dom.document.getElementById("container")
+    // router() render dom.document.getElementById("scrupal")
   }
 }

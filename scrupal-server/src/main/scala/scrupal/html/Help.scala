@@ -33,7 +33,7 @@ object Help {
       "footer" → HtmlContent(span("footer")),
       "endscripts" → HtmlContent(emptyContents)
     )
-    stimulus.context.scrupal.threeColumnBootstrapLayout(stimulus.context, args)
+    stimulus.context.scrupal.scrupalLayout(stimulus.context, args)
   }
 
   def index : HtmlElement = {

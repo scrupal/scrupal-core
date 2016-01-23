@@ -1,3 +1,4 @@
+GET     /api/scrupal$what<.*>            scrupal.core.APIController.scrupalInfo(what)
 GET     /api/:entity/$rest<.*>           scrupal.core.APIController.entityAction(entity, rest)
 PUT     /api/:entity/$rest<.*>           scrupal.core.APIController.entityAction(entity, rest)
 POST    /api/:entity/$rest<.*>           scrupal.core.APIController.entityAction(entity, rest)

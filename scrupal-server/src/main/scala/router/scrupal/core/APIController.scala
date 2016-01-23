@@ -1,8 +1,8 @@
 package router.scrupal.core
 
-import com.reactific.helpers.Patterns
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
+import play.api.routing.JavaScriptReverseRouter
 import scrupal.core._
 import scrupal.utils.ScrupalComponent
 
@@ -14,6 +14,19 @@ import scala.concurrent.Future
   */
 class APIController(val scrupal : Scrupal, val messagesApi : MessagesApi)
   extends Controller with I18nSupport with WithCoreSchema with ScrupalComponent {
+
+  def scrupalInfo(what : String) = Action {
+    what.toLowerCase match {
+      case "" ⇒ help()
+      case "/" ⇒ help()
+      case "help" ⇒ help()
+      case _ ⇒ help()
+    }
+  }
+
+  def help() : Result = {
+    Ok("help")
+  }
 
   def entityAction(entityName: String, rest: String) = {
     Action.async { implicit request : Request[AnyContent] ⇒
@@ -45,5 +58,12 @@ class APIController(val scrupal : Scrupal, val messagesApi : MessagesApi)
         Future.successful { NotFound(s"request.path[${request.path}].startsWith(prefix[$prefix]) is false") }
       }
     }
+  }
+
+  def javascriptRoutes = Action { implicit request =>
+    Ok(
+      JavaScriptReverseRouter("jsRoutes")(
+      )
+    ).as("text/javascript")
   }
 }

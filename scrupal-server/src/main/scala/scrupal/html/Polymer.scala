@@ -338,11 +338,11 @@ trait PolymerLayout extends DetailedPageLayout {
   }
 
   override def imports(args : Arguments) = {
-    super.imports(args) ++ Seq("elements/elements.html")
+    super.imports(args) ++ Seq(assets.webjar("polymer","polymer.html").url)
   }
 
   override def javascriptLinks(args : Arguments) = {
-    super.javascriptLinks(args) ++ Seq("bower_components/webcomponentsjs/webcomponents-lite.js")
+    super.javascriptLinks(args) ++ Seq(assets.webjar("webcomponentsjs","webcomponents-lite.js").url)
 
   }
 }

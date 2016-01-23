@@ -90,11 +90,13 @@ object Settings extends AssetsSettings {
       "akka_version" -> Ver.akka,
       "silhouette_version" -> Ver.silhouette,
       "bootstrap_version" -> Ver.bootstrap,
-      "bootswatch_version" -> Ver.bootswatch,
-      "font_awesome_version" -> Ver.font_awesome,
-      "marked_version" -> Ver.marked,
-      "jquery_version" → Ver.jquery,
-      "modernizr_version" → Ver.modernizr
+      "bootswatch_version" -> Ver.webjar.bootswatch,
+      "font_awesome_version" -> Ver.webjar.font_awesome,
+      "marked_version" -> Ver.webjar.marked,
+      "jquery_version" → Ver.webjar.jquery,
+      "polymer_version" → Ver.webjar.polymer,
+      "webcomponentsjs_version" → Ver.webjar.webcomponentsjs,
+      "modernizr_version" → Ver.webjar.modernizr
     ),
     unmanagedJars in sbt.Test <<= baseDirectory map { base => (base / "libs" ** "*.jar").classpath },
     maxErrors := 50
@@ -113,8 +115,6 @@ object Settings extends AssetsSettings {
   }
 }
 
-
-
 object Ver {
 
   val scala = "2.11.7"
@@ -124,13 +124,19 @@ object Ver {
   val kamon = "0.4.0"
   val silhouette = "3.0.4"
   val bootstrap = "3.3.6" // Note: must match play_bootstrap version
-  val bootswatch = "3.3.5+4"
-  val font_awesome = "4.3.0-3"
-  val marked = "0.3.2"
-  val jquery = "2.1.4"
-  val modernizr = "2.8.3"
   val slickery = "0.3.8"
   val scalatags = "0.5.4"
+
+  object webjar {
+    val polymer = "1.0.8"
+    val webcomponentsjs = "0.7.12"
+    val play = "2.4.0-2"
+    val bootswatch = "3.3.5+4"
+    val font_awesome = "4.3.0-3"
+    val marked = "0.3.2"
+    val jquery = "2.1.4"
+    val modernizr = "2.8.3"
+  }
 
   object shared {
     val scalaRx = "0.2.8"

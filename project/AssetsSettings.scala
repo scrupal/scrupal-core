@@ -15,7 +15,6 @@
 
 import com.typesafe.sbt.digest.Import._
 import com.typesafe.sbt.gzip.Import._
-import com.typesafe.sbt.rjs.Import._
 import com.typesafe.sbt.less.Import.LessKeys
 import com.typesafe.sbt.web.Import._
 
@@ -34,8 +33,6 @@ trait AssetsSettings {
   )
 
   lazy val pipeline_settings = Seq[Setting[_]](
-    RjsKeys.appDir := (resourceManaged in rjs).value,
-    RjsKeys.mainModule := name.value,
     DigestKeys.algorithms := Seq("md5"),
     pipelineStages := Seq(scalaJSProd, digest, gzip)
   )

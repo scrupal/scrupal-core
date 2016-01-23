@@ -93,7 +93,9 @@ object Assets extends LoggingHelper {
     "marked" -> ScrupalBuildInfo.marked_version,
     "jquery" → ScrupalBuildInfo.jquery_version,
     "modernizr" → ScrupalBuildInfo.modernizr_version,
-    "scrupal-core" → ScrupalBuildInfo.version
+    "scrupal-core" → ScrupalBuildInfo.version,
+    "polymer" → ScrupalBuildInfo.polymer_version,
+    "webcomponentsjs" → ScrupalBuildInfo.webcomponentsjs_version
   )
 
   final val webjar_prefix = s"/${WebJarAssetLocator.WEBJARS_PATH_PREFIX}"

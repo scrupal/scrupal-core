@@ -62,7 +62,6 @@ case class Scrupal (
   final val registry = Scrupal
 } with ScrupalComponent with AutoCloseable  with Registrable[Scrupal] with I18nComponents{
 
-
   val applicationLifecycle: DefaultApplicationLifecycle = new DefaultApplicationLifecycle
 
   val httpFilters: Seq[EssentialFilter] = Seq.empty[EssentialFilter]
