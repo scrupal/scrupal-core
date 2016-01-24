@@ -22,6 +22,7 @@ import play.sbt.routes.RoutesKeys._
 import sbt.Keys._
 import sbt._
 import sbtbuildinfo.BuildInfoKeys._
+import sbtbuildinfo.BuildInfoOption
 import scoverage.ScoverageSbtPlugin.ScoverageKeys._
 
 object Settings extends AssetsSettings {
@@ -39,9 +40,18 @@ object Settings extends AssetsSettings {
 
   ).mkString(";")
 
+  lazy val coreSettings = Seq(
+    organization := "com.reactific",
+    copyrightHolder := "Reactific Software LLC",
+    copyrightYears := Seq(2013, 2014, 2015, 2016),
+    developerUrl := url("http://reactific.com/"),
+    titleForDocs := "Scrupal Core",
+    codePackage := "scrupal.core",
+    scalaVersion := Ver.scala
+  )
 
-  val sharedSettings = Seq(
-    scalaVersion := Ver.scala,
+  val sharedSettings = coreSettings ++ Seq(
+    titleForDocs := "Scrupal Core Shared",
     scalacOptions ++= Seq(
       "-Xlint",
       "-unchecked",
@@ -52,6 +62,7 @@ object Settings extends AssetsSettings {
   )
 
   lazy val clientSettings = sharedSettings ++ Seq(
+    titleForDocs := "Scrupal Core Client",
     libraryDependencies ++= Dependencies.clientDependencies.value,
     elideOptions := Seq(),
     scalacOptions ++= elideOptions.value,
@@ -64,12 +75,7 @@ object Settings extends AssetsSettings {
   )
 
   lazy val serverSettings = sharedSettings ++ Seq(
-    organization := "org.scrupal",
-    copyrightHolder := "Reactific Software LLC",
-    copyrightYears := Seq(2013, 2014, 2015),
-    developerUrl := url("http://reactific.com/"),
-    titleForDocs := "Scrupal Core",
-    codePackage := "scrupal.core",
+    titleForDocs := "Scrupal Core Server",
     libraryDependencies ++= Dependencies.serverDependencies,
     commands += ReleaseCmd,
     LessKeys.compress in Assets := true,
@@ -98,6 +104,7 @@ object Settings extends AssetsSettings {
       "webcomponentsjs_version" → Ver.webjar.webcomponentsjs,
       "modernizr_version" → Ver.webjar.modernizr
     ),
+    buildInfoOptions := Seq(BuildInfoOption.ToMap, BuildInfoOption.ToJson, BuildInfoOption.BuildTime),
     unmanagedJars in sbt.Test <<= baseDirectory map { base => (base / "libs" ** "*.jar").classpath },
     maxErrors := 50
   )

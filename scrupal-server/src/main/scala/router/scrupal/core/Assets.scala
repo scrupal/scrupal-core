@@ -18,6 +18,7 @@ package router.scrupal.core
 import javax.inject.{Inject, Singleton}
 
 import com.reactific.helpers.LoggingHelper
+import controllers.Assets.Asset
 import controllers.WebJarAssets
 import org.webjars.WebJarAssetLocator
 import play.api.http.HttpErrorHandler
@@ -36,24 +37,30 @@ class Assets @Inject() (
     environment: Environment
 ) extends WebJarAssets(errorHandler, configuration, environment) with ScrupalComponent {
 
-  import Assets.{webJarPrefix, webPrefix}
+  import Assets.{webJarPrefix, assetPrefix}
 
   def root(file: String) = {
     val lookup = if (file.startsWith("/")) file else "/" + file
     super.at("/", lookup, aggressiveCaching=false)
   }
 
-  def public(file: String) = super.at(webPrefix(""), file, aggressiveCaching=false)
+  def public(file: String) = super.at(assetPrefix(""), file, aggressiveCaching=false)
 
-  def js(file: String) = super.at(webPrefix("javascripts"), file, aggressiveCaching=true)
-
-  def img(file: String) = super.at(webPrefix("images"), file, aggressiveCaching=false)
-
-  def css(file: String) = {
-    val prefix = webPrefix("stylesheets")
-    val path = file + ".min.css"
-    super.at(prefix, path, aggressiveCaching=true)
+  def projectjs(file : String) = {
+    super.at("/public",file)
   }
+
+  def js(p : String, file: Asset) = {
+    super.versioned(assetPrefix("javascripts", p), file)
+  }
+  def css(p : String, file: Asset) = {
+    val prefix = assetPrefix("stylesheets", p)
+    val path = file + ".min.css"
+    super.versioned(prefix, path)
+  }
+
+
+  def img(file: String) = super.at(assetPrefix("images"), file, aggressiveCaching=false)
 
   def themeFromProvider(provider : String, name: String) : Action[AnyContent] = {
     provider match {
@@ -99,15 +106,14 @@ object Assets extends LoggingHelper {
   )
 
   final val webjar_prefix = s"/${WebJarAssetLocator.WEBJARS_PATH_PREFIX}"
-  final val web_prefix = s"$webjar_prefix/${ScrupalBuildInfo.name}/${ScrupalBuildInfo.version}"
 
   def webJarPrefix(webJar: String, partialPath: String) = {
     val version = versionMap.getOrElse(webJar,"{missing_version}")
     s"$webjar_prefix/$webJar/$version/$partialPath"
   }
 
-  def webPrefix(partialPath: String) = {
-    s"/public/$partialPath"
+  def assetPrefix(partialPath: String, prefix : String = "/public") = {
+    s"$prefix/$partialPath"
   }
 
   /** Template

@@ -1,7 +1,6 @@
 package router.scrupal
 
 import com.reactific.helpers.LoggingHelper
-import org.specs2.execute.AsResult
 import play.api.http.Status
 import play.api.libs.iteratee.Iteratee
 import play.api.test.FakeRequest

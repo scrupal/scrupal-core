@@ -19,9 +19,11 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import play.sbt.{PlayLayoutPlugin, PlayScala}
 
 import playscalajs.PlayScalaJS.autoImport._
+import playscalajs.ScalaJSPlay
 
-import sbt.Keys._
 import sbt._
+import sbt.Keys._
+import sbt.Project.projectToRef
 
 import sbtbuildinfo.BuildInfoPlugin
 
@@ -44,39 +46,44 @@ object ScrupalBuild extends Build {
   lazy val sharedJVM = shared.jvm
   lazy val sharedJS = shared.js
 
-  lazy val client = Project("scrupal-client", file("scrupal-client"))
-      .enablePlugins(ScalaJSPlugin)
-      // WARNING: This yields a "These plugins were both included and excluded error"
-      // .disablePlugins(ScoverageSbtPlugin) WARNING:
-      .settings(Settings.clientSettings)
-      .dependsOn(sharedJS)
+  lazy val client = Project("scrupal-client", file("scrupal-client")).
+    enablePlugins(ScalaJSPlugin, ScalaJSPlay).
+    // WARNING: This yields a "These plugins were both included and excluded error"
+    // .disablePlugins(ScoverageSbtPlugin) WARNING:
+    settings(Settings.clientSettings).
+    dependsOn(sharedJS)
 
-  lazy val clients = Seq(client)
+  lazy val jsProjects = Seq(client)
 
-  lazy val server = Project("scrupal-server", file("scrupal-server"))
-    .disablePlugins(PlayLayoutPlugin)
-    .enablePlugins(PlayScala, BuildInfoPlugin, ScrupalPlugin, ScoverageSbtPlugin)
-    .settings(Settings.sbt_web_settings)
-    .settings(Settings.pipeline_settings)
-    .settings(Settings.less_settings)
-    .settings(Settings.serverSettings)
-    .settings(Seq(
-      scalaJSProjects := clients
-    ))
-    .dependsOn(sharedJVM)
+  lazy val server = Project("scrupal-server", file("scrupal-server")).
+    disablePlugins(PlayLayoutPlugin).
+    enablePlugins(PlayScala, BuildInfoPlugin, ScrupalPlugin, ScoverageSbtPlugin).
+    settings(Settings.sbt_web_settings).
+    settings(Settings.pipeline_settings).
+    settings(Settings.less_settings).
+    settings(Settings.serverSettings).
+    settings(Seq(
+      scalaJSProjects := jsProjects
+    )).
+    dependsOn(sharedJVM).
+    aggregate(jsProjects.map(projectToRef): _*)
 
-  lazy val root = Project("scrupal-core", file("."))
-    .aggregate(
+  lazy val root = Project("scrupal-core", file(".")).
+    disablePlugins(PlayLayoutPlugin).
+    enablePlugins(ScrupalPlugin).
+    settings(Settings.coreSettings).
+    settings(
+      publish := {},
+      publishLocal := {},
+      onLoad in Global := (Command.process("project scrupal-server", _: State)) compose (onLoad in Global).value
+    ).
+    aggregate(
       sharedJVM,
       sharedJS,
       client,
       server
     )
-    .settings(
-      publish := {},
-      publishLocal := {},
-      onLoad in Global := (Command.process("project scrupal-server", _: State)) compose (onLoad in Global).value
-    )
+
 
   override def rootProject = Some(root)
 }
