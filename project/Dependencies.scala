@@ -138,10 +138,11 @@ object Dependencies
   )
 
   val clientDependencies = Def.setting(Seq(
+    "org.scala-js"                      %%% "scalajs-dom" % Ver.client.scalaDom,
+    "com.lihaoyi"                       %%% "scalatags" % Ver.scalatags,
     "com.github.japgolly.scalajs-react" %%% "core" % Ver.client.scalajsReact,
     "com.github.japgolly.scalajs-react" %%% "extra" % Ver.client.scalajsReact,
-    "com.github.japgolly.scalacss" %%% "ext-react" % Ver.client.scalaCSS,
-    "org.scala-js" %%% "scalajs-dom" % Ver.client.scalaDom
+    "com.github.japgolly.scalacss"      %%% "ext-react" % Ver.client.scalaCSS
   ))
 
   val jsDependencies = Seq(

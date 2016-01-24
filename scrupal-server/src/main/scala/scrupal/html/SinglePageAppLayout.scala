@@ -14,7 +14,7 @@ class SinglePageAppLayout(implicit val scrupal : Scrupal) extends PolymerLayout 
   val scalajs = new ScalaJS()(scrupal)
 
   val description: String =
-    "A Polymer + React layout for most SPA type page"
+    "A Polymer + React layout for most SPA type pages"
 
   override def contents(args: Arguments) : HtmlContents = {
     div(scalatags.Text.all.id := "spa-content")
