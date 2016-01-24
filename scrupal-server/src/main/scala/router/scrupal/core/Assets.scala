@@ -50,10 +50,11 @@ class Assets @Inject() (
     super.at("/public",file)
   }
 
-  def js(p : String, file: Asset) = {
+  def js(file: Asset, p : String = "/public") = {
     super.versioned(assetPrefix("javascripts", p), file)
   }
-  def css(p : String, file: Asset) = {
+
+  def css(file: Asset, p : String = "/public") = {
     val prefix = assetPrefix("stylesheets", p)
     val path = file + ".min.css"
     super.versioned(prefix, path)

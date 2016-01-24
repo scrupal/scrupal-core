@@ -16,6 +16,7 @@ package router.scrupal
 
 import java.io.File
 
+import controllers.Assets.Asset
 import org.specs2.matcher.MatchResult
 import play.api.http.{DefaultHttpErrorHandler, Status}
 import play.api.mvc.{Action, AnyContent, Request}
@@ -76,11 +77,11 @@ class AssetsSpec extends ScrupalSpecification("Assets") {
     }
 
     "locate scrupal.css with css" in new WithApplication(scrupal.application) {
-      foundAsset(mkAssets.css("scrupal"))
+      foundAsset(mkAssets.css(Asset("scrupal")))
     }
 
     "locate scrupal.js with js" in new WithApplication(scrupal.application) {
-      foundAsset(mkAssets.js("scrupal.js"))
+      foundAsset(mkAssets.js(Asset("scrupal.js")))
     }
 
     "locate Simplex theme with theme(Simplex)" in new WithApplication(scrupal.application) {
