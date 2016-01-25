@@ -16,6 +16,10 @@ scala:
 jdk:
    - oraclejdk8
 
+env:
+  global:
+    JAVA_OPTS=-Xmx2g
+
 # How to run the build. Note the use of scoverage commands
 script:
   - sbt ++$TRAVIS_SCALA_VERSION -Dfile.encoding=UTF8 clean coverage test coverageAggregate
