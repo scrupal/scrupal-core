@@ -51,13 +51,13 @@ class Assets @Inject() (
   }
 
   def js(file: Asset, p : String = "/public") = {
-    super.versioned(assetPrefix("javascripts", p), file)
+    val prefix = assetPrefix("javascripts", p)
+    super.versioned(prefix, file)
   }
 
   def css(file: Asset, p : String = "/public") = {
     val prefix = assetPrefix("stylesheets", p)
-    val path = file + ".min.css"
-    super.versioned(prefix, path)
+    super.versioned(prefix, file)
   }
 
 

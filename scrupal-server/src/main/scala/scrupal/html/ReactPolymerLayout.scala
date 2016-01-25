@@ -17,7 +17,7 @@ case class ReactPolymerLayout(appName : String = "")(implicit val scrupal : Scru
     "A Polymer + React layout for Single Page Application type pages"
 
   override def contents(args: Arguments) : HtmlContents = {
-    div(scalatags.Text.all.id := "polymer-react-app")
+    div(scalatags.Text.all.id := "react-polymer-app")
   }
 
   override def header(args: Arguments) : HtmlContents = {

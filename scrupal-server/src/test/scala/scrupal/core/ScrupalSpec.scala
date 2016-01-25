@@ -100,7 +100,7 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
             response.disposition must beEqualTo(Successful)
             response.payload.isInstanceOf[HtmlContent]
             val content = response.payload.asInstanceOf[HtmlContent]
-            content.content.render.contains("scrupal-client") must beTrue
+            content.content.render.contains("react-polymer-app") must beTrue
           }(scrupal.executionContext)
           await(future)
           success

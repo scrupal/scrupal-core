@@ -77,7 +77,7 @@ class AssetsSpec extends ScrupalSpecification("Assets") {
     }
 
     "locate scrupal.css with css" in new WithApplication(scrupal.application) {
-      foundAsset(mkAssets.css(Asset("scrupal")))
+      foundAsset(mkAssets.css(Asset("scrupal.min.css")))
     }
 
     "locate scrupal.js with js" in new WithApplication(scrupal.application) {

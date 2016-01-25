@@ -120,7 +120,7 @@ case class Scrupal (
   val defaultPageLayout = new DefaultPageLayout()(this)
   val simpleBootstrapLayout = new SimpleBootstrapLayout()(this)
   val threeColumnBootstrapLayout = new ThreeColumnBootstrapLayout()(this)
-  val scrupalLayout = new ReactPolymerLayout()(this)
+  val reactPolymerLayout = new ReactPolymerLayout()(this)
 
   val schema = CoreSchema(name, configuration)(this)
 

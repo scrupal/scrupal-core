@@ -33,11 +33,11 @@ object Help {
       "footer" → HtmlContent(span("footer")),
       "endscripts" → HtmlContent(emptyContents)
     )
-    stimulus.context.scrupal.scrupalLayout(stimulus.context, args)
+    stimulus.context.scrupal.reactPolymerLayout(stimulus.context, args)
   }
 
   def index : HtmlElement = {
-    h1("Welcome to Scrupal")
+    h1("Welcome To Scrupal")
   }
 
 }
