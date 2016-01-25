@@ -41,7 +41,7 @@ class PolymerLayoutSpec extends ValidatingSpecification("Polymer") {
     }
 
     "have polymer iron elements" in {
-      import polymer.text.iron._
+      import Polymer.iron._
       val content = div(
         `a11y-announcer`,
         `a11y-keys-behavior`,
@@ -91,7 +91,7 @@ class PolymerLayoutSpec extends ValidatingSpecification("Polymer") {
     }
 
     "have polymer paper elements" in {
-      import polymer.text.paper._
+      import Polymer.paper._
       val content = div(
         `badge`,
         `behaviors`,
@@ -128,7 +128,7 @@ class PolymerLayoutSpec extends ValidatingSpecification("Polymer") {
       )
       val future = tpl.page(context, makePolymerArgs(content))
       val result = await(future)
-      result.nonEmpty must beTrue // TODO: Nu.Validator doesn't undrestand web components yet
+      result.nonEmpty must beTrue // TODO: Nu.Validator doesn't understand web components yet
     }
   }
 }
