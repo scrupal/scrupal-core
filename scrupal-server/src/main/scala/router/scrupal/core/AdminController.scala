@@ -28,8 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import scalatags.Text.all._
 
-class AdminController(val scrupal : Scrupal, val messagesApi : MessagesApi)
-  extends Controller with I18nSupport with WithCoreSchema {
+class AdminController(val scrupal : Scrupal, val messagesApi : MessagesApi) extends ScrupalController {
 
   private def makePage(result: Status, elem: HtmlElement) : Future[Result] = {
     makePage(result, Seq(elem))

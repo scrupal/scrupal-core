@@ -9,6 +9,8 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/project" />
+            <option value="$PROJECT_DIR$/react-polymer" />
+            <option value="$PROJECT_DIR$/react-polymer/project" />
             <option value="$PROJECT_DIR$/scrupal-client" />
             <option value="$PROJECT_DIR$/scrupal-client/project" />
             <option value="$PROJECT_DIR$/scrupal-server" />
@@ -27,6 +29,8 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/project" />
+            <option value="$PROJECT_DIR$/react-polymer" />
+            <option value="$PROJECT_DIR$/react-polymer/project" />
             <option value="$PROJECT_DIR$/scrupal-client" />
             <option value="$PROJECT_DIR$/scrupal-client/project" />
             <option value="$PROJECT_DIR$/scrupal-server" />

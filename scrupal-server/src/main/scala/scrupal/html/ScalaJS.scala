@@ -11,7 +11,6 @@ import scalatags.Text.all._
   */
 class ScalaJS(implicit scrupal: Scrupal) {
 
-
   def javascriptDependencies(projectName : String) : HtmlContents = {
 
     val jsdeps = s"${projectName.toLowerCase}-jsdeps"

@@ -1,10 +1,9 @@
 package router.scrupal.core
 
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.api.routing.JavaScriptReverseRouter
 import scrupal.core._
-import scrupal.utils.ScrupalComponent
 
 import scala.concurrent.Future
 
@@ -12,31 +11,18 @@ import scala.concurrent.Future
   *
   * Description of thing
   */
-class APIController(val scrupal : Scrupal, val messagesApi : MessagesApi) extends ScrupalController {
+class APPController(val scrupal : Scrupal, val messagesApi : MessagesApi) extends ScrupalController {
 
-  def scrupalInfo(what : String) = Action {
-    what.toLowerCase match {
-      case "" ⇒ help()
-      case "/" ⇒ help()
-      case "help" ⇒ help()
-      case _ ⇒ help()
-    }
-  }
+  def appGET(appName: String, rest : String) = appAction(appName, rest)
+  def appPUT(appName: String, rest : String) = appAction(appName, rest)
+  def appPOST(appName: String, rest : String) = appAction(appName, rest)
+  def appOPTIONS(appName: String, rest : String) = appAction(appName, rest)
+  def appDELETE(appName: String, rest : String) = appAction(appName, rest)
+  def appHEAD(appName: String, rest : String) = appAction(appName, rest)
 
-  def help() : Result = {
-    Ok("help")
-  }
-
-  def entityGET(entityName: String, rest : String) = entityAction(entityName, rest)
-  def entityPUT(entityName: String, rest : String) = entityAction(entityName, rest)
-  def entityPOST(entityName: String, rest : String) = entityAction(entityName, rest)
-  def entityOPTIONS(entityName: String, rest : String) = entityAction(entityName, rest)
-  def entityDELETE(entityName: String, rest : String) = entityAction(entityName, rest)
-  def entityHEAD(entityName: String, rest : String) = entityAction(entityName, rest)
-
-  protected def entityAction(entityName: String, rest: String) = {
+  protected def appAction(appName: String, rest: String) = {
     Action.async { implicit request : Request[AnyContent] ⇒
-      val prefix = s"/api/"
+      val prefix = s"/app/"
       if (request.path.startsWith(prefix)) {
         val rh : RequestHeader = request.copy(path=request.path.toLowerCase.drop(prefix.length-1))
         log.debug(s"req2(method=${rh.method}, host=${rh.host}, uri=${rh.uri}, path=${rh.path}, remoteAddress=${rh.remoteAddress}")

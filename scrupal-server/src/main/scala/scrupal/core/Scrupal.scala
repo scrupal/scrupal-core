@@ -35,7 +35,7 @@ import play.api.libs.concurrent.ActorSystemProvider
 import play.api.mvc.{EssentialFilter, RequestHeader}
 import play.api.routing.Router
 import play.api.routing.sird._
-import router.scrupal.core.{APIController, AdminController, Assets}
+import router.scrupal.core.{APPController, APIController, AdminController, Assets}
 import scrupal.html._
 
 import scala.concurrent.{ExecutionContextExecutorService, ExecutionContext, Future}
@@ -92,13 +92,17 @@ case class Scrupal (
 
   val apiController = new APIController(this, messagesApi)
 
+  val appController = new APPController(this, messagesApi)
+
   val cryptoConfig: CryptoConfig = new CryptoConfigParser(environment, configuration).get
 
   val crypto: Crypto = new Crypto(cryptoConfig)
 
-  val router : Router = new _root_.router.Routes(httpErrorHandler, apiController, assets, adminController, "/")
+  val router : Router =
+    new _root_.router.Routes(httpErrorHandler, apiController, appController, adminController, assets, "/")
 
-  val injector: Injector = new SimpleInjector(NewInstanceInjector) + router + crypto + httpConfiguration + tempFileCreator
+  val injector: Injector =
+    new SimpleInjector(NewInstanceInjector) + router + crypto + httpConfiguration + tempFileCreator
 
   val application: Application = new DefaultApplication(environment, applicationLifecycle, injector,
     configuration, httpRequestHandler, httpErrorHandler, actorSystem, Plugins.empty)
@@ -116,7 +120,7 @@ case class Scrupal (
   val defaultPageLayout = new DefaultPageLayout()(this)
   val simpleBootstrapLayout = new SimpleBootstrapLayout()(this)
   val threeColumnBootstrapLayout = new ThreeColumnBootstrapLayout()(this)
-  val scrupalLayout = new SinglePageAppLayout()(this)
+  val scrupalLayout = new ReactPolymerLayout()(this)
 
   val schema = CoreSchema(name, configuration)(this)
 

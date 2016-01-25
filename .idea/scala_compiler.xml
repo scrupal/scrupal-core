@@ -55,5 +55,17 @@
         <plugin path="$USER_HOME$/.ivy2/cache/org.scala-js/scalajs-compiler_2.11.7/jars/scalajs-compiler_2.11.7-0.6.5.jar" />
       </plugins>
     </profile>
+    <profile name="SBT 7" modules="scrupal-react-polymer">
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
+      <parameters>
+        <parameter value="-P:scalajs:mapSourceURI:file:/Users/reid/Code/scrupal-core/react-polymer/src/main/scala/-&gt;8a6457265fe4293b11aa/" />
+        <parameter value="-Xlint" />
+      </parameters>
+      <plugins>
+        <plugin path="$USER_HOME$/.ivy2/cache/org.scala-js/scalajs-compiler_2.11.7/jars/scalajs-compiler_2.11.7-0.6.5.jar" />
+      </plugins>
+    </profile>
   </component>
 </project>

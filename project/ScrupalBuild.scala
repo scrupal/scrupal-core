@@ -53,7 +53,12 @@ object ScrupalBuild extends Build {
     settings(Settings.clientSettings).
     dependsOn(sharedJS)
 
-  lazy val jsProjects = Seq(client)
+  lazy val reactPolymer = Project("scrupal-react-polymer", file("react-polymer")).
+    enablePlugins(ScalaJSPlugin, ScalaJSPlay).
+    settings(Settings.reactPolymerSettings).
+    dependsOn(client,sharedJS)
+
+  lazy val jsProjects = Seq(client, reactPolymer)
 
   lazy val server = Project("scrupal-server", file("scrupal-server")).
     disablePlugins(PlayLayoutPlugin).

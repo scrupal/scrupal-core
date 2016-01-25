@@ -63,7 +63,7 @@ object Dependencies
   // Fundamental Libraries
   val shapeless               = "com.chuusai"               %% "shapeless"                % "2.2.1"
   val scala_arm               = "com.jsuereth"              %% "scala-arm"                % "1.4"
-  val scalatags               = "com.lihaoyi"               %% "scalatags"                % Ver.scalatags
+  val scalatags               = "com.lihaoyi"               %% "scalatags"                % Ver.shared.scalatags
 
   // Database, Caches, Serialization, Data Storage stuff
   val slickery                = "com.reactific"             %% "slickery"                 % Ver.slickery
@@ -117,10 +117,12 @@ object Dependencies
   }
 
   val sharedDependencies = Def.setting(Seq(
+    "com.lihaoyi" %%% "scalatags" % Ver.shared.scalatags,
+    "com.lihaoyi" %%% "upickle" % Ver.shared.upickle,
     "com.lihaoyi" %%% "autowire" % Ver.shared.autowire,
-    "me.chrons"   %%% "boopickle" % Ver.shared.booPickle,
     "com.lihaoyi" %%% "scalarx" % Ver.shared.scalaRx,
-    "com.lihaoyi" %%% "utest" % Ver.shared.uTest
+    "com.lihaoyi" %%% "utest" % Ver.shared.uTest,
+    "me.chrons"   %%% "boopickle" % Ver.shared.booPickle
   ))
 
   val serverDependencies = Seq(
@@ -139,11 +141,20 @@ object Dependencies
 
   val clientDependencies = Def.setting(Seq(
     "org.scala-js"                      %%% "scalajs-dom" % Ver.client.scalaDom,
-    "com.lihaoyi"                       %%% "scalatags" % Ver.scalatags,
+    "com.lihaoyi"                       %%% "scalatags" % Ver.shared.scalatags,
     "com.github.japgolly.scalajs-react" %%% "core" % Ver.client.scalajsReact,
     "com.github.japgolly.scalajs-react" %%% "extra" % Ver.client.scalajsReact,
     "com.github.japgolly.scalacss"      %%% "ext-react" % Ver.client.scalaCSS
   ))
+
+  val reactPolymerDependencies = Def.setting(Seq(
+    "org.scala-js"                      %%% "scalajs-dom" % Ver.client.scalaDom,
+    "com.lihaoyi"                       %%% "scalatags" % Ver.shared.scalatags,
+    "com.github.japgolly.scalajs-react" %%% "core" % Ver.client.scalajsReact,
+    "com.github.japgolly.scalajs-react" %%% "extra" % Ver.client.scalajsReact,
+    "com.github.japgolly.scalacss"      %%% "ext-react" % Ver.client.scalaCSS
+  ))
+
 
   val jsDependencies = Seq(
     "org.webjars.npm" % "react" % Ver.js.react / "react-with-addons.js" minified "react-with-addons.min.js" commonJSName "React",

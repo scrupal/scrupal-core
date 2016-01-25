@@ -8,27 +8,28 @@ import scalatags.Text.all._
   * A layout for doing a Single Page Application with Scrupal REST Back End, React.js, Scala.js, and Polymer
   * for web components.
   */
-class SinglePageAppLayout(implicit val scrupal : Scrupal) extends PolymerLayout {
+case class ReactPolymerLayout(appName : String = "")(implicit val scrupal : Scrupal) extends PolymerLayout {
   def id: Identifier = 'ScrupalLayout
 
   val scalajs = new ScalaJS()(scrupal)
 
   val description: String =
-    "A Polymer + React layout for most SPA type pages"
+    "A Polymer + React layout for Single Page Application type pages"
 
   override def contents(args: Arguments) : HtmlContents = {
-    div(scalatags.Text.all.id := "spa-content")
+    div(scalatags.Text.all.id := "polymer-react-app")
   }
 
   override def header(args: Arguments) : HtmlContents = {
-    div(scalatags.Text.all.id := "spa-header")
+    emptyContents
   }
 
   override def footer(args: Arguments) : HtmlContents = {
-    div(scalatags.Text.all.id := "spa-footer")
+    emptyContents
   }
 
   override def endScripts(args: Arguments) : HtmlContents = {
-    super.endScripts(args) ++ scalajs.projectScript("scrupal-client")
+    super.endScripts(args) ++ scalajs.projectScript("scrupal-react-polymer") ++
+      { if (appName.nonEmpty) scalajs.projectScript(appName) else emptyContents }
   }
 }

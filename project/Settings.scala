@@ -74,6 +74,20 @@ object Settings extends AssetsSettings {
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
+  lazy val reactPolymerSettings = sharedSettings ++ Seq(
+    titleForDocs := "Scrupal Client For React/Polymer Applications",
+    libraryDependencies ++= Dependencies.reactPolymerDependencies.value,
+    elideOptions := Seq(),
+    scalacOptions ++= elideOptions.value,
+    jsDependencies ++= Dependencies.jsDependencies,
+    skip in packageJSDependencies := false,
+    persistLauncher := true,
+    persistLauncher in Test := false,
+    coverageExcludedPackages := ".*",
+    testFrameworks += new TestFramework("utest.runner.Framework")
+  )
+
+
   lazy val serverSettings = sharedSettings ++ Seq(
     titleForDocs := "Scrupal Core Server",
     libraryDependencies ++= Dependencies.serverDependencies,
@@ -132,7 +146,6 @@ object Ver {
   val silhouette = "3.0.4"
   val bootstrap = "3.3.6" // Note: must match play_bootstrap version
   val slickery = "0.3.8"
-  val scalatags = "0.5.4"
 
   object webjar {
     val polymer = "1.0.8"
@@ -146,6 +159,8 @@ object Ver {
   }
 
   object shared {
+    val scalatags = "0.5.4"
+    val upickle = "0.3.7"
     val scalaRx = "0.2.8"
     val autowire = "0.2.5"
     val booPickle = "1.1.0"
