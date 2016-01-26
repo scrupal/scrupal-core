@@ -8,6 +8,9 @@ sudo: false
 # Our primary language is scala
 language: scala
 
+node_js:
+  - "4.1"
+
 # The version of scala we use in our build
 scala:
    - "2.11.7"
@@ -18,7 +21,7 @@ jdk:
 
 env:
   global:
-    JAVA_OPTS=-Xmx8g
+    JAVA_OPTS=-Xmx3g
 
 # How to run the build. Note the use of scoverage commands
 script:

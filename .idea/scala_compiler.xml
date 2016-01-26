@@ -13,7 +13,7 @@
       </parameters>
     </profile>
     <profile name="SBT 2" modules="root" />
-    <profile name="SBT 3" modules="client,sharedJS">
+    <profile name="SBT 3" modules="client">
       <option name="deprecationWarnings" value="true" />
       <option name="uncheckedWarnings" value="true" />
       <option name="featureWarnings" value="true" />
@@ -52,7 +52,7 @@
         <parameter value="-Xlint" />
       </parameters>
       <plugins>
-        <plugin path="$USER_HOME$/.ivy2/cache/org.scala-js/scalajs-compiler_2.11.7/jars/scalajs-compiler_2.11.7-0.6.5.jar" />
+        <plugin path="$USER_HOME$/.ivy2/cache/org.scala-js/scalajs-compiler_2.11.7/jars/scalajs-compiler_2.11.7-0.6.6.jar" />
       </plugins>
     </profile>
     <profile name="SBT 7" modules="scrupal-react-polymer">
@@ -64,7 +64,18 @@
         <parameter value="-Xlint" />
       </parameters>
       <plugins>
-        <plugin path="$USER_HOME$/.ivy2/cache/org.scala-js/scalajs-compiler_2.11.7/jars/scalajs-compiler_2.11.7-0.6.5.jar" />
+        <plugin path="$USER_HOME$/.ivy2/cache/org.scala-js/scalajs-compiler_2.11.7/jars/scalajs-compiler_2.11.7-0.6.6.jar" />
+      </plugins>
+    </profile>
+    <profile name="SBT 8" modules="sharedJS">
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
+      <parameters>
+        <parameter value="-Xlint" />
+      </parameters>
+      <plugins>
+        <plugin path="$USER_HOME$/.ivy2/cache/org.scala-js/scalajs-compiler_2.11.7/jars/scalajs-compiler_2.11.7-0.6.6.jar" />
       </plugins>
     </profile>
   </component>

@@ -49,7 +49,7 @@ object ScrupalBuild extends Build {
   lazy val client = Project("scrupal-client", file("scrupal-client")).
     enablePlugins(ScalaJSPlugin, ScalaJSPlay).
     // WARNING: This yields a "These plugins were both included and excluded error"
-    // .disablePlugins(ScoverageSbtPlugin) WARNING:
+    // .disablePlugins(ScoverageSbtPlugin)
     settings(Settings.clientSettings).
     dependsOn(sharedJS)
 

@@ -27,27 +27,25 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
 
   "Scrupal" should {
     "construct from ScrupalCache" in {
-      val scrupal = ScrupalCache("ConstructFromCache")
-      scrupal.isInstanceOf[Scrupal] must beTrue
-      scrupal.isInstanceOf[ScrupalComponent] must beTrue
+      withScrupal("ConstructFromCache") { scrpl : Scrupal ⇒
+        scrpl.isInstanceOf[Scrupal] must beTrue
+        scrpl.isInstanceOf[ScrupalComponent] must beTrue
+      }
     }
 
     "auto register" in {
-      val scrupal = ScrupalCache("AutoRegister")
-      Scrupal.lookup(Symbol("AutoRegister")) must beEqualTo(Some(scrupal))
-    }
-
-    "close cleanly" in {
-      val scrupal = ScrupalCache("Close")
-      scrupal.doClose() must beTrue
+      withScrupal("AutoRegister") { scrpl : Scrupal ⇒
+        Scrupal.lookup(Symbol("AutoRegister")) must beEqualTo(Some(scrpl))
+      }
     }
 
     "can access actor, exec, timeout" in {
-      val scrupal = ScrupalCache("Access")
-      scrupal.withActorExec { (as, ec, to) ⇒
-        scrupal.actorSystem must beEqualTo(as)
-        scrupal.executionContext must beEqualTo(ec)
-        scrupal.akkaTimeout must beEqualTo(to)
+      withScrupal("Access") { scrpl ⇒
+        scrpl.withActorExec { (as, ec, to) ⇒
+          scrpl.actorSystem must beEqualTo(as)
+          scrpl.executionContext must beEqualTo(ec)
+          scrpl.akkaTimeout must beEqualTo(to)
+        }
       }
     }
 
@@ -106,6 +104,7 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
       }
     }
   }
+
   "ScrupalLoader" should {
     "load a Scrupal" in {
       val loader = new ScrupalLoader

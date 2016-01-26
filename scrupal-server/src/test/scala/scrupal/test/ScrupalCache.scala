@@ -18,6 +18,7 @@ import play.api._
 
 import com.reactific.helpers.MemoryCache
 import scrupal.core.Scrupal
+import scrupal.utils.ScrupalComponent
 
 /** Scrupal Test Cache
   *
@@ -26,7 +27,7 @@ import scrupal.core.Scrupal
   * case has its own isolated context means that conflicts between test cases will be eliminated. There
   * is no global data except the Scrupal object.
   */
-object ScrupalCache extends MemoryCache[String,Scrupal] {
+object ScrupalCache extends MemoryCache[String,Scrupal] with ScrupalComponent {
 
   def makeContext(
       name : String,
@@ -48,7 +49,13 @@ object ScrupalCache extends MemoryCache[String,Scrupal] {
   }
 
   def unload(name : String) : Unit = {
-    super.remove(name)
+    get(name) match {
+      case Some(scrpl) ⇒
+        scrpl.doClose()
+        super.remove(name)
+      case None ⇒
+        log.warn(s"Attempt to unload an unregistered Scrupal instance: $name")
+    }
   }
 
   def apply(

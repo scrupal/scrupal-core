@@ -61,32 +61,27 @@ object Settings extends AssetsSettings {
     resolvers ++= Seq(Resolver.jcenterRepo)
   )
 
-  lazy val clientSettings = sharedSettings ++ Seq(
+  lazy val commonClientSettings = sharedSettings ++ Seq(
+    scalaJSUseRhino := false,
+    elideOptions := Seq(),
+    scalacOptions ++= elideOptions.value,
+    jsDependencies ++= Dependencies.jsDependencies,
+    skip in packageJSDependencies := false,
+    persistLauncher := true,
+    persistLauncher in Test := false,
+    coverageExcludedPackages := ".*",
+    testFrameworks += new TestFramework("utest.runner.Framework")
+  )
+
+  lazy val clientSettings = commonClientSettings ++ Seq(
     titleForDocs := "Scrupal Core Client",
-    libraryDependencies ++= Dependencies.clientDependencies.value,
-    elideOptions := Seq(),
-    scalacOptions ++= elideOptions.value,
-    jsDependencies ++= Dependencies.jsDependencies,
-    skip in packageJSDependencies := false,
-    persistLauncher := true,
-    persistLauncher in Test := false,
-    coverageExcludedPackages := ".*",
-    testFrameworks += new TestFramework("utest.runner.Framework")
+    libraryDependencies ++= Dependencies.clientDependencies.value
   )
 
-  lazy val reactPolymerSettings = sharedSettings ++ Seq(
+  lazy val reactPolymerSettings = commonClientSettings ++ Seq(
     titleForDocs := "Scrupal Client For React/Polymer Applications",
-    libraryDependencies ++= Dependencies.reactPolymerDependencies.value,
-    elideOptions := Seq(),
-    scalacOptions ++= elideOptions.value,
-    jsDependencies ++= Dependencies.jsDependencies,
-    skip in packageJSDependencies := false,
-    persistLauncher := true,
-    persistLauncher in Test := false,
-    coverageExcludedPackages := ".*",
-    testFrameworks += new TestFramework("utest.runner.Framework")
+    libraryDependencies ++= Dependencies.reactPolymerDependencies.value
   )
-
 
   lazy val serverSettings = sharedSettings ++ Seq(
     titleForDocs := "Scrupal Core Server",
