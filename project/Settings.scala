@@ -145,7 +145,7 @@ object Ver {
   val kamon = "0.4.0"
   val silhouette = "3.0.4"
   val bootstrap = "3.3.6" // Note: must match play_bootstrap version
-  val slickery = "0.3.8"
+  val slickery = "0.3.9-SNAPSHOT"
 
   object webjar {
     val polymer = "1.0.8"

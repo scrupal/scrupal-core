@@ -17,6 +17,8 @@ package scrupal.test
 
 import javax.inject.{Inject, Provider}
 
+import org.specs2.data.AlwaysTag
+import org.specs2.specification.core
 import org.specs2.specification.core.Fragments
 import play.api._
 import play.api.inject._
@@ -35,16 +37,14 @@ trait OneAppPerSpec extends ScrupalSpecification { self : ScrupalSpecification â
     Play.start(application)
   }
 
-  protected def beforeAll() = {}
-
-  protected def afterAll() = {}
-
   private def stopRun() = {
     Play.stop(application)
   }
 
-  override def map(fs : â‡’ Fragments) = {
-    step(startRun()) ^ step(beforeAll()) ^ fs ^ step(afterAll()) ^ step(stopRun())
+  override def map(fs: =>core.Fragments) = {
+    super.map(fs).
+      prepend(fragmentFactory.step(startRun())).
+      append(fragmentFactory.step(stopRun()))
   }
 }
 

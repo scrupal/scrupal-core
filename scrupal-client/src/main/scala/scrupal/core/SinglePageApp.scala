@@ -38,7 +38,7 @@ object SinglePageApp extends js.JSApp {
   }
 
   import dom.ext._
-  import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+  import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
   /** Load application content.
     * This method gets the application loaded into the browser. We consider the application to have three content

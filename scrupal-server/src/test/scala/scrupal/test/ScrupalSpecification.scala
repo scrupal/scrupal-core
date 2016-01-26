@@ -17,6 +17,8 @@ package scrupal.test
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import com.reactific.helpers.testkit.HelperSpecification
+import org.specs2.specification.BeforeAfterAll
 import play.api.test.PlaySpecification
 import scrupal.core._
 import scrupal.utils.ScrupalComponent
@@ -31,7 +33,7 @@ abstract class ScrupalSpecification(
   val specName : String,
   val additionalConfig : Map[String,AnyRef] = Map.empty[String,AnyRef],
   override val timeout : FiniteDuration = Duration(5, "seconds")
-) extends PlaySpecification with ScrupalComponent {
+) extends PlaySpecification with HelperSpecification with BeforeAfterAll with ScrupalComponent {
 
   // WARNING: Do NOT put anything but def and lazy val because of DelayedInit or app startup will get invoked twice
   // and you'll have a real MESS on your hands!!!! (i.e. no db interaction will work!)
@@ -44,6 +46,25 @@ abstract class ScrupalSpecification(
   implicit lazy val context : SiteContext = Context(scrupal, site)
 
   def withExecutionContext[T](f : ExecutionContext ⇒ T) : T = scrupal.withExecutionContext[T](f)
+
+  override def beforeAll : Unit = {
+    // nothing to do
+  }
+  override def afterAll : Unit = {
+    ScrupalCache.unload(specName)
+  }
+
+  def withScrupal[T](
+      name: String,
+      path: java.io.File = new java.io.File("."),
+      moreConfig: Map[String,AnyRef] = Map.empty[String,AnyRef])( f : Scrupal ⇒ T) : T = {
+    val scrupal = ScrupalCache(name,path,moreConfig)
+    try {
+      f(scrupal)
+    } finally {
+      ScrupalCache.unload(name)
+    }
+  }
 
   /*
   def withStoreContext[T](f : StoreContext ⇒ T) : T =  scrupal.withStoreContext[T](f)

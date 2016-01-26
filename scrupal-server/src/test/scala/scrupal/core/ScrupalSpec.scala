@@ -57,33 +57,30 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
     }
 
     "allow thread pool to be configured" in {
-      val s1 = ScrupalCache("s1", additionalConfiguration=Map(
-        "scrupal.executor.type" → "fixed-thread-pool"
-      ))
-      val f1 = s1.withExecutionContext { implicit ec : ExecutionContext ⇒
-        ec.isInstanceOf[ExecutionContextExecutorService] must beTrue
-        Future { Thread.sleep(1) ; "s1" }
+      val f1 = withScrupal("s1", moreConfig = Map("scrupal.executor.type" → "fixed-thread-pool")) { s1: Scrupal ⇒
+        s1.withExecutionContext { implicit ec: ExecutionContext ⇒
+          ec.isInstanceOf[ExecutionContextExecutorService] must beTrue
+          Future {Thread.sleep(1); "s1"}
+        }
       }
-      val s2 = ScrupalCache("s2", additionalConfiguration = Map(
-        "scrupal.executor.type" → "default"
-      ))
-      val f2 = s2.withExecutionContext { implicit ec : ExecutionContext ⇒
-        ec.isInstanceOf[ExecutionContextExecutorService] must beTrue
-        Future { Thread.sleep(1) ; "s2" }
+
+      val f2 = withScrupal("s2", moreConfig = Map("scrupal.executor.type" → "default")) { s2 : Scrupal ⇒
+        s2.withExecutionContext { implicit ec : ExecutionContext ⇒
+          ec.isInstanceOf[ExecutionContextExecutorService] must beTrue
+          Future { Thread.sleep(1) ; "s2" }
+        }
       }
-      val s3 = ScrupalCache("s3", additionalConfiguration = Map(
-        "scrupal.executor.type" → "thread-pool"
-      ))
-      val f3 = s3.withExecutionContext { implicit ec : ExecutionContext ⇒
-        ec.isInstanceOf[ExecutionContextExecutorService] must beTrue
-        Future { Thread.sleep(1) ; "s3" }
+      val f3 = withScrupal("s3", moreConfig = Map("scrupal.executor.type" → "thread-pool")) { s3 : Scrupal ⇒
+        s3.withExecutionContext { implicit ec : ExecutionContext ⇒
+          ec.isInstanceOf[ExecutionContextExecutorService] must beTrue
+          Future { Thread.sleep(1) ; "s3" }
+        }
       }
-      val s4 = ScrupalCache("s4", additionalConfiguration = Map(
-        "scrupal.executor.type" → "akka"
-      ))
-      val f4 = s4.withExecutionContext { implicit ec : ExecutionContext ⇒
-        ec.isInstanceOf[ExecutionContextExecutor] must beTrue
-        Future { Thread.sleep(1) ; "s4" }
+      val f4 = withScrupal("s4", moreConfig = Map("scrupal.executor.type" → "akka")) { s4 : Scrupal ⇒
+        s4.withExecutionContext { implicit ec : ExecutionContext ⇒
+          ec.isInstanceOf[ExecutionContextExecutor] must beTrue
+          Future { Thread.sleep(1) ; "s4" }
+        }
       }
       import scala.concurrent.ExecutionContext.Implicits.global
       val future = Future.sequence(Seq(f1, f2, f3, f4))

@@ -23,7 +23,7 @@ import scalatags.JsDom.all._
   * the application is launched towards the end of page loading.
   */
 object ReactPolymerApp extends js.JSApp {
-  import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+  import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
   /** main method
     * This method is invoked from the bottom of each SinglePageApp page that is loaded into the browser. The

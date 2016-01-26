@@ -47,6 +47,10 @@ object ScrupalCache extends MemoryCache[String,Scrupal] {
     ApplicationLoader.createContext(environment, config) → dbName
   }
 
+  def unload(name : String) : Unit = {
+    super.remove(name)
+  }
+
   def apply(
       name: String,
       path: java.io.File = new java.io.File("."),
