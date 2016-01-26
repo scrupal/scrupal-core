@@ -38,7 +38,7 @@ import play.api.routing.sird._
 import router.scrupal.core.{APPController, APIController, AdminController, Assets}
 import scrupal.html._
 
-import scala.concurrent.{ExecutionContextExecutorService, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
@@ -122,10 +122,6 @@ case class Scrupal (
   val threeColumnBootstrapLayout = new ThreeColumnBootstrapLayout()(this)
   val reactPolymerLayout = new ReactPolymerLayout()(this)
 
-  val schema = CoreSchema(name, configuration)(this)
-
-  schema.create()
-
   val DefaultLocalHostSite = new Site(SiteData("localhost"))(this) {
     object helpprovider extends Provider with Enablee {
       def id = 'HelpProvider
@@ -161,7 +157,6 @@ case class Scrupal (
     val futureResult = applicationLifecycle.stop()
     await(futureResult, closeTimeout, "scrupal shutdown") match {
       case Success(x) =>
-        log.info("Scrupal shutdown completed normally.")
         true
       case Failure(x) =>
         log.warn("Scrupal shutdown failed: ", x)
@@ -172,13 +167,17 @@ case class Scrupal (
   protected def internalClose() : Unit = {
     log.info("Scrupal shutdown initiated")
     // _storeContext.close()
+    val executionContextIsAkka = executionContext == actorSystem.dispatcher
     actorSystem.shutdown()
-    executionContext match {
-      case eces: ExecutionContextExecutorService ⇒
-        eces.shutdown()
-      case _ ⇒
-        // nothing
+    if (!executionContextIsAkka) {
+      executionContext match {
+        case es: ExecutorService ⇒
+          es.shutdown()
+        case _ ⇒
+          log.warn("Execution context is not an ExecutorService, shutdown not possible")
+      }
     }
+    log.info("Scrupal shutdown completed normally.")
   }
 
   def siteForRequest(header: RequestHeader) : (Option[Site],Option[String]) = {

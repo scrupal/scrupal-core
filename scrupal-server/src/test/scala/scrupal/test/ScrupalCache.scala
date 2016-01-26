@@ -48,6 +48,13 @@ object ScrupalCache extends MemoryCache[String,Scrupal] with ScrupalComponent {
     ApplicationLoader.createContext(environment, config) → dbName
   }
 
+  def contains(name : String) : Boolean = {
+    super.get(name) match {
+      case Some(s) ⇒ true
+      case None ⇒ false
+    }
+  }
+
   def unload(name : String) : Unit = {
     get(name) match {
       case Some(scrpl) ⇒

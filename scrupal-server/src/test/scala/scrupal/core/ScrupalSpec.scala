@@ -58,31 +58,36 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
       val f1 = withScrupal("s1", moreConfig = Map("scrupal.executor.type" → "fixed-thread-pool")) { s1: Scrupal ⇒
         s1.withExecutionContext { implicit ec: ExecutionContext ⇒
           ec.isInstanceOf[ExecutionContextExecutorService] must beTrue
-          Future {Thread.sleep(1); "s1"}
+          val future = Future { "s1"}
+          await(future)
         }
       }
 
       val f2 = withScrupal("s2", moreConfig = Map("scrupal.executor.type" → "default")) { s2 : Scrupal ⇒
         s2.withExecutionContext { implicit ec : ExecutionContext ⇒
           ec.isInstanceOf[ExecutionContextExecutorService] must beTrue
-          Future { Thread.sleep(1) ; "s2" }
+          val future = Future { "s2" }
+          await(future)
         }
       }
       val f3 = withScrupal("s3", moreConfig = Map("scrupal.executor.type" → "thread-pool")) { s3 : Scrupal ⇒
         s3.withExecutionContext { implicit ec : ExecutionContext ⇒
           ec.isInstanceOf[ExecutionContextExecutorService] must beTrue
-          Future { Thread.sleep(1) ; "s3" }
+          val future = Future { "s3" }
+          await(future)
         }
       }
       val f4 = withScrupal("s4", moreConfig = Map("scrupal.executor.type" → "akka")) { s4 : Scrupal ⇒
         s4.withExecutionContext { implicit ec : ExecutionContext ⇒
           ec.isInstanceOf[ExecutionContextExecutor] must beTrue
-          Future { Thread.sleep(1) ; "s4" }
+          val future = Future { "s4" }
+          await(future)
         }
       }
-      import scala.concurrent.ExecutionContext.Implicits.global
-      val future = Future.sequence(Seq(f1, f2, f3, f4))
-      await(future) must beEqualTo(Seq("s1", "s2", "s3", "s4"))
+      f1 must beEqualTo("s1")
+      f2 must beEqualTo("s2")
+      f3 must beEqualTo("s3")
+      f4 must beEqualTo("s4")
     }
 
     "provides default site" in {

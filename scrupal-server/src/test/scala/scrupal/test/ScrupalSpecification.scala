@@ -51,16 +51,17 @@ abstract class ScrupalSpecification(
     // nothing to do
   }
   override def afterAll : Unit = {
-    ScrupalCache.unload(specName)
+    if (ScrupalCache.contains(specName))
+      ScrupalCache.unload(specName)
   }
 
   def withScrupal[T](
       name: String,
       path: java.io.File = new java.io.File("."),
       moreConfig: Map[String,AnyRef] = Map.empty[String,AnyRef])( f : Scrupal ⇒ T) : T = {
-    val scrupal = ScrupalCache(name,path,moreConfig)
+    val scrpl = ScrupalCache(name,path,moreConfig)
     try {
-      f(scrupal)
+      f(scrpl)
     } finally {
       ScrupalCache.unload(name)
     }
