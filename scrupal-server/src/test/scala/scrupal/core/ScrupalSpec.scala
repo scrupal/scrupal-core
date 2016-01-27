@@ -26,26 +26,20 @@ import scrupal.html._
 class ScrupalSpec extends ScrupalSpecification("Scrupal") {
 
   "Scrupal" should {
-    "construct from ScrupalCache" in {
-      withScrupal("ConstructFromCache") { scrpl : Scrupal ⇒
-        scrpl.isInstanceOf[Scrupal] must beTrue
-        scrpl.isInstanceOf[ScrupalComponent] must beTrue
-      }
+    "construct from ScrupalCache" in withScrupal("ConstructFromCache") { scrpl : Scrupal ⇒
+      scrpl.isInstanceOf[Scrupal] must beTrue
+      scrpl.isInstanceOf[ScrupalComponent] must beTrue
     }
 
-    "auto register" in {
-      withScrupal("AutoRegister") { scrpl : Scrupal ⇒
+    "auto register" in withScrupal("AutoRegister") { scrpl : Scrupal ⇒
         Scrupal.lookup(Symbol("AutoRegister")) must beEqualTo(Some(scrpl))
-      }
     }
 
-    "can access actor, exec, timeout" in {
-      withScrupal("Access") { scrpl ⇒
-        scrpl.withActorExec { (as, ec, to) ⇒
-          scrpl.actorSystem must beEqualTo(as)
-          scrpl.executionContext must beEqualTo(ec)
-          scrpl.akkaTimeout must beEqualTo(to)
-        }
+    "can access actor, exec, timeout" in withScrupal("Access") { scrpl ⇒
+      scrpl.withActorExec { (as, ec, to) ⇒
+        scrpl.actorSystem must beEqualTo(as)
+        scrpl.executionContext must beEqualTo(ec)
+        scrpl.akkaTimeout must beEqualTo(to)
       }
     }
 
@@ -90,12 +84,12 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
       f4 must beEqualTo("s4")
     }
 
-    "provides default site" in {
+    "provides default site" in withScrupal("default_site") { scrupal ⇒
       val site = scrupal.DefaultLocalHostSite
       val req = FakeRequest("GET", "/")
       site.reactorFor(req) match {
         case Some(reactor) ⇒
-          val stimulus = Stimulus(context, req)
+          val stimulus = Stimulus(Context(scrupal), req)
           val future = reactor(stimulus).map { response ⇒
             response.disposition must beEqualTo(Successful)
             response.payload.isInstanceOf[HtmlContent]

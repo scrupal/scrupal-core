@@ -32,7 +32,7 @@ class ReactorSpec extends ScrupalSpecification("Reactor") {
       }
       await(future)
     }
-    "respond to Context/Request pair" in {
+    "respond to Context/Request pair" in withScrupal("respond_to_context_and_request") { (scrupal) ⇒
       val reactor = SimpleReactor("simple")
       val future = reactor.resultFrom(SimpleContext(scrupal), FakeRequest("GET", "/")).map { result =>
         result.header.status must beEqualTo(Status.OK)

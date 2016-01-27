@@ -17,15 +17,14 @@ package scrupal.core
 
 import akka.actor.ActorSystem
 import play.api.Configuration
-import scrupal.test.ScrupalSpecification
-import scrupal.test.FakeSite
+import scrupal.test.{SharedTestScrupal, ScrupalSpecification, FakeSite}
 
 import scala.concurrent.ExecutionContext
 
 /**
  * Created by reid on 11/11/14.
  */
-class ContextSpec extends ScrupalSpecification("Context") {
+class ContextSpec extends ScrupalSpecification("Context") with SharedTestScrupal {
 
   "Context" should {
     "construct a SimpleContext with a Scrupal" in {

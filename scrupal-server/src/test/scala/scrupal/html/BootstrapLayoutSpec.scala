@@ -15,10 +15,11 @@
 package scrupal.html
 
 import scrupal.core.HtmlContent
+import scrupal.test.SharedTestScrupal
 
 import scalatags.Text.all._
 
-class BootstrapLayoutSpec extends ValidatingSpecification("Bootstrap") {
+class BootstrapLayoutSpec extends ValidatingSpecification("Bootstrap") with SharedTestScrupal {
 
   "BootstrapLayout" should {
     "have some test examples" in {

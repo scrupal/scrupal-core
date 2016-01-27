@@ -2,7 +2,7 @@ package scrupal.html
 
 import scalatags.Text.all._
 
-import scrupal.core.HtmlContent
+import scrupal.core.{Context, HtmlContent}
 
 /** Test Cases For ScrupalLayout */
 class ReactPolymerLayoutSpec extends ValidatingSpecification("ReactPolymerLayout") {
@@ -17,9 +17,9 @@ class ReactPolymerLayoutSpec extends ValidatingSpecification("ReactPolymerLayout
   }
 
   "ScrupalLayout" should {
-    "produce valid HTML" in {
+    "produce valid HTML" in withScrupal("ScrupalLayout_validity") { scrupal ⇒
       val content = div()
-      val future = scrupal.reactPolymerLayout.page(context, makeScrupalArgs(content))
+      val future = scrupal.reactPolymerLayout.page(Context(scrupal), makeScrupalArgs(content))
       val result = await(future)
       result.contains("react-polymer-app") must beTrue
       // FIXME: nu.validator can't handle HTML Imports yet

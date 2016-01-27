@@ -15,8 +15,9 @@
 package scrupal.html
 
 import scrupal.core.SiteData
+import scrupal.test.SharedTestScrupal
 
-class AdministrationSpec extends ValidatingSpecification("Administration") {
+class AdministrationSpec extends ValidatingSpecification("Administration") with SharedTestScrupal {
 
   implicit val ec = scrupal.executionContext
 

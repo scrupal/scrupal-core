@@ -7,11 +7,11 @@ import com.reactific.helpers.{ThrowingHelper, NotImplementedException}
 import play.api.http.Status
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
-import scrupal.test.{FakeSite, ScrupalSpecification}
+import scrupal.test.{SharedTestScrupal, FakeSite, ScrupalSpecification}
 
 import scala.concurrent.TimeoutException
 
-class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler") {
+class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler") with SharedTestScrupal {
 
   def setup(name : String) : RequestHeader = {
     new FakeSite(SiteData(name, s"$name.com"))(scrupal)

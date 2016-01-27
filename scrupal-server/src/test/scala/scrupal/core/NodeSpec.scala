@@ -17,12 +17,12 @@ package scrupal.core
 
 import akka.http.scaladsl.model.MediaTypes
 import com.reactific.slickery.testkit.SlickerySpecification
-import scrupal.test.ScrupalSpecification
+import scrupal.test.{SharedTestScrupal, ScrupalSpecification}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class NodeSpec extends ScrupalSpecification("Node") with SlickerySpecification {
+class NodeSpec extends ScrupalSpecification("Node") with SlickerySpecification with SharedTestScrupal {
 
   "Node" should {
     "produce content" in {

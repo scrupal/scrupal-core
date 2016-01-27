@@ -22,13 +22,13 @@ import play.api.http.{DefaultHttpErrorHandler, Status}
 import play.api.mvc.{Action, AnyContent, Request}
 import play.api.test.{FakeRequest, WithApplication}
 import play.api.{Configuration, Environment, Mode}
-import scrupal.test.ScrupalSpecification
+import scrupal.test.{SharedTestScrupal, ScrupalSpecification}
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-class AssetsSpec extends ScrupalSpecification("Assets") {
+class AssetsSpec extends ScrupalSpecification("Assets") with SharedTestScrupal {
 
   def mkAssets : Assets = {
     val environment = Environment(new File("."), this.getClass.getClassLoader, Mode.Test)

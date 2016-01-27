@@ -15,11 +15,12 @@
 package scrupal.html
 
 import scrupal.core.{Scrupal, HtmlContent}
+import scrupal.test.SharedTestScrupal
 
 import scalatags.Text.all._
 
 
-class LayoutSpec extends ValidatingSpecification("Layout") {
+class LayoutSpec extends ValidatingSpecification("Layout") with SharedTestScrupal {
 
   class TestLayout1(implicit val scrupal : Scrupal) extends Layout {
     def id = 'TestLayout1

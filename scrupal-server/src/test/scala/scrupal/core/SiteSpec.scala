@@ -17,7 +17,7 @@ package scrupal.core
 import java.time.Instant
 
 import play.api.test.FakeRequest
-import scrupal.test.{FakeSite, ScrupalSpecification}
+import scrupal.test.{SharedTestScrupal, FakeSite, ScrupalSpecification}
 
 class SiteSpec extends ScrupalSpecification("Site") {
 
@@ -42,7 +42,7 @@ class SiteSpec extends ScrupalSpecification("Site") {
     }
   }
   "Site" should {
-    "provide reactors and handlers" in {
+    "provide reactors and handlers" in withScrupal("reactors_and_handlers") { scrupal ⇒
       val site = new Site(new SiteData("fie", "fie.com"))(scrupal)
       val request = FakeRequest("GET", "/")
       site.reactorFor(request) must beEqualTo(None)
@@ -52,7 +52,7 @@ class SiteSpec extends ScrupalSpecification("Site") {
 
 }
 
-class SiteRegistrySpec extends ScrupalSpecification("SiteRegistry") {
+class SiteRegistrySpec extends ScrupalSpecification("SiteRegistry") with SharedTestScrupal {
   "SitesRegistry" should {
     "keep track of domain names" in {
       val site1 = FakeSite(SiteData("foo","foo.com"))(scrupal)

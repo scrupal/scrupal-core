@@ -36,28 +36,10 @@ abstract class ScrupalSpecification(
   val specName : String,
   val additionalConfig : Map[String,AnyRef] = Map.empty[String,AnyRef],
   override val timeout : FiniteDuration = Duration(5, "seconds")
-) extends PlaySpecification with SlickerySpecification with BeforeAfterAll with ScrupalComponent {
+) extends PlaySpecification with SlickerySpecification with ScrupalComponent {
 
   // WARNING: Do NOT put anything but def and lazy val because of DelayedInit or app startup will get invoked twice
   // and you'll have a real MESS on your hands!!!! (i.e. no db interaction will work!)
-
-  implicit lazy val scrupal: Scrupal = ScrupalCache(ScrupalSpecification.next(specName),
-    additionalConfiguration = additionalConfig)
-
-  implicit lazy val site: Site = new FakeSite(SiteData(specName, "localhost"))
-
-  implicit lazy val context: SiteContext = Context(scrupal, site)
-
-  def withExecutionContext[T](f: ExecutionContext ⇒ T): T = scrupal.withExecutionContext[T](f)
-
-  override def beforeAll: Unit = {
-    // nothing to do
-  }
-
-  override def afterAll: Unit = {
-    if (ScrupalCache.contains(specName))
-      ScrupalCache.unload(specName)
-  }
 
   abstract class WithScrupal[T](
     val name : String,
@@ -116,16 +98,27 @@ abstract class ScrupalSpecification(
     */
 }
 
-abstract class ScrupalSchemaSpecification(
-  override val specName : String,
-  override val additionalConfig : Map[String,AnyRef] = Map.empty[String,AnyRef],
-  override val timeout : FiniteDuration = Duration(5, "seconds")
-) extends ScrupalSpecification(specName) with SlickerySpecification {
-  def withH2CoreSchema(dbName: String)(f: (CoreSchema_H2) ⇒ Result) : Result = {
-    implicit val ec : ExecutionContext = scrupal.executionContext
-    WithH2Schema[CoreSchema_H2,Result](dbName)(name ⇒ CoreSchema_H2(name, H2Config(name))(scrupal)) {
-      schema: CoreSchema_H2 ⇒ f(schema)
-    }
+trait SharedTestScrupal extends ScrupalSpecification with BeforeAfterAll {
+  implicit lazy val scrupal: Scrupal = ScrupalCache(ScrupalSpecification.next(specName),
+    additionalConfiguration = additionalConfig)
+
+  // WARNING: Do NOT put anything but def and lazy val because of DelayedInit or app startup will get invoked twice
+  // and you'll have a real MESS on your hands!!!! (i.e. no db interaction will work!)
+
+
+  implicit lazy val site: Site = new FakeSite(SiteData(specName, "localhost"))
+
+  implicit lazy val context: SiteContext = Context(scrupal, site)
+
+  def withExecutionContext[T](f: ExecutionContext ⇒ T): T = scrupal.withExecutionContext[T](f)
+
+  override def beforeAll: Unit = {
+    // nothing to do
+  }
+
+  override def afterAll: Unit = {
+    if (ScrupalCache.contains(specName))
+      ScrupalCache.unload(specName)
   }
 }
 

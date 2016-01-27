@@ -4,10 +4,10 @@ import akka.http.scaladsl.model.MediaTypes
 import com.reactific.slickery.Storable._
 import org.specs2.matcher.MatchResult
 import play.api.test.FakeRequest
-import scrupal.test.ScrupalSpecification
+import scrupal.test.{SharedTestScrupal, ScrupalSpecification}
 
 /** Test Cases For EntityProvider */
-class EntityProviderSpec extends ScrupalSpecification("EntityProvider") {
+class EntityProviderSpec extends ScrupalSpecification("EntityProvider") with SharedTestScrupal {
 
   case class TestEntityProvider() extends { val id : Symbol = 'test } with EntityProvider
 

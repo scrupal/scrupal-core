@@ -13,7 +13,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class APIControllerSpec extends ScrupalSpecification("EntityController") {
 
   LoggingHelper.setToDebug(this)
-  LoggingHelper.setToDebug(scrupal.apiController)
 
   case class TestEntityProvider(id : Symbol) extends EntityProvider
 
@@ -32,7 +31,8 @@ class APIControllerSpec extends ScrupalSpecification("EntityController") {
 
 
   "APIController" should {
-    "support all entity invocations" in {
+    "support all entity invocations" in withScrupalSchema("EntityPaths") { (scrupal,schema) ⇒
+      LoggingHelper.setToDebug(scrupal.apiController)
       val site = new SiteForAPITest("testSite")(scrupal)
       val cases = Seq(
         ("GET","/api/feet/42/nada")           → "feet.retrieveById(id=42,details=nada)",

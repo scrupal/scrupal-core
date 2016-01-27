@@ -24,7 +24,7 @@
         <plugin path="$USER_HOME$/.ivy2/cache/org.scala-js/scalajs-compiler_2.11.7/jars/scalajs-compiler_2.11.7-0.6.5.jar" />
       </plugins>
     </profile>
-    <profile name="SBT 4" modules="server,scrupal-server">
+    <profile name="SBT 4" modules="server">
       <option name="postfixOps" value="true" />
       <option name="deprecationWarnings" value="true" />
       <option name="uncheckedWarnings" value="true" />
@@ -78,6 +78,17 @@
       <plugins>
         <plugin path="$USER_HOME$/.ivy2/cache/org.scala-js/scalajs-compiler_2.11.7/jars/scalajs-compiler_2.11.7-0.6.6.jar" />
       </plugins>
+    </profile>
+    <profile name="SBT 9" modules="scrupal-server">
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
+      <parameters>
+        <parameter value="-encoding" />
+        <parameter value="utf8" />
+        <parameter value="-target:jvm-1.8" />
+        <parameter value="-Xlint" />
+      </parameters>
     </profile>
   </component>
 </project>

@@ -1,18 +1,16 @@
 package scrupal.admin
 
-import org.specs2.execute.Result
 import play.api.http.Status
 import play.api.libs.iteratee.Iteratee
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import scrupal.core._
-import scrupal.test.{ScrupalSchemaSpecification, ScrupalSpecification}
+import scrupal.test.{SharedTestScrupal, ScrupalSpecification}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 /** Test Cases For AdminController */
-class AdminControllerSpec extends ScrupalSchemaSpecification("AdminController") {
+class AdminControllerSpec extends ScrupalSpecification("AdminController") with SharedTestScrupal {
 
   class SiteForAdminControllerTest(siteName: String)(implicit scrpl: Scrupal)
     extends Site(new SiteData(siteName, domainName="foo.com"))(scrpl) {
@@ -23,8 +21,9 @@ class AdminControllerSpec extends ScrupalSchemaSpecification("AdminController") 
   }
 
   "AdminController" should {
-    "yield None for irrelevant path" in {
+    "yield None for irrelevant path" in withScrupal("IrrelevantPath") { (scrupal) ⇒
       val req = FakeRequest("GET", "/api/foo/bar")
+      val context = Context(scrupal)
       scrupal.adminController.reactorFor(context, "foo", req) must beEqualTo(None)
     }
 

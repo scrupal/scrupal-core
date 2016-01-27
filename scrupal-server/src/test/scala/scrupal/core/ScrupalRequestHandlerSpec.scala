@@ -3,11 +3,11 @@ package scrupal.core
 import play.api.http.Status
 import play.api.mvc.{Result, AnyContent}
 import play.api.test.FakeRequest
-import scrupal.test.{FakeSite, ScrupalSpecification}
+import scrupal.test.{SharedTestScrupal, FakeSite, ScrupalSpecification}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ScrupalRequestHandlerSpec extends ScrupalSpecification("ScrupalRequestHandler") {
+class ScrupalRequestHandlerSpec extends ScrupalSpecification("ScrupalRequestHandler") with SharedTestScrupal {
 
   "ScrupalRequestHandler" should {
     "route request to correct site" in {

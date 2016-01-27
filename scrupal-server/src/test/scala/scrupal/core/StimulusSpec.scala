@@ -3,13 +3,10 @@ package scrupal.core
 import akka.http.scaladsl.model.MediaTypes
 import play.api.http.HeaderNames
 import play.api.test.FakeRequest
-import scrupal.test.ScrupalSpecification
+import scrupal.test.{SharedTestScrupal, ScrupalSpecification}
 
-/** Title Of Thing.
-  *
-  * Description of thing
-  */
-class StimulusSpec extends ScrupalSpecification("Stimulus") {
+/** Test Cases For Stimulus */
+class StimulusSpec extends ScrupalSpecification("Stimulus") with SharedTestScrupal {
 
   "Stimulus" should {
     val request = FakeRequest("GET", "/")

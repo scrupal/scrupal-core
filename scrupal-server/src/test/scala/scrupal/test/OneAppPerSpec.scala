@@ -28,7 +28,7 @@ import play.api.routing.Router
 
 import scala.runtime.AbstractPartialFunction
 
-trait OneAppPerSpec extends ScrupalSpecification { self : ScrupalSpecification ⇒
+trait OneAppPerSpec extends ScrupalSpecification with SharedTestScrupal {
 
   /** Override app if you need a FakeApplication with other than default parameters. */
   implicit lazy val application : Application = scrupal.application

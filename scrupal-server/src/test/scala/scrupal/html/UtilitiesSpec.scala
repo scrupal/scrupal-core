@@ -17,10 +17,11 @@ package scrupal.html
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import scrupal.core.{ThrowableContent, Stimulus}
+import scrupal.test.SharedTestScrupal
 
 import scalatags.Text.all._
 
-class UtilitiesSpec extends ValidatingSpecification("Utilities") {
+class UtilitiesSpec extends ValidatingSpecification("Utilities") with SharedTestScrupal {
 
   "unauthorized" should {
     "lay out content properly" in {

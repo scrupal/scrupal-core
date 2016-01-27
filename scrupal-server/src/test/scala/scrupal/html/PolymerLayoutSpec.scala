@@ -15,10 +15,11 @@
 package scrupal.html
 
 import scrupal.core.{HtmlContent, Scrupal}
+import scrupal.test.SharedTestScrupal
 
 import scalatags.Text.all._
 
-class PolymerLayoutSpec extends ValidatingSpecification("Polymer") {
+class PolymerLayoutSpec extends ValidatingSpecification("Polymer") with SharedTestScrupal {
 
   class TestPolymerLayout(name : String)(implicit val scrupal: Scrupal)
     extends { val id : Symbol = Symbol(name) } with PolymerLayout {

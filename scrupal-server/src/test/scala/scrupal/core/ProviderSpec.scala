@@ -18,13 +18,13 @@ package scrupal.core
 import com.reactific.helpers.{Registrable, Registry}
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
-import scrupal.test.ScrupalSpecification
+import scrupal.test.{SharedTestScrupal, ScrupalSpecification}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ProviderSpec extends ScrupalSpecification("Provider") {
+class ProviderSpec extends ScrupalSpecification("Provider") with SharedTestScrupal {
 
   val provider1 = NullProvider('One)
   val provider2 = NullProvider('Two)
