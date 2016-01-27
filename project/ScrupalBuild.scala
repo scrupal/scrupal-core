@@ -73,7 +73,7 @@ object ScrupalBuild extends Build {
     dependsOn(sharedJVM).
     aggregate(jsProjects.map(projectToRef): _*)
 
-  lazy val root = Project("scrupal-core", file(".")).
+  lazy val root : Project = Project("scrupal-core", file(".")).
     disablePlugins(PlayLayoutPlugin).
     enablePlugins(ScrupalPlugin).
     settings(Settings.coreSettings).

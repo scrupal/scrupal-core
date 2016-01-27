@@ -1,6 +1,6 @@
 resolvers ++=  Seq( Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots") )
 
-addSbtPlugin("org.scrupal" % "scrupal-sbt" % "0.4.1-SNAPSHOT" )
+addSbtPlugin("org.scrupal" % "scrupal-sbt" % "0.4.1" )
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.2.2")
 
