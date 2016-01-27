@@ -59,11 +59,25 @@ abstract class ScrupalSpecification(
       ScrupalCache.unload(specName)
   }
 
+  abstract class WithScrupal[T](
+    val name : String,
+    moreConfig: Map[String,AnyRef] = Map.empty[String,AnyRef]
+  )( f : (Scrupal) ⇒ T) {
+    implicit val scrupal = ScrupalCache(name, new java.io.File("."), moreConfig)
+    implicit val ec : ExecutionContext = scrupal.executionContext
+    try {
+      f(scrupal)
+    } finally {
+      ScrupalCache.unload(name)
+    }
+  }
+
   def withScrupal[T](
     name: String,
     path: java.io.File = new java.io.File("."),
-    moreConfig: Map[String, AnyRef] = Map.empty[String, AnyRef])(f: Scrupal ⇒ T): T = {
-    val scrpl = ScrupalCache(name, path, moreConfig)
+    moreConfig: Map[String, AnyRef] = Map.empty[String, AnyRef]
+  )(f: (Scrupal) ⇒ T): T = {
+    implicit val scrpl = ScrupalCache(name, path, moreConfig)
     try {
       f(scrpl)
     } finally {
@@ -71,13 +85,20 @@ abstract class ScrupalSpecification(
     }
   }
 
-  def withH2CoreSchema(dbName: String)(f: (CoreSchema_H2) ⇒ Result) : Result = {
-    implicit val ec : ExecutionContext = scrupal.executionContext
-    WithH2Schema[CoreSchema_H2,Result](dbName)(name ⇒ CoreSchema_H2(name, H2Config(name))(scrupal)) { schema:
-    CoreSchema_H2 ⇒
-      f(schema)
+  def withScrupalSchema(
+    configName: String,
+    path: java.io.File = new java.io.File("."),
+    moreConfig: Map[String, AnyRef] = Map.empty[String, AnyRef]
+  )(f: (Scrupal, CoreSchema_H2) ⇒ Result): Result = {
+    val config = H2Config(configName)
+    implicit val scrpl = ScrupalCache(configName, config)
+    implicit val ec : ExecutionContext = scrpl.executionContext
+    WithH2Schema[CoreSchema_H2,Result](configName)(name ⇒ scrpl.schema.asInstanceOf[CoreSchema_H2]) {
+      schema: CoreSchema_H2 ⇒
+        f(scrpl, schema)
     }
   }
+
 
 
     /*
@@ -93,6 +114,19 @@ abstract class ScrupalSpecification(
       }
     }
     */
+}
+
+abstract class ScrupalSchemaSpecification(
+  override val specName : String,
+  override val additionalConfig : Map[String,AnyRef] = Map.empty[String,AnyRef],
+  override val timeout : FiniteDuration = Duration(5, "seconds")
+) extends ScrupalSpecification(specName) with SlickerySpecification {
+  def withH2CoreSchema(dbName: String)(f: (CoreSchema_H2) ⇒ Result) : Result = {
+    implicit val ec : ExecutionContext = scrupal.executionContext
+    WithH2Schema[CoreSchema_H2,Result](dbName)(name ⇒ CoreSchema_H2(name, H2Config(name))(scrupal)) {
+      schema: CoreSchema_H2 ⇒ f(schema)
+    }
+  }
 }
 
 object ScrupalSpecification {

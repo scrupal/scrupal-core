@@ -7,15 +7,15 @@ import scrupal.core._
 
 import scala.concurrent.Future
 
-class AdminSiteProvider(val scrupal : Scrupal) extends {
+class AdminSiteProvider extends {
   val id = 'AdminSiteProvider
-} with Provider with Enablee with WithCoreSchema {
+} with Provider with Enablee {
 
   def provide: ReactionRoutes = {
     case GET(p"/list") ⇒ Reactor.of {list}
-    case GET(p"/${long(oid)}") ⇒ Reactor {site(oid)}
+    case GET(p"/${long(oid)}") ⇒ Reactor { site(oid) }
     case GET(p"/$byName") ⇒ Reactor { site(byName) }
-    case POST(p"/") ⇒ Reactor.of {createSite}
+    case POST(p"/") ⇒ Reactor.of { createSite }
   }
 
   /*  GET     /admin/site/$id<[0-9]+>         scrupal.admin.AdminController.site(id: Long)
@@ -43,8 +43,8 @@ class AdminSiteProvider(val scrupal : Scrupal) extends {
     )
   }
   def site(id: Long)(stimulus: Stimulus): Future[RxResponse] = {
-    mapQuery((schema) ⇒ schema.sites.byId(id)) {
-      case (Some(siteData), ec) ⇒
+    stimulus.context.scrupal.mapQuery( schema ⇒ schema.sites.byId(id)) {
+      case Some(siteData) ⇒
         Response(site2json(siteData), Successful)
       case _ ⇒
         Response(JsNull, Unlocatable)
@@ -52,11 +52,11 @@ class AdminSiteProvider(val scrupal : Scrupal) extends {
   }
 
   def site(theName: String)(stimulus: Stimulus) : Future[RxResponse] = {
-    mapQuery((schema) ⇒ schema.sites.byName(theName)) {
-      case (siteData,ec) ⇒
-        val sites = siteData.map { sd : SiteData ⇒ site2json(sd) }
+    stimulus.context.scrupal.mapQuery { schema ⇒ schema.sites.byName(theName) } {
+      case siteData : Seq[SiteData] ⇒
+        val sites = siteData.map { sd: SiteData ⇒ site2json(sd) }
         if (sites.nonEmpty)
-          Response(JsArray(sites),Successful)
+          Response(JsArray(sites), Successful)
         else
           Response(JsArray(), Unlocatable)
       case _ ⇒

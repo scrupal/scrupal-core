@@ -60,7 +60,7 @@ case class Scrupal (
 ) extends {
   final val id: Symbol = Symbol(name)
   final val registry = Scrupal
-} with ScrupalComponent with AutoCloseable  with Registrable[Scrupal] with I18nComponents{
+} with ScrupalComponent with AutoCloseable  with Registrable[Scrupal] with I18nComponents with WithCoreSchema {
 
   val applicationLifecycle: DefaultApplicationLifecycle = new DefaultApplicationLifecycle
 
@@ -212,6 +212,10 @@ case class Scrupal (
   }
 
   def withApplication[T](f : (Application) ⇒ T) : T = { f(application) }
+
+  lazy val schema : CoreSchema[_] = {
+    CoreSchema(name, configuration)(this)
+  }
 
   protected def getTimeout: Timeout = {
     Timeout(

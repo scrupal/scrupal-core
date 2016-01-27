@@ -14,11 +14,15 @@
   **********************************************************************************************************************/
 package scrupal.test
 
+import com.typesafe.config.{ConfigFactory, Config}
 import play.api._
 
 import com.reactific.helpers.MemoryCache
 import scrupal.core.Scrupal
 import scrupal.utils.ScrupalComponent
+
+import scala.collection.JavaConverters._
+import scala.language.postfixOps
 
 /** Scrupal Test Cache
   *
@@ -73,6 +77,25 @@ object ScrupalCache extends MemoryCache[String,Scrupal] with ScrupalComponent {
     getOrElse(name) {
       val (context, newName) = makeContext(name, path, additionalConfiguration)
       new Scrupal(context, newName)
+    }
+  }
+
+  def apply(
+    name: String,
+    conf : Config
+  ) : Scrupal = {
+    getOrElse(name) {
+      val environment: Environment = Environment(new java.io.File("."), this.getClass.getClassLoader, Mode.Test)
+      val dbName = Scrupal.mkActorName(name)
+      val config = conf.entrySet().asScala.map { case entry ⇒ "scrupal.database." + entry.getKey -> entry.getValue }
+        .toMap[String,AnyRef]
+      val context = ApplicationLoader.createContext(environment, config ++
+        Map(
+          "play.akka.actor-system" → dbName,
+          "app.instance.name" -> dbName
+        )
+      )
+      new Scrupal(context, dbName)
     }
   }
 }

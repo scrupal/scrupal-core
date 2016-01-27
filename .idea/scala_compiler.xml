@@ -25,6 +25,7 @@
       </plugins>
     </profile>
     <profile name="SBT 4" modules="server,scrupal-server">
+      <option name="postfixOps" value="true" />
       <option name="deprecationWarnings" value="true" />
       <option name="uncheckedWarnings" value="true" />
       <option name="featureWarnings" value="true" />
@@ -48,7 +49,7 @@
       <option name="uncheckedWarnings" value="true" />
       <option name="featureWarnings" value="true" />
       <parameters>
-        <parameter value="-P:scalajs:mapSourceURI:file:/Users/reidspencer/Code/scrupal-core/scrupal-client/src/main/scala/-&gt;4d3d2b7bdfbe283374e8/" />
+        <parameter value="-P:scalajs:mapSourceURI:file:/Users/reid/Code/scrupal-core/scrupal-client/src/main/scala/-&gt;a56cb1ecb7f00c54b1b8/" />
         <parameter value="-Xlint" />
       </parameters>
       <plugins>
@@ -60,7 +61,7 @@
       <option name="uncheckedWarnings" value="true" />
       <option name="featureWarnings" value="true" />
       <parameters>
-        <parameter value="-P:scalajs:mapSourceURI:file:/Users/reidspencer/Code/scrupal-core/react-polymer/src/main/scala/-&gt;a74c7da988f83b00910f/" />
+        <parameter value="-P:scalajs:mapSourceURI:file:/Users/reid/Code/scrupal-core/react-polymer/src/main/scala/-&gt;8a6457265fe4293b11aa/" />
         <parameter value="-Xlint" />
       </parameters>
       <plugins>

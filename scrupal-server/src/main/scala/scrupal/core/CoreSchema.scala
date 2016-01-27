@@ -87,7 +87,7 @@ object CoreSchema extends ScrupalComponent {
             toss(s"Unsupported database type: ${db.kindName} while opening Scrupal Core DB")
         }
       case None ⇒
-        toss(s"Configuration path 'core' not found")
+        toss(s"Configuration path '$configPath' not found")
     }
   }
   def apply(configPath : String, configuration : Configuration)(implicit scrupal: Scrupal) : CoreSchema[_] = {

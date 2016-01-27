@@ -28,39 +28,20 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-import scrupal.test.ScrupalSpecification
+import scrupal.test.{ScrupalSchemaSpecification, ScrupalSpecification}
 
 /** Test Case For CoreSchema */
-class CoreSchemaSpec extends ScrupalSpecification("CoreSchema") with SlickerySpecification {
+class CoreSchemaSpec extends ScrupalSchemaSpecification("CoreSchema")  {
 
   import com.reactific.helpers.LoggingHelper.ScalaLoggerExtension
-
-  final val baseDir = "target/testdb"
-
-  def testH2DbConfig(name : String) : Config = H2.makeDbConfigFor(name, dir=baseDir, disableConnectionPool=true)
-
-  def testPGDbConfig(name : String) : Config = PostgresQL.makeDbConfigFor(name, dir=baseDir, disableConnectionPool=true)
-
-  def WithCoreSchema[R](dbName: String)(f : (CoreSchema[_]) ⇒ R)(implicit ev: AsResult[R]) : Result = {
-    val h2Name = s"${dbName}_h2"
-    val h2Config = testH2DbConfig(h2Name)
-    log.debug(s"$h2Name: ${h2Config.toString}")
-    WithH2Schema[CoreSchema_H2,R](h2Name)( CoreSchema_H2(_, h2Config))(f)
-
-    // val pgName = s"${dbName}_pg"
-    // val pgConfig = testPGDbConfig(pgName)
-    // WithPostgresSchema[CoreSchema_PG,R](pgName)(CoreSchema_PG(_, pgConfig))(f)
-  }
 
   "CoreSchema" should {
     log.setToDebug()
     LoggingHelper.setToDebug("com.reactific.slickery.*")
-    LoggingHelper.setToDebug("org.h2.*")
-    LoggingHelper.setToDebug("slick.*")
     log.debug("Starting CoreSchema test")
 
     "CRUD SiteData" in {
-      WithCoreSchema("site_crud") { schema : CoreSchema[_] ⇒
+      withH2CoreSchema("site_crud") { schema : CoreSchema_H2 ⇒
         log.debug(s"JDBC Source: ${schema.db.source}")
         val future = scrupal.withExecutionContext { implicit ec: ExecutionContext ⇒
           val site = SiteData("testSite", "foo.com", "testing only")
@@ -98,7 +79,7 @@ class CoreSchemaSpec extends ScrupalSpecification("CoreSchema") with SlickerySpe
     }
 
     "CRUD Node" in {
-      WithCoreSchema("node_crud") { schema : CoreSchema[_] ⇒
+      withH2CoreSchema("node_crud") { schema : CoreSchema_H2 ⇒
         val future = scrupal.withExecutionContext { implicit ec: ExecutionContext ⇒
           val when = Instant.now()
           StoredNode.fromContent("foo", "fooness", TextContent("bar"), when, when).flatMap { node : StoredNode ⇒
@@ -128,8 +109,9 @@ class CoreSchemaSpec extends ScrupalSpecification("CoreSchema") with SlickerySpe
         await(future, 1.minute, "CRUD Sites").get
       }
     }
+
     "construct from configuration" in {
-      val config = testH2DbConfig("fromConfig")
+      val config = H2Config("fromConfig")
       val configObj = config.getObject("fromConfig")
       val hashmap = new java.util.HashMap[String,AnyRef]
       hashmap.put("scrupal.database.fromConfig", configObj)

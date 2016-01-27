@@ -67,7 +67,7 @@ object Reactor {
 
   def apply(func : (Stimulus) ⇒ Future[RxResponse]) : Reactor = {
     new Reactor {
-      def apply(stimulus: Stimulus) = {
+      def apply(stimulus: Stimulus) : Future[RxResponse] = {
         func(stimulus)
       }
     }
@@ -75,7 +75,7 @@ object Reactor {
 
   def from(response: RxResponse) : Reactor = {
     new Reactor {
-      def apply(stimulus: Stimulus) = {
+      def apply(stimulus: Stimulus) : Future[RxResponse] = {
         Future.successful { response }
       }
     }
@@ -83,7 +83,7 @@ object Reactor {
 
   def of(func : (Stimulus) ⇒ RxResponse) : Reactor = {
     new Reactor {
-      def apply(stimulus : Stimulus) = {
+      def apply(stimulus : Stimulus) : Future[RxResponse] = {
         Future { func(stimulus) } (stimulus.context.scrupal.executionContext)
       }
     }
@@ -91,7 +91,7 @@ object Reactor {
 
   def unimplemented(what : ⇒ String) : Reactor = {
     new Reactor {
-      def apply(stimulus : Stimulus) = {
+      def apply(stimulus : Stimulus) : Future[RxResponse] = {
         Future.successful {
           UnimplementedResponse(what)
         }
@@ -102,7 +102,7 @@ object Reactor {
 
 trait UnimplementedReactorTrait extends Reactor {
   def what : String
-  def apply(stimulus: Stimulus): Future[Response[Content[_]]] = {
+  def apply(stimulus: Stimulus): Future[RxResponse] = {
     Future.successful {
       UnimplementedResponse(what)
     }

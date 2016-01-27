@@ -14,26 +14,19 @@
   **********************************************************************************************************************/
 package scrupal.admin
 
-import play.api.data.Forms._
-import play.api.data._
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 
 import scrupal.core._
-import scrupal.html.Administration.CreateSite
-import scrupal.html._
 
-import scala.concurrent.{ExecutionContext, Future}
-import scalatags.Text.all._
-
-class AdminController(val scrupal : Scrupal, val messagesApi : MessagesApi) extends ScrupalController with WithCoreSchema {
+class AdminController(val scrupal : Scrupal, val messagesApi : MessagesApi) extends ScrupalController {
 
   val pathPrefix: String = "admin"
 
-  object moduleProvider extends AdminModuleProvider(scrupal)
-  object siteProvider extends AdminSiteProvider(scrupal)
-  object scrupalProvider extends AdminScrupalProvider(scrupal)
-  object userProvider extends AdminUserProvider(scrupal)
+  object moduleProvider extends AdminModuleProvider
+  object siteProvider extends AdminSiteProvider
+  object scrupalProvider extends AdminScrupalProvider
+  object userProvider extends AdminUserProvider
 
   def contextFor(thing: String, request: RequestHeader) : Option[Context] = {
     Some(Context(scrupal))

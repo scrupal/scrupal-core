@@ -134,17 +134,17 @@ object Settings extends AssetsSettings {
 object Ver {
 
   val scala = "2.11.7"
-  val play = "2.4.4"
+  val play = "2.4.6"
   val akka = "2.3.13"
   val akka_http = "2.0.1"
   val kamon = "0.4.0"
   val silhouette = "3.0.4"
   val bootstrap = "3.3.6" // Note: must match play_bootstrap version
-  val slickery = "0.3.9"
+  val slickery = "0.3.10-SNAPSHOT"
 
   object webjar {
     val polymer = "1.0.8"
-    val webcomponentsjs = "0.7.12"
+    val webcomponentsjs = "0.7.2"
     val play = "2.4.0-2"
     val bootswatch = "3.3.5+4"
     val font_awesome = "4.3.0-3"

@@ -7,9 +7,9 @@ import scrupal.html._
 
 import scalatags.Text.all._
 
-class AdminScrupalProvider(val scrupal : Scrupal) extends {
+class AdminScrupalProvider extends {
   val id = 'AdminScrupalProvider
-} with Provider with Enablee with WithCoreSchema {
+} with Provider with Enablee  {
   def provide = {
     case GET(p"/help") ⇒ Reactor.from { Response(help(), Successful) }
     case GET(p"/")     ⇒ Reactor.from { Response(help(), Successful) }

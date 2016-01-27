@@ -4,9 +4,9 @@ import play.api.routing.sird._
 
 import scrupal.core._
 
-class AdminModuleProvider (val scrupal : Scrupal) extends {
+class AdminModuleProvider extends {
   val id = 'AdminModuleProvider
-} with Provider with Enablee with WithCoreSchema {
+} with Provider with Enablee {
   def provide = {
     case GET(p"") ⇒ Reactor.from { Response("foo", Successful) }
   }

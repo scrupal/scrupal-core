@@ -21,7 +21,6 @@ import scala.concurrent.ExecutionContext
 trait WithCoreSchema extends WithSchema {
 
   type SCHEMA_TYPE = CoreSchema[_]
-  def scrupal : Scrupal
-  def executionContext : ExecutionContext = scrupal.executionContext
-  val schema : SCHEMA_TYPE = CoreSchema(scrupal.name, scrupal.configuration)(scrupal)
+  implicit val executionContext : ExecutionContext
+  def schema : SCHEMA_TYPE
 }
