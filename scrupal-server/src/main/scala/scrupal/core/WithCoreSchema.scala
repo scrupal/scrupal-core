@@ -23,5 +23,5 @@ trait WithCoreSchema extends WithSchema {
   type SCHEMA_TYPE = CoreSchema[_]
   def scrupal : Scrupal
   def executionContext : ExecutionContext = scrupal.executionContext
-  def schema : SCHEMA_TYPE = CoreSchema(scrupal.name, scrupal.configuration)(scrupal)
+  val schema : SCHEMA_TYPE = CoreSchema(scrupal.name, scrupal.configuration)(scrupal)
 }

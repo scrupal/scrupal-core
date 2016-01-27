@@ -40,20 +40,22 @@ class AdminController(val scrupal : Scrupal, val messagesApi : MessagesApi) exte
   }
 
   def reactorFor(context: Context, thing: String, request: RequestHeader): Option[Reactor] = {
-    val prefix = s"/$thing/"
-    if (request.path.startsWith(prefix)) {
-      val rh: RequestHeader = request.copy(path = request.path.toLowerCase.drop(prefix.length - 1))
+    val prefix = s"/$thing/".toLowerCase()
+    if (request.path.toLowerCase.startsWith(prefix)) {
+      val rh: RequestHeader = request.copy(path = request.path.drop(prefix.length - 1))
       thing match {
         case "module" ⇒ moduleProvider.reactorFor(rh)
         case "scrupal" ⇒ scrupalProvider.reactorFor(rh)
         case "site" ⇒ siteProvider.reactorFor(rh)
-        case "user" ⇒ siteProvider.reactorFor(rh)
+        case "user" ⇒ userProvider.reactorFor(rh)
         case _ ⇒ None
       }
     } else {
       None
     }
   }
+
+  /*
 
   private def makePage(result: Status, elem: HtmlElement) : Future[Result] = {
     makePage(result, Seq(elem))
@@ -146,4 +148,5 @@ class AdminController(val scrupal : Scrupal, val messagesApi : MessagesApi) exte
     makePage(Ok, Administration.module())
   }
 
+*/
 }

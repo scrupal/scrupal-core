@@ -51,7 +51,7 @@ trait Reactor extends Reaction {
   def resultFrom(context: Context, request : Request[AnyContent]) : Future[Result] = {
     context.withExecutionContext { implicit ec: ExecutionContext ⇒
       val stimulus: Stimulus = Stimulus(context, request)
-      apply(stimulus) map { response : Response[_] ⇒
+      apply(stimulus) map { response : RxResponse ⇒
         val d = response.disposition
         val status = d.toStatusCode.intValue()
         val reason = Some(s"HTTP($status): ${d.id.name}(${d.code}): ${d.msg}")

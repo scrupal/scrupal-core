@@ -16,7 +16,7 @@ package scrupal.html
 
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
-import scrupal.core.{Stimulus}
+import scrupal.core.{ThrowableContent, Stimulus}
 
 import scalatags.Text.all._
 
@@ -79,6 +79,16 @@ class UtilitiesSpec extends ValidatingSpecification("Utilities") {
       val html = display_context_table(context).render
       html.contains("Context") must beTrue
       validate("display_context_table", html, "div")
+    }
+  }
+
+  "display_throwable_content" should {
+    "lay out content properly" in {
+      val xcptn = new IllegalArgumentException("foo")
+      val dtc = display_throwable_content(ThrowableContent(xcptn))
+      val html = dtc().render
+      html.contains("IllegalArgumentException") must beTrue
+      validate("display_throwable_content", html, "div")
     }
   }
 

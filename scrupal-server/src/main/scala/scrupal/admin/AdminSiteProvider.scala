@@ -15,7 +15,6 @@ class AdminSiteProvider(val scrupal : Scrupal) extends {
     case GET(p"/list") ⇒ Reactor.of {list}
     case GET(p"/${long(oid)}") ⇒ Reactor {site(oid)}
     case GET(p"/$byName") ⇒ Reactor { site(byName) }
-    case POST(p"") ⇒ Reactor.of {createSite}
     case POST(p"/") ⇒ Reactor.of {createSite}
   }
 

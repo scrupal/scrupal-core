@@ -14,12 +14,58 @@
   **********************************************************************************************************************/
 package scrupal.core
 
-import play.api.libs.json.JsString
-import scala.concurrent.ExecutionContext.Implicits.global
+import java.io.ByteArrayInputStream
+import java.util
+
+import play.api.libs.iteratee.Enumerator
+import play.api.libs.json.{Json, JsString}
 
 import scrupal.test.ScrupalSpecification
 
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import scalatags.Text.all._
+
+
 class ContentSpec extends ScrupalSpecification("Content") {
+
+  "Content" should {
+    "convert to bytes" in {
+      val data = Array[Byte](1,2,3,4,5)
+      val enum = Enumerator(data)
+      val ec = EnumeratedContent(enum)
+      val f1 = ec.toBytes.map { bytes ⇒ util.Arrays.equals(bytes, data) must beTrue }
+      val enum2 = Enumerator(data)
+      val ec2 = EnumeratorsContent(Seq(enum, enum2))
+      val f2 = ec2.toBytes.map { bytes ⇒
+        bytes.length must beEqualTo(10)
+        util.Arrays.equals(bytes.slice(0,5), data) must beTrue
+        util.Arrays.equals(bytes.slice(5,10), data) must beTrue
+      }
+      val oc = OctetsContent(data)
+      val f3 = oc.toBytes.map { bytes ⇒ util.Arrays.equals(bytes, data) must beTrue}
+      val html = Seq(div("foo"))
+      val hc = HtmlContent(html)
+      val f4 = hc.toBytes.map { bytes ⇒ html.render must beEqualTo(new String(bytes,utf8)) }
+      val is = new ByteArrayInputStream(data)
+      val sc = StreamContent(is)
+      val f5 = sc.toBytes.map { bytes ⇒ util.Arrays.equals(bytes, data) must beTrue}
+      val js = Json.obj("foo" → "bar")
+      val jc = JsonContent(js)
+      val f6 = jc.toBytes.map { bytes ⇒ Json.stringify(js) must beEqualTo(new String(bytes,utf8)) }
+      val f = Future.sequence(Seq(f1, f2, f3, f4, f5))
+      await(f)
+    }
+  }
+
+  "HtmlContent" should {
+    "construct from scalatags RawFrag" in {
+      val rawFrag : RawFrag = RawFrag("<div>foo</div>")
+      val hc = HtmlContent(rawFrag)
+      hc.content.render must beEqualTo(div("foo").render)
+    }
+  }
 
   "EmptyContent" should {
     "have Unit content" in {

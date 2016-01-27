@@ -86,6 +86,7 @@ object ScrupalBuild extends Build {
       sharedJVM,
       sharedJS,
       client,
+      reactPolymer,
       server
     )
 

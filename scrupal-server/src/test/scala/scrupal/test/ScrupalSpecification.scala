@@ -18,6 +18,9 @@ package scrupal.test
 import java.util.concurrent.atomic.AtomicInteger
 
 import com.reactific.helpers.testkit.HelperSpecification
+import com.reactific.slickery.H2Driver
+import com.reactific.slickery.testkit.SlickerySpecification
+import org.specs2.execute.{AsResult, Result}
 import org.specs2.specification.BeforeAfterAll
 import play.api.test.PlaySpecification
 import scrupal.core._
@@ -33,33 +36,34 @@ abstract class ScrupalSpecification(
   val specName : String,
   val additionalConfig : Map[String,AnyRef] = Map.empty[String,AnyRef],
   override val timeout : FiniteDuration = Duration(5, "seconds")
-) extends PlaySpecification with HelperSpecification with BeforeAfterAll with ScrupalComponent {
+) extends PlaySpecification with SlickerySpecification with BeforeAfterAll with ScrupalComponent {
 
   // WARNING: Do NOT put anything but def and lazy val because of DelayedInit or app startup will get invoked twice
   // and you'll have a real MESS on your hands!!!! (i.e. no db interaction will work!)
 
-  implicit lazy val scrupal : Scrupal = ScrupalCache( ScrupalSpecification.next(specName),
-    additionalConfiguration = additionalConfig )
+  implicit lazy val scrupal: Scrupal = ScrupalCache(ScrupalSpecification.next(specName),
+    additionalConfiguration = additionalConfig)
 
-  implicit lazy val site : Site = new FakeSite(SiteData(specName, "localhost"))
+  implicit lazy val site: Site = new FakeSite(SiteData(specName, "localhost"))
 
-  implicit lazy val context : SiteContext = Context(scrupal, site)
+  implicit lazy val context: SiteContext = Context(scrupal, site)
 
-  def withExecutionContext[T](f : ExecutionContext ⇒ T) : T = scrupal.withExecutionContext[T](f)
+  def withExecutionContext[T](f: ExecutionContext ⇒ T): T = scrupal.withExecutionContext[T](f)
 
-  override def beforeAll : Unit = {
+  override def beforeAll: Unit = {
     // nothing to do
   }
-  override def afterAll : Unit = {
+
+  override def afterAll: Unit = {
     if (ScrupalCache.contains(specName))
       ScrupalCache.unload(specName)
   }
 
   def withScrupal[T](
-      name: String,
-      path: java.io.File = new java.io.File("."),
-      moreConfig: Map[String,AnyRef] = Map.empty[String,AnyRef])( f : Scrupal ⇒ T) : T = {
-    val scrpl = ScrupalCache(name,path,moreConfig)
+    name: String,
+    path: java.io.File = new java.io.File("."),
+    moreConfig: Map[String, AnyRef] = Map.empty[String, AnyRef])(f: Scrupal ⇒ T): T = {
+    val scrpl = ScrupalCache(name, path, moreConfig)
     try {
       f(scrpl)
     } finally {
@@ -67,19 +71,28 @@ abstract class ScrupalSpecification(
     }
   }
 
-  /*
-  def withStoreContext[T](f : StoreContext ⇒ T) : T =  scrupal.withStoreContext[T](f)
-
-  def withSchema[T](schemaName : String)(f : Schema ⇒ T) : T =  scrupal.withSchema(schemaName)(f)
-
-  def ensureSchema[T](d: SchemaDesign)(f : Schema ⇒ T) : Future[T] = {
-    testScrupal.withExecutionContext { implicit ec : ExecutionContext ⇒
-      scrupal.withStoreContext { sc : StoreContext ⇒
-        sc.ensureSchema(d).map { schema: Schema ⇒ f(schema) }
-      }
+  def withH2CoreSchema(dbName: String)(f: (CoreSchema_H2) ⇒ Result) : Result = {
+    implicit val ec : ExecutionContext = scrupal.executionContext
+    WithH2Schema[CoreSchema_H2,Result](dbName)(name ⇒ CoreSchema_H2(name, H2Config(name))(scrupal)) { schema:
+    CoreSchema_H2 ⇒
+      f(schema)
     }
   }
-  */
+
+
+    /*
+    def withStoreContext[T](f : StoreContext ⇒ T) : T =  scrupal.withStoreContext[T](f)
+
+    def withSchema[T](schemaName : String)(f : Schema ⇒ T) : T =  scrupal.withSchema(schemaName)(f)
+
+    def ensureSchema[T](d: SchemaDesign)(f : Schema ⇒ T) : Future[T] = {
+      testScrupal.withExecutionContext { implicit ec : ExecutionContext ⇒
+        scrupal.withStoreContext { sc : StoreContext ⇒
+          sc.ensureSchema(d).map { schema: Schema ⇒ f(schema) }
+        }
+      }
+    }
+    */
 }
 
 object ScrupalSpecification {
