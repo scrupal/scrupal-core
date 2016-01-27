@@ -43,49 +43,47 @@ case class Site(data: SiteData)(implicit val scrupal : Scrupal) extends {
     val id: Symbol = Symbol(data.name)
 } with EnablementProvider[Site] with Registrable[Site] {
 
-  def reactorFor(request: RequestHeader, subdomain: String) : Option[Reactor] = {
-    reactorFor(request)
-  }
-
   def isChildScope(e : Enablement[_]) : Boolean = delegates.exists { x ⇒ x == e }
 
-  def onDevServerError(request : RequestHeader, exception : UsefulException, subDomain : Option[String]) : Future[Result] = {
-    Future.successful(InternalServerError(views.html.defaultpages.devError(None, exception)))
+  def onDevServerError(request : RequestHeader, exception : UsefulException) : Future[Result] = {
+    Future.successful ( InternalServerError(views.html.defaultpages.devError(None, exception)))
   }
 
-  def onProdServerError(request : RequestHeader, exception : UsefulException, subDomain: Option[String]) : Future[Result] = {
-    Future.successful(InternalServerError(views.html.defaultpages.error(exception)))
+  def onProdServerError(request : RequestHeader, exception : UsefulException) : Future[Result] = {
+    Future.successful ( InternalServerError(views.html.defaultpages.error(exception)))
   }
 
-  def onNotImplemented(request: RequestHeader, what: String, subDomain: Option[String]) : Future[Result] = {
-    Future.successful ( Results.NotImplemented(s"Not Implemented: $what ($subDomain)"))
+  def onNotImplemented(request: RequestHeader, what: String) : Future[Result] = {
+    Future.successful ( Results.NotImplemented(s"Not Implemented: $what"))
   }
 
-  def onServiceUnavailable(request: RequestHeader, what: String, subDomain: Option[String]) : Future[Result] = {
-    Future.successful ( Results.ServiceUnavailable(s"ServiceUnavailable: $what ($subDomain)"))
+  def onServiceUnavailable(request: RequestHeader, what: String) : Future[Result] = {
+    Future.successful ( Results.ServiceUnavailable(s"ServiceUnavailable: $what"))
   }
 
-  def onBadRequest(request : RequestHeader, message : String, subDomain: Option[String]) : Future[Result] = {
-    Future.successful ( Results.BadRequest(s"BadRequest: $request: $message ($subDomain)") )
+  def onBadRequest(request : RequestHeader, message : String) : Future[Result] = {
+    Future.successful ( Results.BadRequest(s"BadRequest: $request: $message") )
   }
 
-  def onUnauthorized(request : RequestHeader, message: String, subDomain: Option[String]) : Future[Result] = {
-    Future.successful ( Results.Unauthorized(s"Unauthorized: $request: $message ($subDomain)"))
+  def onUnauthorized(request : RequestHeader, message: String) : Future[Result] = {
+    Future.successful ( Results.Unauthorized(s"Unauthorized: $request: $message"))
   }
 
-  def onForbidden(request : RequestHeader, message : String, subDomain: Option[String]) : Future[Result] = {
-    Future.successful ( Results.Forbidden(s"Forbidden: $request: $message ($subDomain)") )
+  def onForbidden(request : RequestHeader, message : String) : Future[Result] = {
+    Future.successful ( Results.Forbidden(s"Forbidden: $request: $message") )
   }
 
-  def onNotFound(request : RequestHeader, message : String, subDomain: Option[String]) : Future[Result] = {
-    Future.successful ( Results.NotFound(s"NotFound: $request: $message ($subDomain)") )
+  def onNotFound(request : RequestHeader, message : String) : Future[Result] = {
+    Future.successful ( Results.NotFound(s"NotFound: $request: $message") )
   }
 
-  def onGenericClientError(request: RequestHeader, status: Int, msg: String, sub: Option[String]) : Future[Result] = {
-    Future.successful ( Results.Status(status)(s"Error($status): $request $msg ($sub)"))
+  def onGenericClientError(request: RequestHeader, status: Int, msg: String) : Future[Result] = {
+    Future.successful ( Results.Status(status)(s"Error($status): $request $msg"))
   }
 
   def debugFooter : Boolean = true // TODO: Implement with Feature
+
+  def subDomainSite(subDomain : String) : Option[Site] = None
 }
 
 case class SitesRegistry() extends Registry[Site] {
@@ -106,6 +104,15 @@ case class SitesRegistry() extends Registry[Site] {
 
   def forHost(hostName : String) : Option[Site] = {
     byDomainName.get(hostName)
+  }
+
+  def forHost(domain: String, subDomain: String) : Option[Site] = {
+    byDomainName.get(domain) match {
+      case Some(topSite) ⇒
+        topSite.subDomainSite(subDomain)
+      case None ⇒
+        None
+    }
   }
 
 }

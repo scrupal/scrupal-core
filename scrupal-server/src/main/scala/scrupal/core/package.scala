@@ -28,6 +28,7 @@ package object core {
 
   lazy val utf8 = StandardCharsets.UTF_8
 
+  type RxResponse = Response[Content[_]]
   /** The typical type of identifier.
     * We use Symbol because they are memoized by the compiler which means we only pay for the memory of a given
     * identifier once. They aren't as easily mistaken for a string either.
@@ -85,7 +86,7 @@ package object core {
         case Unauthorized ⇒ StatusCodes.Unauthorized
         case Unavailable ⇒ StatusCodes.ServiceUnavailable
         case Unacceptable ⇒ StatusCodes.NotAcceptable
-        case NotFound ⇒ StatusCodes.NotFound
+        case Unlocatable ⇒ StatusCodes.NotFound
         case Ambiguous ⇒ StatusCodes.Conflict
         case Conflict ⇒ StatusCodes.Conflict
         case TooComplex ⇒ StatusCodes.Forbidden

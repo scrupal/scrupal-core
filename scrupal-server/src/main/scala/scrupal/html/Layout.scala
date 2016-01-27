@@ -108,7 +108,9 @@ trait PageLayout extends Layout {
     * @return
     */
   def page(context : Context, arrangement: Arrangement) : Future[String]  = {
-    apply(context, arrangement).map { contents ⇒ "<!DOCTYPE html>" + contents.render } (context.scrupal.executionContext)
+    apply(context, arrangement).map {
+      contents ⇒ "<!DOCTYPE html>" + contents.render
+    }(context.scrupal.executionContext)
   }
 }
 

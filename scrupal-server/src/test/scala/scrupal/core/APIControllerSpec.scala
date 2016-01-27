@@ -1,10 +1,10 @@
-package router.scrupal
+package scrupal.core
 
 import com.reactific.helpers.LoggingHelper
 import play.api.http.Status
 import play.api.libs.iteratee.Iteratee
+import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
-import scrupal.core._
 import scrupal.test.ScrupalSpecification
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,6 +19,10 @@ class APIControllerSpec extends ScrupalSpecification("EntityController") {
 
   class SiteForAPITest(siteName: String)(implicit scrpl: Scrupal)
       extends Site(new SiteData(siteName, domainName="foo.com"))(scrpl) {
+    override def reactorFor(request: RequestHeader) : Option[Reactor] = {
+      val reactor = super.reactorFor(request)
+      reactor
+    }
     val tep1 = TestEntityProvider(Symbol("foot"))
     val tep2 = TestEntityProvider(Symbol("book"))
     enable(tep1,this)
@@ -29,7 +33,7 @@ class APIControllerSpec extends ScrupalSpecification("EntityController") {
 
   "APIController" should {
     "support all entity invocations" in {
-      val site = new SiteForAPITest("testSite")
+      val site = new SiteForAPITest("testSite")(scrupal)
       val cases = Seq(
         ("GET","/api/feet/42/nada")           → "feet.retrieveById(id=42,details=nada)",
         ("GET","/api/feet/forty-two/nada")    → "feet.retrieveByName(name=forty-two,details=nada)",

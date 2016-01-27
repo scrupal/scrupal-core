@@ -62,7 +62,7 @@ class DispositionSpec extends Specification {
     "have no duplicate values" in {
       val seq = Seq (
         Indeterminate, Successful, Received, Pending, Promise, Unspecified, TimedOut, Unintelligible, Unimplemented,
-        Unsupported, Unauthorized, Unavailable, NotFound, Ambiguous, Conflict, TooComplex, Exhausted, Exception,
+        Unsupported, Unauthorized, Unavailable, Unlocatable, Ambiguous, Conflict, TooComplex, Exhausted, Exception,
         Unacceptable
       )
       val set : Set[Int] = {seq.map { x ⇒ x.code }}.toSet
@@ -81,7 +81,7 @@ class DispositionSpec extends Specification {
       Unauthorized.toStatusCode must beEqualTo(StatusCodes.Unauthorized)
       Unavailable.toStatusCode must beEqualTo(StatusCodes.ServiceUnavailable)
       Unacceptable.toStatusCode must beEqualTo(StatusCodes.NotAcceptable)
-      NotFound.toStatusCode must beEqualTo(StatusCodes.NotFound)
+      Unlocatable.toStatusCode must beEqualTo(StatusCodes.NotFound)
       Ambiguous.toStatusCode must beEqualTo(StatusCodes.Conflict)
       Conflict.toStatusCode must beEqualTo(StatusCodes.Conflict)
       TooComplex.toStatusCode must beEqualTo(StatusCodes.Forbidden)

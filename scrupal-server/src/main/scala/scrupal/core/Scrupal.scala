@@ -35,7 +35,7 @@ import play.api.libs.concurrent.ActorSystemProvider
 import play.api.mvc.{EssentialFilter, RequestHeader}
 import play.api.routing.Router
 import play.api.routing.sird._
-import router.scrupal.core.{APPController, APIController, AdminController, Assets}
+import scrupal.admin.AdminController
 import scrupal.html._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -92,7 +92,7 @@ case class Scrupal (
 
   val apiController = new APIController(this, messagesApi)
 
-  val appController = new APPController(this, messagesApi)
+  val appController = new ApplicationController(this, messagesApi)
 
   val cryptoConfig: CryptoConfig = new CryptoConfigParser(environment, configuration).get
 
@@ -130,7 +130,7 @@ case class Scrupal (
           new Reactor {
             val description = "Help Page Reactor"
             def oid : Option[OIDType] = None
-            def apply(stimulus: Stimulus) : Future[Response[_]] = {
+            def apply(stimulus: Stimulus) : Future[RxResponse] = {
               Help.page(stimulus).map { html ⇒
                 Response(HtmlContent(html))
               }
@@ -180,14 +180,14 @@ case class Scrupal (
     log.info("Scrupal shutdown completed normally.")
   }
 
-  def siteForRequest(header: RequestHeader) : (Option[Site],Option[String]) = {
+  def siteForRequest(header: RequestHeader) : Option[Site] = {
     DomainNames.matchDomainName(header.domain) match {
       case (Some(domain),Some(subDomain)) =>
-        sites.forHost(domain) → Some(subDomain)
+        sites.forHost(domain,subDomain)
       case (Some(domain), None) ⇒
-        sites.forHost(domain) → None
+        sites.forHost(domain)
       case _ =>
-        None → None
+        None
     }
   }
 

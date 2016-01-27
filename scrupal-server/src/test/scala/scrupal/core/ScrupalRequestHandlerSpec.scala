@@ -13,7 +13,6 @@ class ScrupalRequestHandlerSpec extends ScrupalSpecification("ScrupalRequestHand
     "route request to correct site" in {
       val site1 = new FakeSite(SiteData("one", "one.com"))(scrupal)
       val site2 = new FakeSite(SiteData("two", "two.com"))(scrupal)
-      val app = scrupal.application
       val srh = new ScrupalRequestHandler(scrupal)
       val orig_request = FakeRequest("GET", "/index.html").withHeaders("Host" -> "one.com:80")
       val (request, handler) = srh.handlerForRequest(orig_request)

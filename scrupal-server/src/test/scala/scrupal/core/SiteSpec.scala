@@ -45,7 +45,7 @@ class SiteSpec extends ScrupalSpecification("Site") {
     "provide reactors and handlers" in {
       val site = new Site(new SiteData("fie", "fie.com"))(scrupal)
       val request = FakeRequest("GET", "/")
-      site.reactorFor(request, "") must beEqualTo(None)
+      site.reactorFor(request) must beEqualTo(None)
       // site.handlerForRequest(request) must beEqualTo(request → null)
     }
   }

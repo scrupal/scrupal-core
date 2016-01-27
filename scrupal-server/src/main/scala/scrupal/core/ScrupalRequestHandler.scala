@@ -41,12 +41,8 @@ class ScrupalRequestHandler @Inject() (scrupal: Scrupal ) extends HttpRequestHan
   lazy val defaultHandler = new DefaultHttpRequestHandler(
     scrupal.router, scrupal.httpErrorHandler, scrupal.httpConfiguration, scrupal.httpFilters:_* )
 
-  def getReactor(header: RequestHeader, site: Site, subDomain: Option[String]) : (RequestHeader, Handler) = {
-    subDomain.flatMap {
-      sub ⇒ site.reactorFor(header, sub)
-    } orElse {
-      site.reactorFor(header)
-    } match {
+  def getReactor(header: RequestHeader, site: Site) : (RequestHeader, Handler) = {
+    site.reactorFor(header) match {
       case Some(rx) ⇒
         val context = Context(scrupal, site)
         header → ReactorAction(context, rx)
@@ -59,13 +55,12 @@ class ScrupalRequestHandler @Inject() (scrupal: Scrupal ) extends HttpRequestHan
 
   override def handlerForRequest(header: RequestHeader) : (RequestHeader, Handler) = {
     numRequests.incrementAndGet()
-    scrupal.siteForRequest(header) match {
-      case (Some(site),Some(subDomain)) =>
-        getReactor(header, site, Some(subDomain))
-      case (Some(site), None) ⇒
-        getReactor(header, site, None)
+    val result = scrupal.siteForRequest(header) match {
+      case Some(site) ⇒
+        getReactor(header, site)
       case _ =>
         defaultHandler.handlerForRequest(header)
     }
+    result
   }
 }

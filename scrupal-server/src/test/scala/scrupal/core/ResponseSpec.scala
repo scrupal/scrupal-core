@@ -43,9 +43,9 @@ class ResponseSpec extends ScrupalSpecification("Response") {
         val good = Response.safely { NoopResponse }
         val bad = Response.safely { throw new Exception("oops") }
         good.payload must beEqualTo(EmptyContent)
-        bad.isInstanceOf[Response[_]] must beTrue
-        val payload = bad.asInstanceOf[Response[_]].payload.asInstanceOf[ThrowableContent].content
-        payload.getMessage must beEqualTo("oops")
+        bad.payload.isInstanceOf[ThrowableContent] must beTrue
+        val content = bad.payload.asInstanceOf[ThrowableContent].content
+        content.getMessage must beEqualTo("oops")
       }
     }
     "NoopResponse" should {

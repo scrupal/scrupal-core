@@ -33,7 +33,7 @@ import scala.concurrent.ExecutionContext
   *
   * @tparam PT The Payload Type
   */
-sealed trait Response[PT <: Content[_]] {
+sealed trait Response[+PT <: Content[_]] {
   /** The payload content of the response
     *
     * @return a Content[_] object that provides the payload of the response
@@ -160,12 +160,12 @@ object Response {
     * @param f A by-name argument that produces a Response
     * @return The Response, even if there's an exception
     */
-  def safely[PT <: Content[_]]( f: ⇒ Response[PT] ) : Response[_] = {
+  def safely[PT <: Content[_]]( f: ⇒ Response[PT] ) : Response[PT] = {
     try {
       f
     } catch {
       case x : Throwable ⇒
-        Response(ThrowableContent(x), Exception)
+        Response(ThrowableContent(x), Exception).asInstanceOf[Response[PT]]
     }
   }
 }

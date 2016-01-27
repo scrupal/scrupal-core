@@ -16,15 +16,20 @@ case class ReactPolymerLayout(appName : String = "")(implicit val scrupal : Scru
   val description: String =
     "A Polymer + React layout for Single Page Application type pages"
 
+  final override def arrangementDescription: Map[String,String] = Map(
+    "contents" → "The main content",
+    "endscripts" → "Scripts to be loaded at the end of the page"
+  )
+
   override def contents(args: Arguments) : HtmlContents = {
     div(scalatags.Text.all.id := "react-polymer-app")
   }
 
-  override def header(args: Arguments) : HtmlContents = {
+  final override def header(args: Arguments) : HtmlContents = {
     emptyContents
   }
 
-  override def footer(args: Arguments) : HtmlContents = {
+  final override def footer(args: Arguments) : HtmlContents = {
     emptyContents
   }
 

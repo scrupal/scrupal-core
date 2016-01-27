@@ -24,8 +24,6 @@ class AdministrationSpec extends ValidatingSpecification("Administration") {
     "have an introduction page" in {
       val future = Administration.page(context, Administration.introduction, Map(1L → "One", 2L → "Two"))
       val page = await(future)
-      page.contains("<p>Welcome") must beTrue
-      page.contains("Administration Help") must beTrue
       validate("Admin Introduction", page)
     }
     "have a site page" in {

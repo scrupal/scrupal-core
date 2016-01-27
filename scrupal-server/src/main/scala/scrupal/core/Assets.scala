@@ -13,7 +13,7 @@
   * the specific language governing permissions and limitations under the License.                                     *
   *********************************************************************************************************************/
 
-package router.scrupal.core
+package scrupal.core
 
 import javax.inject.{Inject, Singleton}
 
@@ -25,19 +25,17 @@ import play.api.http.HttpErrorHandler
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.mvc.{Action, AnyContent, RequestHeader}
 import play.api.{Configuration, Environment, Mode}
-import scrupal.core.ScrupalBuildInfo
 import scrupal.utils.ScrupalComponent
 
 import scala.util.{Failure, Success, Try}
 
-@Singleton
-class Assets @Inject() (
+class Assets (
     errorHandler: HttpErrorHandler,
     configuration: Configuration,
     environment: Environment
 ) extends WebJarAssets(errorHandler, configuration, environment) with ScrupalComponent {
 
-  import Assets.{webJarPrefix, assetPrefix}
+  import Assets.{assetPrefix, webJarPrefix}
 
   def root(file: String) = {
     val lookup = if (file.startsWith("/")) file else "/" + file

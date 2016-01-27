@@ -12,7 +12,7 @@
   * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for  *
   * the specific language governing permissions and limitations under the License.                                     *
   *********************************************************************************************************************/
-package router.scrupal
+package scrupal.core
 
 import java.io.File
 
@@ -22,8 +22,6 @@ import play.api.http.{DefaultHttpErrorHandler, Status}
 import play.api.mvc.{Action, AnyContent, Request}
 import play.api.test.{FakeRequest, WithApplication}
 import play.api.{Configuration, Environment, Mode}
-import router.scrupal.core.Assets
-import scrupal.core.ScrupalBuildInfo
 import scrupal.test.ScrupalSpecification
 
 import scala.concurrent.Await

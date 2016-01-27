@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class ReactorSpec extends ScrupalSpecification("Reactor") {
 
   case class SimpleReactor(msg : String) extends Reactor {
-    def apply(stim: Stimulus) : Future[Response[_]] = {
+    def apply(stim: Stimulus) : Future[RxResponse] = {
       Future.successful(Response(msg,Successful))
     }
     val description: String = "for testing"
@@ -24,9 +24,9 @@ class ReactorSpec extends ScrupalSpecification("Reactor") {
   "Reactor" should {
     "respond to Stimulus" in {
       val reactor = SimpleReactor("simple")
-      val future = reactor(Stimulus.empty).map { resp : Response[_] =>
+      val future = reactor(Stimulus.empty).map { resp : RxResponse =>
+        resp.payload.isInstanceOf[TextContent] must beTrue
         resp.disposition must beEqualTo(Successful)
-        resp.isInstanceOf[Response[_]] must beTrue
         val textResponse = resp.asInstanceOf[Response[TextContent]]
         textResponse.payload.content must beEqualTo("simple")
       }
@@ -43,7 +43,7 @@ class ReactorSpec extends ScrupalSpecification("Reactor") {
 
   "UnimplementedReactor" should {
     "generated UnimplementedResponse" in {
-      val ur = UnimplementedReactor("test", None)
+      val ur = UnimplementedReactor("test")
       val future = ur.apply(Stimulus.empty).map { resp =>
         resp.disposition must beEqualTo(Unimplemented)
       }

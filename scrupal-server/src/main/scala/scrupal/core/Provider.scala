@@ -38,7 +38,8 @@ trait Provider { self ⇒
   def provide : ReactionRoutes
 
   def reactorFor(request: RequestHeader) : Option[Reactor] = {
-    provide.lift(request)
+    val possibleRoutes = provide
+    possibleRoutes.lift(request)
   }
 
   def withPrefix(prefix: String): Provider = {
@@ -82,13 +83,25 @@ trait DelegatingProvider extends Provider {
   def isTerminal : Boolean = delegates.isEmpty
 
   override def provide : ReactionRoutes = {
-    delegates.foldLeft(Provider.emptyReactionRoutes) { case (accum,next) ⇒ accum.orElse(next.provide) }
+    delegates.foldLeft(Provider.emptyReactionRoutes) {
+      case (accum,next) ⇒
+        accum.orElse(next.provide)
+    }
   }
 }
 
 trait EnablementProvider[T <: EnablementProvider[T]] extends DelegatingProvider with Enablement[T] with Enablee {
-  def isEnabledProvider(e : Enablee) : Boolean = { e.isInstanceOf[Provider] && isEnabled(e, this) }
-  def delegates : Iterable[Provider] = mapIf[Provider]{ isEnabledProvider } { e : Enablee ⇒ e.asInstanceOf[Provider]}
+  def isEnabledProvider(e : Enablee) : Boolean = {
+    e.isInstanceOf[Provider] && isEnabled(e, this)
+  }
+
+  def delegates : Iterable[Provider] = {
+    mapIf[Provider]{
+      isEnabledProvider
+    } { e : Enablee ⇒
+      e.asInstanceOf[Provider]
+    }
+  }
 }
 
 trait SingularProvider extends IdentifiableProvider {

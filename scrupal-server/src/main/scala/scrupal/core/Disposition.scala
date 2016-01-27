@@ -59,8 +59,8 @@ object Unauthorized extends Disposition(-6, 'Unauthorized,
   "Request rejected because requester is not authorized for it.")
 object Unavailable extends Disposition(-7, 'Unavailable,
   "Request rejected because the resource is not currently available.")
-object NotFound extends Disposition(-8, 'NotFound,
-  "Request rejected because the resource was not found.")
+object Unlocatable extends Disposition(-8, 'Unlocatable,
+  "Request rejected because the resource could not be located.")
 object Ambiguous extends Disposition(-9, 'Ambiguous,
   "Request rejected because of ambiguity on the resource requested.")
 object Conflict extends Disposition(-10, 'Conflict,

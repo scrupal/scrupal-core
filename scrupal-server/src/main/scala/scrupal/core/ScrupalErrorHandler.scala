@@ -39,14 +39,12 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler w
   val clientErrors = new AtomicLong(0)
   val serverErrors = new AtomicLong(0)
 
-  private def forSiteAndSubdomain(request: RequestHeader)
-    (found: (RequestHeader, Site, Option[String]) ⇒ Future[Result])
+  private def forSite(request: RequestHeader)
+    (found: (RequestHeader, Site) ⇒ Future[Result])
     (orElse: () ⇒ Future[Result]): Future[Result] = {
     scrupal.siteForRequest(request) match {
-      case (Some(site), Some(subDomain)) ⇒
-        found(request, site, Some(subDomain))
-      case (Some(site), None) ⇒
-        found(request, site, None)
+      case Some(site) ⇒
+        found(request, site)
       case _ ⇒
         orElse()
     }
@@ -78,24 +76,24 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler w
   }
 
   def onBadRequest(request: RequestHeader, message: String): Future[Result] = {
-    forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
-      site.onBadRequest(request, message, subDomain)
+    forSite(request) { (header, site) ⇒
+      site.onBadRequest(request, message)
     } { () ⇒
       Future.successful(BadRequest(views.html.defaultpages.badRequest(request.method, request.uri, message)))
     }
   }
 
   def onForbidden(request: RequestHeader, message: String): Future[Result] = {
-    forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
-      site.onForbidden(request, message, subDomain)
+    forSite(request) { (header, site) ⇒
+      site.onForbidden(request, message)
     } { () ⇒
       Future.successful(Forbidden(views.html.defaultpages.unauthorized()))
     }
   }
 
   def onNotFound(request: RequestHeader, message: String): Future[Result] = {
-    forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
-      site.onNotFound(request, message, subDomain)
+    forSite(request) { (header, site) ⇒
+      site.onNotFound(request, message)
     } { () ⇒
       Future.successful(play.api.mvc.Results.NotFound(scrupal.environment.mode match {
         case Mode.Prod =>
@@ -107,16 +105,16 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler w
   }
 
   def onUnauthorized(request: RequestHeader, message: String): Future[Result] = {
-    forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
-      site.onUnauthorized(request, message, subDomain)
+    forSite(request) { (header, site) ⇒
+      site.onUnauthorized(request, message)
     } { () ⇒
       Future.successful(play.api.mvc.Results.Unauthorized(views.html.defaultpages.unauthorized()))
     }
   }
 
   protected def onGenericClientError(request: RequestHeader, status: Int, message: String): Future[Result] = {
-    forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
-      site.onGenericClientError(request, status, message, subDomain)
+    forSite(request) { (header, site) ⇒
+      site.onGenericClientError(request, status, message)
     } { () ⇒
       Future.successful(
         Results.Status(status)(
@@ -199,8 +197,8 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler w
     * @param exception The exception.
     */
   def onDevServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
-    forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
-      site.onDevServerError(request, exception, subDomain)
+    forSite(request) { (header, site) ⇒
+      site.onDevServerError(request, exception)
     } { () ⇒
       Future.successful(InternalServerError(views.html.defaultpages.devError(playEditor, exception)))
     }
@@ -216,24 +214,24 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler w
     * @param exception The exception.
     */
   def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
-    forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
-      site.onProdServerError(request, exception, subDomain)
+    forSite(request) { (header, site) ⇒
+      site.onProdServerError(request, exception)
     } { () ⇒
       Future.successful(InternalServerError(views.html.defaultpages.error(exception)))
     }
   }
 
   def onNotImplemented(request: RequestHeader, exception: Throwable) : Future[Result] = {
-    forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
-      site.onNotImplemented(request, exception.getMessage, subDomain)
+    forSite(request) { (header, site) ⇒
+      site.onNotImplemented(request, exception.getMessage)
     } { () ⇒
       defaultServerError(request, exception)
     }
   }
 
   def onServiceUnavailable(request: RequestHeader, exception: Throwable) : Future[Result] = {
-    forSiteAndSubdomain(request) { (header, site, subDomain) ⇒
-      site.onServiceUnavailable(request, exception.getMessage, subDomain)
+    forSite(request) { (header, site) ⇒
+      site.onServiceUnavailable(request, exception.getMessage)
     } { () ⇒
       defaultServerError(request, exception)
     }

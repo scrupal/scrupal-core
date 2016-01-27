@@ -1,4 +1,4 @@
-package router.scrupal
+package scrupal.core
 
 import scrupal.test.ScrupalSpecification
 

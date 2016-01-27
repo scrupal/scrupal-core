@@ -1,5 +1,7 @@
 package scrupal.html
 
+import scalatags.Text.all._
+
 /** Layout for Polymer based pages */
 trait PolymerLayout extends DetailedPageLayout {
 
@@ -31,4 +33,5 @@ trait PolymerLayout extends DetailedPageLayout {
     super.javascriptLinks(args) ++ Seq(assets.webjar("webcomponentsjs","webcomponents-lite.js").url)
 
   }
+
 }

@@ -12,23 +12,48 @@
   * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for  *
   * the specific language governing permissions and limitations under the License.                                     *
   **********************************************************************************************************************/
-package router.scrupal.core
+package scrupal.admin
 
-
-import play.api.data._
 import play.api.data.Forms._
-import play.api.i18n.{MessagesApi, I18nSupport}
-
+import play.api.data._
+import play.api.i18n.MessagesApi
 import play.api.mvc._
+
 import scrupal.core._
 import scrupal.html.Administration.CreateSite
 import scrupal.html._
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import scalatags.Text.all._
 
-class AdminController(val scrupal : Scrupal, val messagesApi : MessagesApi) extends ScrupalController {
+class AdminController(val scrupal : Scrupal, val messagesApi : MessagesApi) extends ScrupalController with WithCoreSchema {
+
+  val pathPrefix: String = "admin"
+
+  object moduleProvider extends AdminModuleProvider(scrupal)
+  object siteProvider extends AdminSiteProvider(scrupal)
+  object scrupalProvider extends AdminScrupalProvider(scrupal)
+  object userProvider extends AdminUserProvider(scrupal)
+
+  def contextFor(thing: String, request: RequestHeader) : Option[Context] = {
+    Some(Context(scrupal))
+  }
+
+  def reactorFor(context: Context, thing: String, request: RequestHeader): Option[Reactor] = {
+    val prefix = s"/$thing/"
+    if (request.path.startsWith(prefix)) {
+      val rh: RequestHeader = request.copy(path = request.path.toLowerCase.drop(prefix.length - 1))
+      thing match {
+        case "module" ⇒ moduleProvider.reactorFor(rh)
+        case "scrupal" ⇒ scrupalProvider.reactorFor(rh)
+        case "site" ⇒ siteProvider.reactorFor(rh)
+        case "user" ⇒ siteProvider.reactorFor(rh)
+        case _ ⇒ None
+      }
+    } else {
+      None
+    }
+  }
 
   private def makePage(result: Status, elem: HtmlElement) : Future[Result] = {
     makePage(result, Seq(elem))
@@ -77,7 +102,7 @@ class AdminController(val scrupal : Scrupal, val messagesApi : MessagesApi) exte
         val siteData = SiteData(data.name, data.domainName,data.description,data.requireHttps)
         mapQuery( (schema) ⇒ schema.sites.create(siteData) ) { (id : Long, ec: ExecutionContext) ⇒
           val site = Site(siteData.copy(oid=Some(id)))(scrupal)
-          Redirect(router.scrupal.core.routes.AdminController.site(id))
+          Redirect(router.scrupal.admin.routes.AdminController.doGET("side",id.toString))
         }
       }
     )

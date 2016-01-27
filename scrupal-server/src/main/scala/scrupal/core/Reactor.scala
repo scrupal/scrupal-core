@@ -15,7 +15,6 @@
 
 package scrupal.core
 
-import com.reactific.slickery.{Describable, Nameable}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,7 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   * @see [[scrupal.core.Reactor]]
   */
-trait Reaction extends ((Stimulus) ⇒ Future[Response[_]])
+trait Reaction extends ((Stimulus) ⇒ Future[Response[Content[_]]])
 
 /** An Named, Described Reaction
   *
@@ -45,11 +44,9 @@ trait Reaction extends ((Stimulus) ⇒ Future[Response[_]])
   * @see [[scrupal.core.Response]]
   *
   */
-trait Reactor extends Reaction with Nameable with Describable {
+trait Reactor extends Reaction {
 
-  val name : String = this.getClass.getSimpleName
-
-  def apply(stimulus: Stimulus) : Future[Response[_]]
+  def apply(stimulus: Stimulus) : Future[RxResponse]
 
   def resultFrom(context: Context, request : Request[AnyContent]) : Future[Result] = {
     context.withExecutionContext { implicit ec: ExecutionContext ⇒
@@ -65,16 +62,54 @@ trait Reactor extends Reaction with Nameable with Describable {
   }
 }
 
+object Reactor {
+  import scala.language.existentials
+
+  def apply(func : (Stimulus) ⇒ Future[RxResponse]) : Reactor = {
+    new Reactor {
+      def apply(stimulus: Stimulus) = {
+        func(stimulus)
+      }
+    }
+  }
+
+  def from(response: RxResponse) : Reactor = {
+    new Reactor {
+      def apply(stimulus: Stimulus) = {
+        Future.successful { response }
+      }
+    }
+  }
+
+  def of(func : (Stimulus) ⇒ RxResponse) : Reactor = {
+    new Reactor {
+      def apply(stimulus : Stimulus) = {
+        Future { func(stimulus) } (stimulus.context.scrupal.executionContext)
+      }
+    }
+  }
+
+  def unimplemented(what : ⇒ String) : Reactor = {
+    new Reactor {
+      def apply(stimulus : Stimulus) = {
+        Future.successful {
+          UnimplementedResponse(what)
+        }
+      }
+    }
+  }
+}
+
 trait UnimplementedReactorTrait extends Reactor {
   def what : String
-  def apply(stimulus: Stimulus): Future[Response[_]] = {
+  def apply(stimulus: Stimulus): Future[Response[Content[_]]] = {
     Future.successful {
       UnimplementedResponse(what)
     }
   }
 }
 
-case class UnimplementedReactor(what: String, oid : Option[Long] = None) extends UnimplementedReactorTrait {
+case class UnimplementedReactor(what: String) extends UnimplementedReactorTrait {
   val description = s"A Reactor that returns a not-implemented response for $what"
 }
 
@@ -120,29 +155,29 @@ case class NodeIdReactor(id : Long) extends Reactor {
 
 /** A Query to Find Nodes by their alias path, like this:
   *     {{{val selector = BSONDocument("$eq" → BSONDocument("pathAlias" → BSONString(path)))}}}
-trait NodeQueries extends Queries[Node] {
-  def byAlias(alias: String) : Query[Node]
-}
+  * trait NodeQueries extends Queries[Node] {
+  * def byAlias(alias: String) : Query[Node]
+  * }
 
-case class NodeAliasReactor(alias : String) extends Reactor {
-  val description = "A Reactor that returns the node found at a path alias"
-  def apply(stimulus: Stimulus): Future[Response] = {
-    val context = stimulus.context
-    context.withStoreContext { sc: StoreContext ⇒
-      context.withExecutionContext { implicit ec: ExecutionContext ⇒
-        sc.withCollection("core", "nodes") { coll: Collection[Node] ⇒
-          val queries : NodeQueries = coll.queriesFor[NodeQueries]
-          coll.findOne(queries.byAlias(alias)).flatMap {
-            case Some(node) ⇒
-              node(context)
-            case None ⇒
-              Future.successful(ErrorResponse(s"Node alias '$name' for path '$alias' could not found.", NotFound))
-          }
-        }
-      }
-    }
-  }
-}
+  * case class NodeAliasReactor(alias : String) extends Reactor {
+  * val description = "A Reactor that returns the node found at a path alias"
+  * def apply(stimulus: Stimulus): Future[Response] = {
+  * val context = stimulus.context
+  * context.withStoreContext { sc: StoreContext ⇒
+  * context.withExecutionContext { implicit ec: ExecutionContext ⇒
+  * sc.withCollection("core", "nodes") { coll: Collection[Node] ⇒
+  * val queries : NodeQueries = coll.queriesFor[NodeQueries]
+  * coll.findOne(queries.byAlias(alias)).flatMap {
+  * case Some(node) ⇒
+  * node(context)
+  * case None ⇒
+  * Future.successful(ErrorResponse(s"Node alias '$name' for path '$alias' could not found.", NotFound))
+  * }
+  * }
+  * }
+  * }
+  * }
+  * }
   */
 
 
