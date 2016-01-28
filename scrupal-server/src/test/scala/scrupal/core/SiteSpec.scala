@@ -66,7 +66,7 @@ class SiteRegistrySpec extends ScrupalSpecification("SiteRegistry") with SharedT
       scrupal.sites.forHost("bar.com") must beEqualTo(None)
       scrupal.sites.forHost("foo.com") must beEqualTo(Some(site1))
       scrupal.sites.forHost("www.bar.com") must beEqualTo(Some(site3))
-      scrupal.sites.forHost("localhost") must beEqualTo(scrupal.DefaultLocalHostSite)
+      scrupal.sites.forHost("localhost") must beEqualTo(Some(scrupal.DefaultLocalHostSite))
     }
   }
 }
