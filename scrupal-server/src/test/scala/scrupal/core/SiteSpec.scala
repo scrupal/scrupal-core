@@ -54,16 +54,19 @@ class SiteSpec extends ScrupalSpecification("Site") {
 
 class SiteRegistrySpec extends ScrupalSpecification("SiteRegistry") with SharedTestScrupal {
   "SitesRegistry" should {
+    val site1 = FakeSite(SiteData("foo","foo.com"))(scrupal)
+    val site2 = FakeSite(SiteData("bar", "bar.com"))(scrupal)
+    val site3 = FakeSite(SiteData("wwwbar", "www.bar.com"))(scrupal)
     "keep track of domain names" in {
-      val site1 = FakeSite(SiteData("foo","foo.com"))(scrupal)
-      val site2 = FakeSite(SiteData("bar", "bar.com"))(scrupal)
-      scrupal.sites.size must beEqualTo(3) // DefaultLocalHostSite is always registered
+      scrupal.sites.size must beEqualTo(4) // DefaultLocalHostSite is always registered
       scrupal.sites.unregister(site2)
-      scrupal.sites.size must beEqualTo(2)
+      scrupal.sites.size must beEqualTo(3)
       scrupal.sites.registryName must beEqualTo("Sites")
       scrupal.sites.registrantsName must beEqualTo("site")
       scrupal.sites.forHost("bar.com") must beEqualTo(None)
       scrupal.sites.forHost("foo.com") must beEqualTo(Some(site1))
+      scrupal.sites.forHost("www.bar.com") must beEqualTo(Some(site3))
+      scrupal.sites.forHost("localhost") must beEqualTo(scrupal.DefaultLocalHostSite)
     }
   }
 }

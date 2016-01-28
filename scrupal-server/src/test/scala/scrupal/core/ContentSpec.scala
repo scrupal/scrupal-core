@@ -17,6 +17,7 @@ package scrupal.core
 import java.io.ByteArrayInputStream
 import java.util
 
+import akka.http.scaladsl.model.{MediaType, MediaTypes}
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.{Json, JsString}
 
@@ -57,6 +58,20 @@ class ContentSpec extends ScrupalSpecification("Content") {
       val f = Future.sequence(Seq(f1, f2, f3, f4, f5))
       await(f)
     }
+    "Construct Specialized Classes" in {
+      val data = Array[Byte](51,52,53,54,55)
+      val cases = Seq[(MediaType,Class[_])](
+        MediaTypes.`application/octet-stream` → classOf[OctetsContent],
+        MediaTypes.`text/plain` → classOf[TextContent],
+        MediaTypes.`text/html` → classOf[HtmlContent],
+        MediaTypes.`application/json` → classOf[JsonContent],
+        MediaTypes.`application/excel` → classOf[OctetsContent]
+      )
+      for (c← cases) {
+        Content(data, c._1).getClass must beEqualTo(c._2)
+      }
+      success
+    }
   }
 
   "HtmlContent" should {
@@ -83,7 +98,7 @@ class ContentSpec extends ScrupalSpecification("Content") {
     "convert to JSON" in {
       val tc = ThrowableContent(mkThrowable("testing"))
       val json = tc.toJson
-      json.keys.toSeq.sorted must beEqualTo(Seq("class", "message", "rootCauseMessage", "rootCauseStack", "stack"))
+      json.keys.toSeq.sorted must beEqualTo(Seq("class", "context", "message", "rootCauseMessage", "rootCauseStack", "stack"))
       val clazz = (json \ "class").get
       clazz.isInstanceOf[JsString] must beTrue
       clazz.asInstanceOf[JsString].value must beEqualTo("scrupal.utils.ScrupalException")
@@ -92,18 +107,25 @@ class ContentSpec extends ScrupalSpecification("Content") {
       message.asInstanceOf[JsString].value.contains("testing") must beTrue
     }
     "convert to Html" in {
-      val tc = ThrowableContent(mkThrowable("testing"))
-      val html = tc.toHtml
-      html.render.contains("testing") must beTrue
+      val tc = ThrowableContent(mkThrowable("testing"), Some("while testing"))
+      val html = tc.toHtml.render
+      html must contain("testing")
+      html must contain("while testing")
     }
+
     "convert to Bytes" in {
-      val tc = ThrowableContent(mkThrowable("testing"))
-      val future = tc.toBytes.map { bytes ⇒
-        bytes.isEmpty must beFalse
-        val str = new String(bytes, utf8)
-        str.contains("testing") must beTrue
+      def check(tc: ThrowableContent) = {
+        val future = tc.toBytes.map { bytes ⇒
+          bytes.isEmpty must beFalse
+          val str = new String(bytes, utf8)
+          str must contain("testing")
+          str must contain("foo_context")
+        }
+        await(future)
       }
-      await(future)
+      check(ThrowableContent(mkThrowable("testing"), Some("foo_context"), MediaTypes.`text/html`))
+      check(ThrowableContent(mkThrowable("testing"), Some("foo_context"), MediaTypes.`application/json`))
+      check(ThrowableContent(mkThrowable("testing"), Some("foo_context"), MediaTypes.`text/plain`))
     }
   }
 }

@@ -96,7 +96,7 @@ object Settings extends AssetsSettings {
     namespaceReverseRouter := true,
     coverageFailOnMinimum := true,
     coverageExcludedPackages := classesIgnoredByScoverage,
-    coverageMinimum := 75,
+    coverageMinimum := 80,
     coverallsToken := Some("uoZrsbhbC0E2289tvwp3ISntZLH2yjwqX"),
     buildInfoObject := "ScrupalBuildInfo",
     buildInfoPackage := "scrupal.core",

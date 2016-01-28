@@ -82,8 +82,6 @@ case class Site(data: SiteData)(implicit val scrupal : Scrupal) extends {
   }
 
   def debugFooter : Boolean = true // TODO: Implement with Feature
-
-  def subDomainSite(subDomain : String) : Option[Site] = None
 }
 
 case class SitesRegistry() extends Registry[Site] {
@@ -105,14 +103,4 @@ case class SitesRegistry() extends Registry[Site] {
   def forHost(hostName : String) : Option[Site] = {
     byDomainName.get(hostName)
   }
-
-  def forHost(domain: String, subDomain: String) : Option[Site] = {
-    byDomainName.get(domain) match {
-      case Some(topSite) ⇒
-        topSite.subDomainSite(subDomain)
-      case None ⇒
-        None
-    }
-  }
-
 }

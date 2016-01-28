@@ -183,7 +183,7 @@ case class Scrupal (
   def siteForRequest(header: RequestHeader) : Option[Site] = {
     DomainNames.matchDomainName(header.domain) match {
       case (Some(domain),Some(subDomain)) =>
-        sites.forHost(domain,subDomain)
+        sites.forHost(subDomain + "." + domain)
       case (Some(domain), None) ⇒
         sites.forHost(domain)
       case _ =>

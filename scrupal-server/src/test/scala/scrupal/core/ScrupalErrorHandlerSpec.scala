@@ -4,12 +4,14 @@ import java.io.InterruptedIOException
 import java.sql.SQLTimeoutException
 
 import com.reactific.helpers.{ThrowingHelper, NotImplementedException}
+import org.specs2.execute.AsResult
+import org.specs2.execute.{Result⇒SpecsResult}
 import play.api.http.Status
-import play.api.mvc.RequestHeader
+import play.api.mvc.{Result, RequestHeader}
 import play.api.test.FakeRequest
 import scrupal.test.{SharedTestScrupal, FakeSite, ScrupalSpecification}
 
-import scala.concurrent.TimeoutException
+import scala.concurrent.{Future, TimeoutException}
 
 class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler") with SharedTestScrupal {
 
@@ -18,103 +20,92 @@ class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler"
     FakeRequest("GET", "/index.html").withHeaders("Host" -> s"$name.com:80")
   }
 
+  def checkResult(result: Future[Result], status: Int) : SpecsResult = {
+    result.isCompleted must beTrue
+    result.value.isDefined must beTrue
+    result.value.get.isSuccess must beTrue
+    val res = result.value.get.get
+    AsResult.apply(res.header.status must beEqualTo(status))
+  }
+
   "ScrupalErrorHandler" should {
     "generate BadRequest errors" in {
-      val header = setup("one")
+      val request = setup("one")
       val seh = new ScrupalErrorHandler(scrupal)
-      val result = seh.onClientError(header, Status.BAD_REQUEST, "fake")
-      result.isCompleted must beTrue
-      result.value.isDefined must beTrue
-      result.value.get.isSuccess must beTrue
-      val res = result.value.get.get
-      res.header.status must beEqualTo(Status.BAD_REQUEST)
+      checkResult(seh.onClientError(request, Status.BAD_REQUEST, "fake"), Status.BAD_REQUEST)
+      val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
+      checkResult(seh.onClientError(request2, Status.BAD_REQUEST, "fake"), Status.BAD_REQUEST)
     }
     "generate Unauthorized errors" in {
-      val header = setup("two")
+      val request = setup("two")
       val seh = new ScrupalErrorHandler(scrupal)
-      val result = seh.onClientError(header, Status.UNAUTHORIZED, "fake")
-      result.isCompleted must beTrue
-      result.value.isDefined must beTrue
-      result.value.get.isSuccess must beTrue
-      val res = result.value.get.get
-      res.header.status must beEqualTo(Status.UNAUTHORIZED)
+      checkResult(seh.onClientError(request, Status.UNAUTHORIZED, "fake"), Status.UNAUTHORIZED)
+      val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
+      checkResult(seh.onClientError(request2, Status.UNAUTHORIZED, "fake"), Status.UNAUTHORIZED)
     }
     "generate Forbidden errors" in {
-      val header = setup("three")
+      val request = setup("three")
       val seh = new ScrupalErrorHandler(scrupal)
-      val result = seh.onClientError(header, Status.FORBIDDEN, "fake")
-      result.isCompleted must beTrue
-      result.value.isDefined must beTrue
-      result.value.get.isSuccess must beTrue
-      val res = result.value.get.get
-      res.header.status must beEqualTo(Status.FORBIDDEN)
+      checkResult(seh.onClientError(request, Status.FORBIDDEN, "fake"), Status.FORBIDDEN)
+      val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
+      checkResult(seh.onClientError(request2, Status.FORBIDDEN, "fake"), Status.FORBIDDEN)
     }
     "generate NotFound errors" in {
-      val header = setup("four")
+      val request = setup("four")
       val seh = new ScrupalErrorHandler(scrupal)
-      val result = seh.onClientError(header, Status.NOT_FOUND, "fake")
-      result.isCompleted must beTrue
-      result.value.isDefined must beTrue
-      result.value.get.isSuccess must beTrue
-      val res = result.value.get.get
-      res.header.status must beEqualTo(Status.NOT_FOUND)
+      checkResult(seh.onClientError(request, Status.NOT_FOUND, "fake"), Status.NOT_FOUND)
+      val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
+      checkResult(seh.onClientError(request2, Status.NOT_FOUND, "fake"), Status.NOT_FOUND)
     }
     "generate Other Client errors" in {
-      val header = setup("eight")
+      val request = setup("eight")
       val seh = new ScrupalErrorHandler(scrupal)
-      val result = seh.onClientError(header, Status.METHOD_NOT_ALLOWED, "fake")
-      result.isCompleted must beTrue
-      result.value.isDefined must beTrue
-      result.value.get.isSuccess must beTrue
-      val res = result.value.get.get
-      res.header.status must beEqualTo(Status.METHOD_NOT_ALLOWED)
+      checkResult(seh.onClientError(request, Status.METHOD_NOT_ALLOWED, "fake"), Status.METHOD_NOT_ALLOWED)
+      val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
+      checkResult(seh.onClientError(request2, Status.METHOD_NOT_ALLOWED, "fake"), Status.METHOD_NOT_ALLOWED)
     }
     "handle NotImplementedError" in {
-      val header = setup("five")
+      val request = setup("five")
       val seh = new ScrupalErrorHandler(scrupal)
-      val result = seh.onServerError(header, new NotImplementedError("fake"))
-      result.isCompleted must beTrue
-      result.value.isDefined must beTrue
-      result.value.get.isSuccess must beTrue
-      val res = result.value.get.get
-      res.header.status must beEqualTo(Status.NOT_IMPLEMENTED)
+      checkResult(seh.onServerError(request, new NotImplementedError("fake")), Status.NOT_IMPLEMENTED)
+      val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
+      checkResult(seh.onServerError(request2, new NotImplementedError("fake")), Status.INTERNAL_SERVER_ERROR)
     }
     "handle NotImplementedException" in {
-      val header = setup("six")
+      val request = setup("six")
       val component = new ThrowingHelper {}
       val seh = new ScrupalErrorHandler(scrupal)
-      val result = seh.onServerError(header, new NotImplementedException(component, "fake"))
-      result.isCompleted must beTrue
-      result.value.isDefined must beTrue
-      result.value.get.isSuccess must beTrue
-      val res = result.value.get.get
-      res.header.status must beEqualTo(Status.NOT_IMPLEMENTED)
+      checkResult(
+        seh.onServerError(request, new NotImplementedException(component, "fake")), Status.NOT_IMPLEMENTED
+      )
+      val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
+      checkResult(
+        seh.onServerError(request2, new NotImplementedException(component, "fake")), Status.INTERNAL_SERVER_ERROR
+      )
     }
     "handle Other exceptions" in {
-      val header = setup("nine")
+      val request = setup("nine")
       val component = new ThrowingHelper {}
       val seh = new ScrupalErrorHandler(scrupal)
-      val result = seh.onServerError(header, new IllegalArgumentException("fake: ignore me"))
-      result.isCompleted must beTrue
-      result.value.isDefined must beTrue
-      result.value.get.isSuccess must beTrue
-      val res = result.value.get.get
-      res.header.status must beEqualTo(Status.INTERNAL_SERVER_ERROR)
+      checkResult(
+        seh.onServerError(request, new IllegalArgumentException("fake: ignore me")), Status.INTERNAL_SERVER_ERROR
+      )
+      val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
+      checkResult(
+        seh.onServerError(request2, new IllegalArgumentException("fake: ignore me")), Status.INTERNAL_SERVER_ERROR
+      )
     }
-    "handle timeouts" in {
-      val header = setup("seven")
+    "handle service unavailable" in {
+      val request = setup("seven")
       val seh = new ScrupalErrorHandler(scrupal)
       val timeouts = Seq(
         new TimeoutException("fake"), new InterruptedException(),
         new SQLTimeoutException(), new InterruptedIOException()
       )
+      val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
       for (xcptn ← timeouts) {
-        val result = seh.onServerError(header, xcptn)
-        result.isCompleted must beTrue
-        result.value.isDefined must beTrue
-        result.value.get.isSuccess must beTrue
-        val res = result.value.get.get
-        res.header.status must beEqualTo(Status.SERVICE_UNAVAILABLE)
+        checkResult(seh.onServerError(request, xcptn), Status.SERVICE_UNAVAILABLE)
+        checkResult(seh.onServerError(request2, xcptn), Status.SERVICE_UNAVAILABLE)
       }
       success
     }

@@ -240,6 +240,7 @@ case class ThrowableContent(
     Json.obj(
       "class" -> content.getClass.getCanonicalName,
       "message" → content.getMessage,
+      "context" → JsString(context.getOrElse("None")),
       "stack" → ExceptionUtils.getStackTrace(content),
       "rootCauseMessage" → ExceptionUtils.getRootCauseMessage(content),
       "rootCauseStack" → ExceptionUtils.getRootCauseStackTrace(content).mkString("\n\tat ")
@@ -262,7 +263,7 @@ case class ThrowableContent(
       case MediaTypes.`application/json` ⇒
         Json.stringify(toJson).getBytes(utf8)
       case _ ⇒
-        content.toString.getBytes(utf8)
+        s"while ${context.getOrElse("Processing")}: $content".getBytes(utf8)
     }
   }
 }

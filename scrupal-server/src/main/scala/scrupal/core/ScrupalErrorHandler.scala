@@ -139,7 +139,7 @@ class ScrupalErrorHandler @Inject()(scrupal: Scrupal) extends HttpErrorHandler w
     try {
       exception match {
         case x: NotImplementedError ⇒
-          this.onNotImplemented(request, x)
+          onNotImplemented(request, x)
         case x: NotImplementedException ⇒
           onNotImplemented(request, x)
         case x: TimeoutException ⇒

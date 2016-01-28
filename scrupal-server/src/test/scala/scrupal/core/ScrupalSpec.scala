@@ -31,6 +31,12 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
       scrpl.isInstanceOf[ScrupalComponent] must beTrue
     }
 
+    "is closeable" in withScrupal("IsCloseable") { scrupal ⇒
+      scrupal.close()
+      scrupal.application.actorSystem.isTerminated must beTrue
+      scrupal.actorSystem.isTerminated must beTrue
+    }
+
     "auto register" in withScrupal("AutoRegister") { scrpl : Scrupal ⇒
         Scrupal.lookup(Symbol("AutoRegister")) must beEqualTo(Some(scrpl))
     }
