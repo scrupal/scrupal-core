@@ -24,7 +24,7 @@ import play.api.Configuration
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-import scrupal.test.{ScrupalSpecification}
+import scrupal.test.ScrupalSpecification
 
 /** Test Case For CoreSchema */
 class CoreSchemaSpec extends ScrupalSpecification("CoreSchema")  {
@@ -70,6 +70,17 @@ class CoreSchemaSpec extends ScrupalSpecification("CoreSchema")  {
         }
       }
       await(future, 1.minute, "CRUD Sites").get
+    }
+
+    "map oid/site names" in withScrupalSchema("map_site_names") { (scrupal, schema) ⇒
+      val future = scrupal.withExecutionContext { implicit ec : ExecutionContext ⇒
+        val site = SiteData("testSite", "foo.com", "testing only")
+        schema.db.run {
+          schema.sites.create(site).flatMap { oid ⇒ schema.sites.mapNames() }
+        }
+      }
+      val map = await(future)
+      map.values must contain("testSite")
     }
 
     "CRUD Node" in withScrupalSchema("node_crud") { (scrupal,schema) ⇒

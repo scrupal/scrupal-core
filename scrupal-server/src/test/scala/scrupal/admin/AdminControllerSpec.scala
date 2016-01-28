@@ -1,16 +1,13 @@
 package scrupal.admin
 
-import play.api.http.Status
-import play.api.libs.iteratee.Iteratee
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import scrupal.core._
-import scrupal.test.{SharedTestScrupal, ScrupalSpecification}
+import scrupal.test.{ControllerSpecification, SharedTestScrupal}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 
 /** Test Cases For AdminController */
-class AdminControllerSpec extends ScrupalSpecification("AdminController") with SharedTestScrupal {
+class AdminControllerSpec extends ControllerSpecification("AdminController") with SharedTestScrupal {
 
   class SiteForAdminControllerTest(siteName: String)(implicit scrpl: Scrupal)
     extends Site(new SiteData(siteName, domainName="foo.com"))(scrpl) {
@@ -20,50 +17,23 @@ class AdminControllerSpec extends ScrupalSpecification("AdminController") with S
     }
   }
 
+  def testCases : Seq[Case] = Seq(
+    Case("GET","/admin/module/", Successful, "foo"),
+    Case("GET","/admin/scrupal/",Successful, "<p>help</p>"),
+    Case("GET","/admin/scrupal/help", Successful, "<p>help</p>"),
+    Case("POST","/admin/site/", Unimplemented, "foo"),
+    Case("GET", "/admin/user/", Successful, "foo"),
+    Case("GET", "/admin/site/list", Successful, ""),
+    Case("GET", "/admin/site/1", Successful, ""),
+    Case("GET", "/admin/site/Foo", Successful, ""),
+    Case("GET", "/crapola", Unlocatable, "")
+  )
+
   "AdminController" should {
     "yield None for irrelevant path" in withScrupal("IrrelevantPath") { (scrupal) ⇒
       val req = FakeRequest("GET", "/api/foo/bar")
       val context = Context(scrupal)
       scrupal.adminController.reactorFor(context, "foo", req) must beEqualTo(None)
-    }
-
-    "support all Admin URL Paths" in withScrupalSchema("AdminPaths") { (scrupal, schema) ⇒
-      val cases = Seq(
-        ("GET","/admin/module/")        → "foo",
-        ("GET","/admin/scrupal/")       → "<p>help</p>",
-        ("GET","/admin/scrupal/help")   → "<p>help</p>",
-        ("POST","/admin/site/")         → "foo",
-        ("GET", "/admin/user/")         → "foo",
-        ("GET", "/admin/site/list")     → "",
-        ("GET", "/admin/site/1")        → "",
-        ("GET", "/admin/site/testSite") → ""
-      )
-      await(schema.create())
-      await(
-        schema.db.run {
-          val site = new SiteForAdminControllerTest("testSite")(scrupal)
-          schema.sites.create(site.data)
-        }
-      )
-
-      for (((method,path),expected) ← cases) {
-        val req = FakeRequest(method, path).withHeaders("Host"→"foo.com")
-        route(scrupal.application, req) match {
-          case Some(fr) ⇒
-            val future = fr.flatMap { result ⇒
-              result.body.run(Iteratee.consume[Array[Byte]]().map(x => new String(x, utf8))).map { body ⇒
-                if (result.header.status != Status.OK && result.header.status != Status.NOT_IMPLEMENTED) {
-                  failure(s"Wrong status (${result.header.status}) for request ($req) with result body ($body)")
-                }
-                body must contain(expected)
-              }
-            }
-            await(future)
-          case None ⇒
-            failure("route not found")
-        }
-      }
-      success
     }
 
     "have an index page" in {

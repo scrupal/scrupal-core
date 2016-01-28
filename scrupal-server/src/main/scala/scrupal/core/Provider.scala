@@ -116,7 +116,7 @@ trait SingularProvider extends IdentifiableProvider {
   }
 
   def isSingular(request: RequestHeader): Boolean = {
-    request.path.startsWith(singularPrefix)
+    request.path.startsWith(singularPrefix) || request.path.startsWith("/" + singularPrefix)
   }
 
   protected def withPrefix(routes: ReactionRoutes, prefix: String): ReactionRoutes = {
@@ -166,7 +166,7 @@ trait PluralProvider extends SingularProvider {
   }
 
   def isPlural(request: RequestHeader) : Boolean = {
-    request.path.startsWith(pluralPrefix)
+    request.path.startsWith(pluralPrefix) || request.path.startsWith("/" + pluralPrefix)
   }
 }
 

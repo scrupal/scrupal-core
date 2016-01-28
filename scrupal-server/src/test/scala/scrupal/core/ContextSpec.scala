@@ -21,9 +21,7 @@ import scrupal.test.{SharedTestScrupal, ScrupalSpecification, FakeSite}
 
 import scala.concurrent.ExecutionContext
 
-/**
- * Created by reid on 11/11/14.
- */
+/** Test Cases For the Context class */
 class ContextSpec extends ScrupalSpecification("Context") with SharedTestScrupal {
 
   "Context" should {
@@ -49,6 +47,11 @@ class ContextSpec extends ScrupalSpecification("Context") with SharedTestScrupal
     "empty gives NotImplementedError when accessing scrupal" in {
       val ctxt = Context.empty
       ctxt.scrupal must throwA[NotImplementedError]
+    }
+    "provides basic contextual data" in {
+      val ctxt = Context(scrupal)
+      ctxt.site must beEqualTo(None)
+      ctxt.user must beEqualTo(None)
     }
   }
 }

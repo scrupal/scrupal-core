@@ -234,7 +234,7 @@ trait EntityProvider extends PluralProvider with Enablee {
 }
 
 abstract class NoOpEntity(val what : String) extends UnimplementedReactorTrait {
-  def oid : Option[Long] = None
+  val oid : Option[Long] = None
 }
 
 case class NoOpEntityCreate(pName: String, details: String)

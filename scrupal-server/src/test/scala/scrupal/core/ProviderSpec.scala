@@ -114,7 +114,7 @@ class ProviderSpec extends ScrupalSpecification("Provider") with SharedTestScrup
       ep.enable(e_root)
       ep.enable(e_root_1)
       ep.disable(e_root_2)
-      val future = ep.provide(request)(stimulus).map { resp : Response[_] ⇒
+      val future = ep.provide(request)(stimulus).map { resp : RxResponse ⇒
         resp.disposition must beEqualTo(Unimplemented)
         resp.asInstanceOf[UnimplementedResponse].formatted must beEqualTo("Unimplemented: single")
       }
@@ -130,13 +130,14 @@ class ProviderSpec extends ScrupalSpecification("Provider") with SharedTestScrup
       }
     }
 
-    "has isSingular cateogrize requests properly" in {
+    "have isSingular categorize requests properly" in {
       sp.singularPrefix must beEqualTo("foot-")
       sp.isSingular(FakeRequest("GET", "foot-")) must beTrue
       sp.isSingular(FakeRequest("GET", "bar")) must beFalse
+      sp.isSingular(FakeRequest("GET", "/foot-")) must beTrue
     }
 
-    "find provides with prefix" in {
+    "have withPrefix provide " in {
       scrupal.withExecutionContext { implicit ec: ExecutionContext ⇒
         val req: RequestHeader = null
         sp.withPrefix("foo").provide.lift(req).isDefined must beFalse
@@ -148,7 +149,7 @@ class ProviderSpec extends ScrupalSpecification("Provider") with SharedTestScrup
     "provides reactor appropriately" in {
       val request = FakeRequest("GET", "/foot-")
       val stimulus = Stimulus(SimpleContext(scrupal), request)
-      val future = sp.provide(request)(stimulus).map { resp: Response[_] ⇒
+      val future = sp.provide(request)(stimulus).map { resp: RxResponse ⇒
         resp.disposition must beEqualTo(Unimplemented)
         resp.asInstanceOf[UnimplementedResponse].formatted must beEqualTo("Unimplemented: single")
       }
@@ -181,7 +182,7 @@ class ProviderSpec extends ScrupalSpecification("Provider") with SharedTestScrup
     "provides reactor appropriate for plurality of request" in {
       val singleRequest = FakeRequest("GET", "/foot")
       val singleStimulus = Stimulus(SimpleContext(scrupal), singleRequest)
-      val singleFuture = sp.provide(singleRequest)(singleStimulus).map { resp: Response[_] ⇒
+      val singleFuture = sp.provide(singleRequest)(singleStimulus).map { resp: RxResponse ⇒
         resp.disposition must beEqualTo(Unimplemented)
         resp.isInstanceOf[UnimplementedResponse]
         val ur = resp.asInstanceOf[UnimplementedResponse]
@@ -189,7 +190,7 @@ class ProviderSpec extends ScrupalSpecification("Provider") with SharedTestScrup
       }
       val pluralRequest = FakeRequest("GET", "/feet")
       val pluralStimulus = Stimulus(SimpleContext(scrupal), pluralRequest)
-      val pluralFuture = sp.provide(pluralRequest)(pluralStimulus).map { resp: Response[_] ⇒
+      val pluralFuture = sp.provide(pluralRequest)(pluralStimulus).map { resp: RxResponse ⇒
         resp.disposition must beEqualTo(Unimplemented)
         resp.isInstanceOf[UnimplementedResponse]
         val ur = resp.asInstanceOf[UnimplementedResponse]

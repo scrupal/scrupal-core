@@ -39,7 +39,7 @@ trait Context {
   def themeProvider : String = "bootswatch"
   def themeName : String = "Flatly"
   def description : String = ""
-  def user : String = "guest"
+  def user : Option[String] = None
 
   def withConfiguration[T](f : (Configuration) ⇒ T) : T = { scrupal.withConfiguration(f) }
 
