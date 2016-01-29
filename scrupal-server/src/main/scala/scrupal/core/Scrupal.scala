@@ -293,7 +293,7 @@ case class Scrupal (
           case Some("thread-pool") ⇒
             makeThreadPoolExecutionContext(conf.getConfig("thread-pool").getOrElse(Configuration()))
           case Some(s: String) ⇒
-            toss("Invalid valid for configuration key 'scrupal.executor.type'")
+            toss("Invalid value for configuration key 'scrupal.executor.type'")
           case None ⇒
             makeWorkStealingPool()
         }

@@ -6,7 +6,7 @@ import java.sql.SQLTimeoutException
 import com.reactific.helpers.{ThrowingHelper, NotImplementedException}
 import org.specs2.execute.AsResult
 import org.specs2.execute.{Result⇒SpecsResult}
-import play.api.http.Status
+import play.api.http.{HttpErrorHandlerExceptions, Status}
 import play.api.mvc.{Result, RequestHeader}
 import play.api.test.FakeRequest
 import scrupal.test.{SharedTestScrupal, FakeSite, ScrupalSpecification}
@@ -36,6 +36,7 @@ class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler"
       val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
       checkResult(seh.onClientError(request2, Status.BAD_REQUEST, "fake"), Status.BAD_REQUEST)
     }
+
     "generate Unauthorized errors" in {
       val request = setup("two")
       val seh = new ScrupalErrorHandler(scrupal)
@@ -43,6 +44,7 @@ class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler"
       val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
       checkResult(seh.onClientError(request2, Status.UNAUTHORIZED, "fake"), Status.UNAUTHORIZED)
     }
+
     "generate Forbidden errors" in {
       val request = setup("three")
       val seh = new ScrupalErrorHandler(scrupal)
@@ -50,6 +52,7 @@ class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler"
       val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
       checkResult(seh.onClientError(request2, Status.FORBIDDEN, "fake"), Status.FORBIDDEN)
     }
+
     "generate NotFound errors" in {
       val request = setup("four")
       val seh = new ScrupalErrorHandler(scrupal)
@@ -57,13 +60,7 @@ class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler"
       val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
       checkResult(seh.onClientError(request2, Status.NOT_FOUND, "fake"), Status.NOT_FOUND)
     }
-    "generate Other Client errors" in {
-      val request = setup("eight")
-      val seh = new ScrupalErrorHandler(scrupal)
-      checkResult(seh.onClientError(request, Status.METHOD_NOT_ALLOWED, "fake"), Status.METHOD_NOT_ALLOWED)
-      val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
-      checkResult(seh.onClientError(request2, Status.METHOD_NOT_ALLOWED, "fake"), Status.METHOD_NOT_ALLOWED)
-    }
+
     "handle NotImplementedError" in {
       val request = setup("five")
       val seh = new ScrupalErrorHandler(scrupal)
@@ -71,6 +68,7 @@ class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler"
       val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
       checkResult(seh.onServerError(request2, new NotImplementedError("fake")), Status.INTERNAL_SERVER_ERROR)
     }
+
     "handle NotImplementedException" in {
       val request = setup("six")
       val component = new ThrowingHelper {}
@@ -83,18 +81,7 @@ class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler"
         seh.onServerError(request2, new NotImplementedException(component, "fake")), Status.INTERNAL_SERVER_ERROR
       )
     }
-    "handle Other exceptions" in {
-      val request = setup("nine")
-      val component = new ThrowingHelper {}
-      val seh = new ScrupalErrorHandler(scrupal)
-      checkResult(
-        seh.onServerError(request, new IllegalArgumentException("fake: ignore me")), Status.INTERNAL_SERVER_ERROR
-      )
-      val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
-      checkResult(
-        seh.onServerError(request2, new IllegalArgumentException("fake: ignore me")), Status.INTERNAL_SERVER_ERROR
-      )
-    }
+
     "handle service unavailable" in {
       val request = setup("seven")
       val seh = new ScrupalErrorHandler(scrupal)
@@ -109,19 +96,59 @@ class ScrupalErrorHandlerSpec extends ScrupalSpecification("ScrupalErrorHandler"
       }
       success
     }
+
+    "generate Other Client errors" in {
+      val request = setup("eight")
+      val seh = new ScrupalErrorHandler(scrupal)
+      checkResult(seh.onClientError(request, Status.METHOD_NOT_ALLOWED, "fake"), Status.METHOD_NOT_ALLOWED)
+      val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
+      checkResult(seh.onClientError(request2, Status.METHOD_NOT_ALLOWED, "fake"), Status.METHOD_NOT_ALLOWED)
+    }
+
+    "handle Other exceptions" in {
+      val request = setup("nine")
+      val component = new ThrowingHelper {}
+      val seh = new ScrupalErrorHandler(scrupal)
+      checkResult(
+        seh.onServerError(request, new IllegalArgumentException("fake: ignore me")), Status.INTERNAL_SERVER_ERROR
+      )
+      val request2 = FakeRequest("GET","/").withHeaders("Host" → s"oops.com:80")
+      checkResult(
+        seh.onServerError(request2, new IllegalArgumentException("fake: ignore me")), Status.INTERNAL_SERVER_ERROR
+      )
+    }
+
     "handle exception while handling exception" in {
-      val header = setup("ten")
+      val request = setup("ten")
       val seh = new ScrupalErrorHandler(scrupal) {
         override def defaultServerError(request : RequestHeader, x : Throwable) = {
           toss("exception in handling exception")
         }
       }
-      val result = seh.onServerError(header, new Exception("foo"))
+      val result = seh.onServerError(request, new Exception("foo"))
       result.isCompleted must beTrue
       result.value.isDefined must beTrue
       result.value.get.isSuccess must beTrue
       val res = result.value.get.get
       res.header.status must beEqualTo(Status.INTERNAL_SERVER_ERROR)
     }
+
+    "reject onClientError with server code" in {
+      val request = setup("eleven")
+      val seh = new ScrupalErrorHandler(scrupal)
+      seh.onClientError(request, Status.INTERNAL_SERVER_ERROR, "foo") must throwA[IllegalArgumentException]
+    }
+
+    "deal with production mode" in {
+      val request = setup("twelve")
+      val xcptn = new IllegalArgumentException("fake: Ignore me")
+      val usefulException =
+        HttpErrorHandlerExceptions.throwableToUsefulException(scrupal.sourceMapper, isProd=true, xcptn)
+      val seh = new ScrupalErrorHandler(scrupal)
+      checkResult (
+        seh.onProdServerError(request, usefulException), Status.INTERNAL_SERVER_ERROR
+      )
+    }
+
   }
 }

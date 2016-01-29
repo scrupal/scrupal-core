@@ -41,19 +41,6 @@ abstract class ScrupalSpecification(
   // WARNING: Do NOT put anything but def and lazy val because of DelayedInit or app startup will get invoked twice
   // and you'll have a real MESS on your hands!!!! (i.e. no db interaction will work!)
 
-  abstract class WithScrupal[T](
-    val name : String,
-    moreConfig: Map[String,AnyRef] = Map.empty[String,AnyRef]
-  )( f : (Scrupal) ⇒ T) {
-    implicit val scrupal = ScrupalCache(name, new java.io.File("."), moreConfig)
-    implicit val ec : ExecutionContext = scrupal.executionContext
-    try {
-      f(scrupal)
-    } finally {
-      ScrupalCache.unload(name)
-    }
-  }
-
   def withScrupal[T](
     name: String,
     path: java.io.File = new java.io.File("."),

@@ -39,6 +39,10 @@ class ReactorSpec extends ScrupalSpecification("Reactor") {
       }
       await(future)
     }
+    "provide unimplemented(what)" in {
+      Reactor.unimplemented("nada") must beEqualTo(UnimplementedReactor("nada"))
+    }
+
   }
 
   "UnimplementedReactor" should {

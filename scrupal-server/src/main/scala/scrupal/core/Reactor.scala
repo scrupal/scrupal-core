@@ -90,13 +90,7 @@ object Reactor {
   }
 
   def unimplemented(what : ⇒ String) : Reactor = {
-    new Reactor {
-      def apply(stimulus : Stimulus) : Future[RxResponse] = {
-        Future.successful {
-          UnimplementedResponse(what)
-        }
-      }
-    }
+    UnimplementedReactor(what)
   }
 }
 

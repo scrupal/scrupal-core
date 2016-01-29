@@ -16,7 +16,7 @@ package scrupal.core
 
 import play.api.test.FakeRequest
 import scrupal.test.{ScrupalSpecification, ScrupalCache}
-import scrupal.utils.ScrupalComponent
+import scrupal.utils.{ScrupalException, ScrupalComponent}
 
 import scala.concurrent.{ExecutionContextExecutor, ExecutionContextExecutorService, ExecutionContext, Future}
 
@@ -62,6 +62,7 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
           await(future)
         }
       }
+      f1 must beEqualTo("s1")
 
       val f2 = withScrupal("s2", moreConfig = Map("scrupal.executor.type" → "default")) { s2 : Scrupal ⇒
         s2.withExecutionContext { implicit ec : ExecutionContext ⇒
@@ -70,6 +71,8 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
           await(future)
         }
       }
+      f2 must beEqualTo("s2")
+
       val f3 = withScrupal("s3", moreConfig = Map("scrupal.executor.type" → "thread-pool")) { s3 : Scrupal ⇒
         s3.withExecutionContext { implicit ec : ExecutionContext ⇒
           ec.isInstanceOf[ExecutionContextExecutorService] must beTrue
@@ -77,6 +80,8 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
           await(future)
         }
       }
+      f3 must beEqualTo("s3")
+
       val f4 = withScrupal("s4", moreConfig = Map("scrupal.executor.type" → "akka")) { s4 : Scrupal ⇒
         s4.withExecutionContext { implicit ec : ExecutionContext ⇒
           ec.isInstanceOf[ExecutionContextExecutor] must beTrue
@@ -84,10 +89,22 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
           await(future)
         }
       }
-      f1 must beEqualTo("s1")
-      f2 must beEqualTo("s2")
-      f3 must beEqualTo("s3")
       f4 must beEqualTo("s4")
+
+      val f5 = withScrupal("s5", moreConfig = Map("scrupal.executor.type" → "work-stealing-pool")) { s1: Scrupal ⇒
+        s1.withExecutionContext { implicit ec: ExecutionContext ⇒
+          ec.isInstanceOf[ExecutionContextExecutorService] must beTrue
+          val future = Future { "s5"}
+          await(future)
+        }
+      }
+      f5 must beEqualTo("s5")
+
+      val cfg = Map("scrupal.executor.type" → "not-a-pool-type")
+
+      { withScrupal("s6", moreConfig = cfg) { s6 : Scrupal ⇒ () } } must
+        throwA[ScrupalException]("Invalid value for configuration key 'scrupal.executor.type'")
+
     }
 
     "provides default site" in withScrupal("default_site") { scrupal ⇒
@@ -107,6 +124,16 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
         case None ⇒
           failure("DefaultLocalHostSite should have provided Reactor")
       }
+    }
+
+    "siteForRequest works for subdomains" in withScrupal("subdomain_check") { scrupal ⇒
+      val req = FakeRequest("GET", "/").withHeaders("Host" → "foo.bar.com")
+
+      scrupal.siteForRequest(req) must beEqualTo(None)
+
+      val site = new Site(SiteData("foo", "foo.bar.com", "nada"))(scrupal)
+
+      scrupal.siteForRequest(req) must beEqualTo(Some(site))
     }
   }
 
