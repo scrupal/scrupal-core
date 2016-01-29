@@ -35,7 +35,7 @@ import play.api.libs.concurrent.ActorSystemProvider
 import play.api.mvc.{EssentialFilter, RequestHeader}
 import play.api.routing.Router
 import play.api.routing.sird._
-import scrupal.admin.AdminController
+
 import scrupal.html._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,10 +43,6 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 import scrupal.utils.{DomainNames, ScrupalComponent}
-
-trait ScrupalUser {
-  def scrupal : Scrupal
-}
 
 class ScrupalLoader extends ApplicationLoader {
   def load(context: ApplicationLoader.Context) : Application = {
@@ -88,18 +84,14 @@ case class Scrupal (
 
   val assets = new Assets(httpErrorHandler, configuration, environment)
 
-  val adminController = new AdminController(this, messagesApi)
-
-  val apiController = new APIController(this, messagesApi)
-
-  val appController = new ApplicationController(this, messagesApi)
+  val scrupalController  = ScrupalController(this, messagesApi)
 
   val cryptoConfig: CryptoConfig = new CryptoConfigParser(environment, configuration).get
 
   val crypto: Crypto = new Crypto(cryptoConfig)
 
   val router : Router =
-    new _root_.router.Routes(httpErrorHandler, apiController, appController, adminController, assets, "/")
+    new _root_.router.Routes(httpErrorHandler, scrupalController, assets, "/")
 
   val injector: Injector =
     new SimpleInjector(NewInstanceInjector) + router + crypto + httpConfiguration + tempFileCreator

@@ -11,8 +11,8 @@ class AdminScrupalProvider extends {
   val id = 'AdminScrupalProvider
 } with Provider with Enablee  {
   def provide = {
-    case GET(p"/help") ⇒ Reactor.from { Response(help(), Successful) }
-    case GET(p"/")     ⇒ Reactor.from { Response(help(), Successful) }
+    case GET(p"/scrupal/help") ⇒ Reactor.from { Response(help(), Successful) }
+    case GET(p"/scrupal/")     ⇒ Reactor.from { Response(help(), Successful) }
   }
 
   def help() : HtmlContents = {

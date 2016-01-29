@@ -1,39 +1,41 @@
 package scrupal.admin
 
-import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import scrupal.core._
 import scrupal.test.{ControllerSpecification, SharedTestScrupal}
 
 
 /** Test Cases For AdminController */
-class AdminControllerSpec extends ControllerSpecification("AdminController") with SharedTestScrupal {
+class AdminProviderSpec extends ControllerSpecification("AdminProvider") with SharedTestScrupal {
 
-  class SiteForAdminControllerTest(siteName: String)(implicit scrpl: Scrupal)
-    extends Site(new SiteData(siteName, domainName="foo.com"))(scrpl) {
-    override def reactorFor(request: RequestHeader) : Option[Reactor] = {
-      val reactor = super.reactorFor(request)
-      reactor
-    }
+  class SiteForAdminProviderTest(implicit scrpl: Scrupal)
+    extends Site(new SiteData("foo", domainName="foo.com"))(scrpl) {
+    object adminProvider extends AdminProvider
+    enable(adminProvider, this)
+  }
+
+
+  override def makeSite(implicit scrupal : Scrupal) : Site = {
+    new SiteForAdminProviderTest()(scrupal)
   }
 
   def testCases : Seq[Case] = Seq(
-    Case("GET","/admin/module/", Successful, "foo"),
-    Case("GET","/admin/scrupal/",Successful, "<p>help</p>"),
-    Case("GET","/admin/scrupal/help", Successful, "<p>help</p>"),
-    Case("POST","/admin/site/", Unimplemented, "foo"),
-    Case("GET", "/admin/user/", Successful, "foo"),
-    Case("GET", "/admin/site/list", Successful, ""),
-    Case("GET", "/admin/site/1", Successful, ""),
-    Case("GET", "/admin/site/Foo", Successful, ""),
+    Case("POST","/app/admin/site/", Unimplemented, "foo"),
+    Case("GET", "/app/admin/scrupal/",Successful, "<p>help</p>"),
+    Case("GET", "/app/admin/scrupal/help", Successful, "<p>help</p>"),
+    Case("GET", "/app/admin/user/", Successful, "foo"),
+    Case("GET", "/app/admin/site/list", Successful, ""),
+    Case("GET", "/app/admin/site/1", Successful, ""),
+    Case("GET", "/app/admin/site/foo", Successful, ""),
+    Case("GET", "/app/admin/module/", Successful, "foo"),
     Case("GET", "/crapola", Unlocatable, "")
   )
 
-  "AdminController" should {
+  "AdminProvider" should {
     "yield None for irrelevant path" in withScrupal("IrrelevantPath") { (scrupal) ⇒
       val req = FakeRequest("GET", "/api/foo/bar")
       val context = Context(scrupal)
-      scrupal.adminController.reactorFor(context, "foo", req) must beEqualTo(None)
+      scrupal.scrupalController.appReactorFor(context, "foo", req) must beEqualTo(None)
     }
 
     "have an index page" in {

@@ -7,6 +7,6 @@ class AdminUserProvider extends {
   val id = 'AdminUserProvider
 } with Provider with Enablee {
   def provide = {
-    case GET(p"/") ⇒ Reactor.from { Response("foo", Successful) }
+    case GET(p"/user/") ⇒ Reactor.from { Response("foo", Successful) }
   }
 }

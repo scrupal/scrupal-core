@@ -18,6 +18,8 @@ package scrupal.core
 import com.reactific.helpers.{Identifiable, Patterns, Pluralizer}
 import play.api.mvc._
 
+import scala.reflect.{ClassTag,classTag}
+
 /** Provider Of Reactors
   *
   * Scrupal objects that mix in this trait participate in the routing of RequestHeaders to a
@@ -102,6 +104,22 @@ trait EnablementProvider[T <: EnablementProvider[T]] extends DelegatingProvider 
       e.asInstanceOf[Provider]
     }
   }
+
+  def delegatesOfType[P <: Provider with Enablee : ClassTag] = {
+    mapIf[P] { e : Enablee ⇒
+      classTag[P].runtimeClass.isInstance(e) && isEnabled(e,this)
+    } { e : Enablee ⇒
+      e.asInstanceOf[P]
+    }
+  }
+
+  def provideFor[P <: Provider with Enablee : ClassTag] : ReactionRoutes = {
+    delegatesOfType[P].foldLeft(Provider.emptyReactionRoutes) {
+      case (accum, next) ⇒
+        accum.orElse(next.provide)
+    }
+  }
+
 }
 
 trait SingularProvider extends IdentifiableProvider {

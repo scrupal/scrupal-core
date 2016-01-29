@@ -9,12 +9,12 @@ import scalatags.Text.all._
   * for web components.
   */
 case class ReactPolymerLayout(appName : String = "")(implicit val scrupal : Scrupal) extends PolymerLayout {
-  def id: Identifier = 'ScrupalLayout
+  def id: Identifier = 'ReactPolymerLayout
 
   val scalajs = new ScalaJS()(scrupal)
 
   val description: String =
-    "A Polymer + React layout for Single Page Application type pages"
+    "A Polymer + React layout for Single Page Applications"
 
   final override def arrangementDescription: Map[String,String] = Map(
     "contents" → "The main content",
@@ -22,7 +22,7 @@ case class ReactPolymerLayout(appName : String = "")(implicit val scrupal : Scru
   )
 
   override def contents(args: Arguments) : HtmlContents = {
-    div(scalatags.Text.all.id := "react-polymer-app")
+    div(scalatags.Text.all.id := "scrupal-jsapp", data("appname"):=appName)
   }
 
   final override def header(args: Arguments) : HtmlContents = {
@@ -34,7 +34,7 @@ case class ReactPolymerLayout(appName : String = "")(implicit val scrupal : Scru
   }
 
   override def endScripts(args: Arguments) : HtmlContents = {
-    super.endScripts(args) ++ scalajs.projectScript("scrupal-react-polymer") ++
+    super.endScripts(args) ++ scalajs.projectScript("scrupal-jsapp") ++
       { if (appName.nonEmpty) scalajs.projectScript(appName) else emptyContents }
   }
 }

@@ -22,7 +22,7 @@ import scalatags.JsDom.all._
   * to invoke the main method. We place that fragment at the bottom of the HTML page in a script element so that
   * the application is launched towards the end of page loading.
   */
-object ReactPolymerApp extends js.JSApp {
+object ReactPolymerApp extends {
   import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
   /** main method
@@ -31,8 +31,7 @@ object ReactPolymerApp extends js.JSApp {
     * spa-header, spa-content, and spa-footer. We just locate these in the DOM document and then pass them to the
     * load method to do the actual loading.
     */
-  @JSExport
-  override def main(): Unit = {
+  def fakeMain(): Unit = {
     val app = dom.document.getElementById("polymer-react-app").asInstanceOf[html.Div]
     application.map { a ⇒ app.appendChild(a.render) }
   }

@@ -28,7 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   * @see [[scrupal.core.Reactor]]
   */
-trait Reaction extends ((Stimulus) ⇒ Future[Response[Content[_]]])
+trait Reaction extends ( (Stimulus) ⇒ Future[RxResponse] )
 
 /** An Named, Described Reaction
   *

@@ -12,6 +12,18 @@
         <parameter value="-target:jvm-1.8" />
       </parameters>
     </profile>
+    <profile name="SBT 10" modules="scrupal-jsapp">
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
+      <parameters>
+        <parameter value="-P:scalajs:mapSourceURI:file:/Users/reidspencer/Code/scrupal-core/scrupal-jsapp/src/main/scala/-&gt;79a7ff04e4c20427e8fb/" />
+        <parameter value="-Xlint" />
+      </parameters>
+      <plugins>
+        <plugin path="$USER_HOME$/.ivy2/cache/org.scala-js/scalajs-compiler_2.11.7/jars/scalajs-compiler_2.11.7-0.6.6.jar" />
+      </plugins>
+    </profile>
     <profile name="SBT 2" modules="root" />
     <profile name="SBT 3" modules="client">
       <option name="deprecationWarnings" value="true" />

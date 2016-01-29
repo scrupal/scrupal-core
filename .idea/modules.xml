@@ -2,13 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-client.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-client.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-client-build.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-client-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-core.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-core-build.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-core-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-jsapp.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-jsapp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-jsapp-build.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-jsapp-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-react-polymer.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-react-polymer.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-react-polymer.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-react-polymer.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-react-polymer-build.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-react-polymer-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-react-polymer-build.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-react-polymer-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-server.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-server.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-server-build.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-server-build.iml" />

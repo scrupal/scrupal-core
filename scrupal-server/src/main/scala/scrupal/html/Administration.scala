@@ -22,7 +22,7 @@ import scalatags.Text.all._
 
 object Administration {
 
-  val routes = router.scrupal.admin.routes.AdminController
+  val routes = router.scrupal.core.routes.ScrupalController
 
   def navbar(sites : Map[Long, String], modules: Map[Symbol,String]) = {
     div(cls:="container",
@@ -40,10 +40,10 @@ object Administration {
             a(href:="#",cls:="dropdown-toggle",data("toggle"):="dropdown",role:="button",
               aria.haspopup:="true",aria.expanded:="false","Sites",span(cls:="caret")),
             ul(cls:="dropdown-menu",
-              li(cls:="dropdown-header",a(href:=routes.doPOST("site","").url, "Create New Site")),
+              li(cls:="dropdown-header",a(href:=routes.appPOST("site","").url, "Create New Site")),
               li(role:="separator",cls:="divider"),
               for( (oid,name) ← sites) {
-                li(a(href:=routes.doGET("site",oid.toString).url,name))
+                li(a(href:=routes.appGET("site",oid.toString).url,name))
               }
             )
           ),
@@ -52,7 +52,7 @@ object Administration {
               aria.expanded:="false", "Modules", span(cls:="caret")),
             ul(cls:="dropdown-menu",
               for( (id,name) ← modules) {
-                li(a(href:=routes.doGET("module",id.name).url, name))
+                li(a(href:=routes.appGET("module",id.name).url, name))
               }
             )
           )

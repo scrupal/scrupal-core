@@ -46,19 +46,14 @@ object ScrupalBuild extends Build {
   lazy val sharedJVM = shared.jvm
   lazy val sharedJS = shared.js
 
-  lazy val client = Project("scrupal-client", file("scrupal-client")).
+  lazy val jsapp = Project("scrupal-jsapp", file("scrupal-jsapp")).
     enablePlugins(ScalaJSPlugin, ScalaJSPlay).
     // WARNING: This yields a "These plugins were both included and excluded error"
     // .disablePlugins(ScoverageSbtPlugin)
     settings(Settings.clientSettings).
     dependsOn(sharedJS)
 
-  lazy val reactPolymer = Project("scrupal-react-polymer", file("react-polymer")).
-    enablePlugins(ScalaJSPlugin, ScalaJSPlay).
-    settings(Settings.reactPolymerSettings).
-    dependsOn(client,sharedJS)
-
-  lazy val jsProjects = Seq(client, reactPolymer)
+  lazy val jsProjects = Seq(jsapp)
 
   lazy val server = Project("scrupal-server", file("scrupal-server")).
     disablePlugins(PlayLayoutPlugin).
@@ -85,8 +80,7 @@ object ScrupalBuild extends Build {
     aggregate(
       sharedJVM,
       sharedJS,
-      client,
-      reactPolymer,
+      jsapp,
       server
     )
 

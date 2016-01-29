@@ -21,7 +21,7 @@ class ReactPolymerLayoutSpec extends ValidatingSpecification("ReactPolymerLayout
       val content = div()
       val future = scrupal.reactPolymerLayout.page(Context(scrupal), makeScrupalArgs(content))
       val result = await(future)
-      result.contains("react-polymer-app") must beTrue
+      result.contains("scrupal-jsapp") must beTrue
       // FIXME: nu.validator can't handle HTML Imports yet
       validate("ReactPolymerLayout", result)
       result.contains("rel=\"import\"")
