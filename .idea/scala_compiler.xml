@@ -17,7 +17,7 @@
       <option name="uncheckedWarnings" value="true" />
       <option name="featureWarnings" value="true" />
       <parameters>
-        <parameter value="-P:scalajs:mapSourceURI:file:/Users/reidspencer/Code/scrupal-core/scrupal-jsapp/src/main/scala/-&gt;79a7ff04e4c20427e8fb/" />
+        <parameter value="-P:scalajs:mapSourceURI:file:/Users/reid/Code/scrupal-core/scrupal-jsapp/src/main/scala/-&gt;eabe0fdb70c2752e0ce4/" />
         <parameter value="-Xlint" />
       </parameters>
       <plugins>

@@ -23,11 +23,20 @@ import scrupal.core._
 
 import scala.concurrent.ExecutionContext
 
+case class TestOtherProvider(id : Symbol) extends SingularProvider with Enablee {
+  import play.api.routing.sird._
+  def singularRoutes : ReactionRoutes = {
+    case GET(p"/foo") ⇒ Reactor.from { Response("foo",Successful) }
+    case PUT(p"/nada") ⇒ Reactor.unimplemented("nada")
+  }
+}
+
+case class TestEntityProvider(id : Symbol) extends EntityProvider
+
+
 abstract class ControllerSpecification(name : String) extends ScrupalSpecification(name) {
 
   LoggingHelper.setToDebug(this)
-
-  case class TestEntityProvider(id : Symbol) extends EntityProvider
 
   class SiteForControllerTest(implicit scrpl: Scrupal)
     extends Site(new SiteData(name="Foo", domainName="foo.com"))(scrpl) {
@@ -37,8 +46,10 @@ abstract class ControllerSpecification(name : String) extends ScrupalSpecificati
     }
     val tep1 = TestEntityProvider(Symbol("foot"))
     val tep2 = TestEntityProvider(Symbol("book"))
+    val top3 = TestOtherProvider(Symbol("other"))
     enable(tep1,this)
     enable(tep2,this)
+    enable(top3,this)
     require(delegates.toSeq.contains(tep1),"Failed to register tep1")
   }
 

@@ -189,6 +189,13 @@ case class UnimplementedResponse(what: String) extends Response[TextContent] {
   override def toEnumerator(implicit ec: ExecutionContext) = Enumerator(formatted.getBytes(utf8))
 }
 
+case class UnlocatableResponse(what : String) extends Response[TextContent] {
+  val payload = TextContent(what)
+  def disposition = Unlocatable
+  def formatted = s"${disposition.id.name}: $what"
+  override def toEnumerator(implicit ec : ExecutionContext) = Enumerator(formatted.getBytes(utf8))
+}
+
 /** Response With An Enumerator
   * This is used to capture responses of arbitrary type as a single type since all Reponses can be
   * converted into this kind of response

@@ -80,7 +80,7 @@ case class ScrupalController(scrupal : Scrupal, messagesApi : MessagesApi)
   def thingDELETE(thing: String, what : String) = thingReactor(cleanse(thing), what)
   def thingHEAD(thing: String, what : String) = thingReactor(cleanse(thing), what)
 
-  def thingReactor(thing : String, what : String) = reactorFor(thing.length+1, thing, what, thingReactorFor)
+  def thingReactor(thing : String, what : String) = reactorFor(0, thing, what, thingReactorFor)
 
   def reactorFor(prefixLenToDrop : Int, thing: String, what : String, rxFinder : RxFinder ) = {
     Action.async { implicit request : Request[AnyContent] ⇒
@@ -92,10 +92,10 @@ case class ScrupalController(scrupal : Scrupal, messagesApi : MessagesApi)
             case Some(reactor) ⇒
               reactor.resultFrom(context, request)
             case None ⇒
-              UnimplementedReactor(s"No reactor found for $rh").resultFrom(context, request)
+              Reactor.unlocatable(s"No reactor found for $rh").resultFrom(context, request)
           }
         case None ⇒
-          UnimplementedReactor(s"No context found for $rh").resultFrom(Context(scrupal), request)
+          Reactor.unlocatable(s"No context found for $rh").resultFrom(Context(scrupal), request)
       }
     }
   }

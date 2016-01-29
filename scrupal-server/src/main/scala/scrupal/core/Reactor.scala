@@ -92,10 +92,13 @@ object Reactor {
   def unimplemented(what : ⇒ String) : Reactor = {
     UnimplementedReactor(what)
   }
+
+  def unlocatable(what : ⇒ String) : Reactor = {
+    UnlocatableReactor(what)
+  }
 }
 
-trait UnimplementedReactorTrait extends Reactor {
-  def what : String
+case class UnimplementedReactor(what : String) extends Reactor {
   def apply(stimulus: Stimulus): Future[RxResponse] = {
     Future.successful {
       UnimplementedResponse(what)
@@ -103,8 +106,12 @@ trait UnimplementedReactorTrait extends Reactor {
   }
 }
 
-case class UnimplementedReactor(what: String) extends UnimplementedReactorTrait {
-  val description = s"A Reactor that returns a not-implemented response for $what"
+case class UnlocatableReactor(what : String) extends Reactor {
+  def apply(stimulus: Stimulus): Future[RxResponse] = {
+    Future.successful {
+      UnlocatableResponse(what)
+    }
+  }
 }
 
 /** Reactor From A Node

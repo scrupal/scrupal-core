@@ -18,6 +18,8 @@ package scrupal.core
 import com.reactific.slickery.Storable._
 import play.api.routing.sird._
 
+import scala.concurrent.Future
+
 
 trait EntityCollectionReactor extends Reactor
 trait EntityInstanceReactor extends Reactor
@@ -233,8 +235,13 @@ trait EntityProvider extends PluralProvider with Enablee {
   }
 }
 
-abstract class NoOpEntity(val what : String) extends UnimplementedReactorTrait {
+abstract class NoOpEntity(val what : String) extends Reactor {
   val oid : Option[Long] = None
+  def apply(stimulus: Stimulus): Future[RxResponse] = {
+    Future.successful {
+      UnimplementedResponse(what)
+    }
+  }
 }
 
 case class NoOpEntityCreate(pName: String, details: String)

@@ -53,7 +53,13 @@ class ScrupalControllerSpec extends ControllerSpecification("ScrupalController")
     Case("PUT","/api/book/42/facet/facet_id/nada",Unimplemented,"book.setById(id=42,facet=facet,facet_id=facet_id,details=nada)"),
     Case("PUT","/api/book/forty-two/facet/facet_id/nada",Unimplemented,"book.setByName(name=forty-two,facet=facet,facet_id=facet_id,details=nada)"),
     Case("DELETE","/api/book/42/facet/facet_id/nada",Unimplemented,"book.removeById(id=42,facet=facet,facet_id=facet_id,details=nada)"),
-    Case("DELETE","/api/book/forty-two/facet/facet_id/nada",Unimplemented,"book.removeByName(name=forty-two,facet=facet,facet_id=facet_id,details=nada)")
+    Case("DELETE","/api/book/forty-two/facet/facet_id/nada",Unimplemented,"book.removeByName(name=forty-two,facet=facet,facet_id=facet_id,details=nada)"),
+    Case("GET", "/other/foo", Successful, "foo"),
+    Case("PUT", "/other/nada", Unimplemented, "nada"),
+    Case("POST", "/other/x", Unlocatable, ""),
+    Case("OPTIONS", "/other/nada", Unlocatable, ""),
+    Case("HEAD", "/other/foo", Unlocatable, ""),
+    Case("DELETE", "/other/nada", Unlocatable, "")
   )
 
   "ScrupalController" should {
@@ -70,9 +76,9 @@ class ScrupalControllerSpec extends ControllerSpecification("ScrupalController")
       route(scrupal.application, req) match {
         case Some(fr) ⇒
           val result = await(fr)
-          result.header.status must beEqualTo(Status.NOT_IMPLEMENTED)
+          result.header.status must beEqualTo(Status.NOT_FOUND)
         case None ⇒
-          0 must beEqualTo(Status.NOT_IMPLEMENTED)
+          0 must beEqualTo(Status.NOT_FOUND)
       }
     }
 
@@ -89,9 +95,9 @@ class ScrupalControllerSpec extends ControllerSpecification("ScrupalController")
       route(scrupal.application, req) match {
         case Some(fr) ⇒
           val result = await(fr)
-          result.header.status must beEqualTo(Status.NOT_IMPLEMENTED)
+          result.header.status must beEqualTo(Status.NOT_FOUND)
         case None ⇒
-          0 must beEqualTo(Status.NOT_IMPLEMENTED)
+          0 must beEqualTo(Status.NOT_FOUND)
       }
     }
 

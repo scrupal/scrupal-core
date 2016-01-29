@@ -28,6 +28,10 @@ class AdminProviderSpec extends ControllerSpecification("AdminProvider") with Sh
     Case("GET", "/app/admin/site/1", Successful, ""),
     Case("GET", "/app/admin/site/foo", Successful, ""),
     Case("GET", "/app/admin/module/", Successful, "foo"),
+    Case("PUT", "/app/admin/foo/", Unlocatable, "foo"),
+    Case("OPTIONS", "/app/admin/foo/", Unlocatable, ""),
+    Case("DELETE", "/app/admin/foo/", Unlocatable, ""),
+    Case("HEAD", "/app/admin/foo/", Unlocatable, ""),
     Case("GET", "/crapola", Unlocatable, "")
   )
 
