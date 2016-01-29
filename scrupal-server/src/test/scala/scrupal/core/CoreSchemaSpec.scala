@@ -20,6 +20,7 @@ import com.reactific.helpers.LoggingHelper
 import com.typesafe.config.ConfigFactory
 
 import play.api.Configuration
+import scrupal.utils.ScrupalException
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -72,17 +73,6 @@ class CoreSchemaSpec extends ScrupalSpecification("CoreSchema")  {
       await(future, 1.minute, "CRUD Sites").get
     }
 
-    "map oid/site names" in withScrupalSchema("map_site_names") { (scrupal, schema) ⇒
-      val future = scrupal.withExecutionContext { implicit ec : ExecutionContext ⇒
-        val site = SiteData("testSite", "foo.com", "testing only")
-        schema.db.run {
-          schema.sites.create(site).flatMap { oid ⇒ schema.sites.mapNames() }
-        }
-      }
-      val map = await(future)
-      map.values must contain("testSite")
-    }
-
     "CRUD Node" in withScrupalSchema("node_crud") { (scrupal,schema) ⇒
       val future = scrupal.withExecutionContext { implicit ec: ExecutionContext ⇒
         val when = Instant.now()
@@ -113,15 +103,50 @@ class CoreSchemaSpec extends ScrupalSpecification("CoreSchema")  {
       await(future, 1.minute, "CRUD Sites").get
     }
 
-    "construct from configuration" in withScrupal("from_config") { (scrupal) ⇒
+    "map oid/site names" in withScrupalSchema("map_site_names") { (scrupal, schema) ⇒
+      val future = scrupal.withExecutionContext { implicit ec : ExecutionContext ⇒
+        val site = SiteData("testSite", "foo.com", "testing only")
+        schema.db.run {
+          schema.sites.create(site).flatMap { oid ⇒ schema.sites.mapNames() }
+        }
+      }
+      val map = await(future)
+      map.values must contain("testSite")
+    }
+
+
+    "construct from H2 configuration" in withScrupal("h2_from_config") { (scrupal) ⇒
       val config = H2Config("fromConfig")
       val configObj = config.getObject("fromConfig")
       val hashmap = new java.util.HashMap[String,AnyRef]
       hashmap.put("scrupal.database.fromConfig", configObj)
       val config2 = ConfigFactory.parseMap( hashmap )
       val conf = Configuration( config2 )
-      val cs = CoreSchema("fromConfig", conf)(scrupal)
+      val cs = CoreSchema.apply("fromConfig", conf)(scrupal)
       cs.schemaName must beEqualTo("ScrupalCore")
+    }
+
+    "construct from Postgres configuration" in withScrupal("postgres_from_config") { (scrupal) ⇒
+      val config = PostgresConfig("fromConfig")
+      val configObj = config.getObject("fromConfig")
+      val hashmap = new java.util.HashMap[String,AnyRef]
+      hashmap.put("scrupal.database.fromConfig", configObj)
+      val config2 = ConfigFactory.parseMap( hashmap)
+      val conf = Configuration( config2 )
+      val cs = CoreSchema.apply("fromConfig", conf)(scrupal)
+      cs.schemaName must beEqualTo("ScrupalCore")
+    }
+
+    "reject invalid configuration" in withScrupal("bad_config") { (scrupal : Scrupal) ⇒
+      val conf1 = Configuration("scrupal.missing" → "nada")
+      val conf2 = PostgresConfig("dbName")
+      val conf3 = MySQLConfig("dbName")
+
+      { val cs = CoreSchema("foo", conf1)(scrupal) } must throwA[ScrupalException]("scrupal.database")
+
+      { val cs = CoreSchema("wrongName", conf2)(scrupal) } must throwA[ScrupalException]("'wrongName' not found")
+
+      { val cs = CoreSchema("dbName", conf3)(scrupal) } must throwA[ScrupalException]("Unsupported database type")
     }
   }
 }

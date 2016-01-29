@@ -214,7 +214,7 @@ case class Scrupal (
   def withApplication[T](f : (Application) ⇒ T) : T = { f(application) }
 
   lazy val schema : CoreSchema[_] = {
-    CoreSchema(name, configuration)(this)
+    CoreSchema.apply(name, configuration)(this)
   }
 
   protected def getTimeout: Timeout = {
