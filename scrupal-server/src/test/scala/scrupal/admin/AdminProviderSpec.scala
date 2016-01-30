@@ -34,7 +34,7 @@ class AdminProviderSpec extends ControllerSpecification("AdminProvider") with Sh
     Case("OPTIONS", "/app/admin/foo/", Unlocatable, ""),
     Case("DELETE", "/app/admin/foo/", Unlocatable, ""),
     Case("HEAD", "/app/admin/foo/", Unlocatable, ""),
-    Case("GET", "/app/admin/", Successful, "Administration"),
+    Case("GET", "/app/admin/", Successful, "scrupal-jsapp"),
     Case("GET", "/crapola", Unlocatable, "")
   )
 
