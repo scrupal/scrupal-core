@@ -14,16 +14,11 @@
   **********************************************************************************************************************/
 package scrupal.html
 
-import play.api.data.Form
-import scrupal.core.{SiteData, HtmlContent, Context}
-
 import scala.concurrent.Future
-import scalatags.Text.all._
+import scalatags.JsDom.all._
 
 object Administration {
-
-  val routes = router.scrupal.core.routes.ScrupalController
-
+/*
   def navbar(sites : Map[Long, String], modules: Map[Symbol,String]) = {
     div(cls:="container",
       div(cls:="navbar-header",
@@ -40,7 +35,7 @@ object Administration {
             a(href:="#",cls:="dropdown-toggle",data("toggle"):="dropdown",role:="button",
               aria.haspopup:="true",aria.expanded:="false","Sites",span(cls:="caret")),
             ul(cls:="dropdown-menu",
-              li(cls:="dropdown-header",a(href:=routes.appPOST("site","").url, "Create New Site")),
+              li(cls:="dropdown-header",a(href:="/site", "Create New Site")),
               li(role:="separator",cls:="divider"),
               for( (oid,name) ← sites) {
                 li(a(href:=routes.appGET("site",oid.toString).url,name))
@@ -80,10 +75,7 @@ object Administration {
   }
 
   def page(context : Context, contents : HtmlContents, siteMap: Map[Long,String] ) : Future[String] = {
-    val args : Arrangement = Map[String,HtmlContentsGenerator] (
-      "contents" → HtmlContent(contents),
-      "endscripts" → HtmlContent(emptyContents)
-    )
+    val args : NamedArguments = Map.empty[String,String]
     context.scrupal.reactPolymerLayout.page(context, args)
   }
 
@@ -216,6 +208,6 @@ object Administration {
       p(msg)
     )
   }
+*/
 }
-
 

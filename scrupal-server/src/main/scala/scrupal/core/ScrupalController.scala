@@ -13,13 +13,8 @@ import scrupal.utils.ScrupalComponent
 case class ScrupalController(scrupal : Scrupal, messagesApi : MessagesApi)
   extends Controller with I18nSupport with ScrupalComponent {
 
-  def contextFor(thing: String, request: RequestHeader) : Option[Context] = {
-    scrupal.siteForRequest(request) match {
-      case Some(site) ⇒
-        Some(Context(scrupal, site))
-      case _ ⇒
-        Some(Context(scrupal))
-    }
+  def contextFor(thing: String, request: RequestHeader) : Option[Context] ={
+    Some(scrupal.contextForRequest(request))
   }
 
   type RxFinder = (Context, String, RequestHeader) ⇒ Option[Reactor]

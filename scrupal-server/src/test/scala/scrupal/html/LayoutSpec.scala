@@ -22,30 +22,30 @@ import scalatags.Text.all._
 
 class LayoutSpec extends ValidatingSpecification("Layout") with SharedTestScrupal {
 
-  class TestLayout1(implicit val scrupal : Scrupal) extends Layout {
+  class TestLayout1(implicit val scrupal : Scrupal) extends AppPageLayout {
     def id = 'TestLayout1
     def description : String = "Test Layout #1"
-    def arrangementDescription: Map[String,String] = Map("one"→"First Argument")
-    override def layout(args : Arguments) : HtmlElement = div(args.content.get("one"))
+    def argumentDescription: Map[String,String] = Map("one"→"First Argument")
+    override def layout(args : Arguments) : HtmlElement = div(args.args.get("one"))
   }
 
-  class TestLayout2(implicit val scrupal : Scrupal) extends PageLayout {
+  class TestLayout2(implicit val scrupal : Scrupal) extends AppPageLayout {
     def id = 'TestLayout2
     def description : String = "Test Layout #2"
-    def arrangementDescription: Map[String, String] = Map("one" → "First Argument")
+    def argumentDescription: Map[String, String] = Map("one" → "First Argument")
     override def headTag(args: Arguments): HtmlElement = head(meta(rel:="foo"))
   }
 
   class TestLayout3(implicit val scrupal : Scrupal) extends DetailedPageLayout {
     def id = 'TestLayout3
     def description : String = "Test Layout #3"
-    override def arrangementDescription: Map[String,String] = Map("one"→"First Argument")
+    override def argumentDescription: Map[String,String] = Map("one"→"First Argument")
   }
 
   "Layout" should {
     val tl1 = new TestLayout1()(scrupal)
     "Allow simple fragment overloading" in {
-      val result = tl1.apply(context, Map("one" → HtmlContent(span("one")))).map { html : HtmlElement ⇒
+      val result = tl1.apply(context, Map("one" → "one")).map { html : HtmlElement ⇒
         html.render.contains("one") must beTrue
       }(scrupal.executionContext)
       await(result)
@@ -71,13 +71,13 @@ class LayoutSpec extends ValidatingSpecification("Layout") with SharedTestScrupa
   "DefaultPageLayout" should {
     val dpl = scrupal.defaultPageLayout
     "generate valid HTML" in {
-      val future = dpl.page(context, Map("one" → HtmlContent(span("one"))))
+      val future = dpl.page(context, Map("one" → "one"))
       val result = await(future)
       validate("DefaultPageLayout", result)
     }
     "have sane members" in {
       dpl.id must beEqualTo('DefaultPageLayout)
-      dpl.arrangementDescription.nonEmpty must beTrue
+      dpl.argumentDescription.nonEmpty must beTrue
       dpl.description.nonEmpty must beTrue
     }
   }

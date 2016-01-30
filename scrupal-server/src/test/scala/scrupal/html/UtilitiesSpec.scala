@@ -127,7 +127,7 @@ class UtilitiesSpec extends ValidatingSpecification("Utilities") with SharedTest
 
   "reactific_copyright" should {
     "lay out content properly" in {
-      val html = reactific_copyright(context).render
+      val html = reactific_copyright().render
       html.contains("Reactific") must beTrue
       validate("reactific_copyright", html, "div")
     }

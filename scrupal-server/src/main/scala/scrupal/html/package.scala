@@ -52,18 +52,16 @@ package object html {
     */
   type HtmlContentsGenerator =  (Context) ⇒ HtmlContents
 
-  /** Arrangement Of Layout Arguments
-    * This type maps argument names to the HtmlContentsGenerator that will produce the HtmlContents for that argument.
-    * This is used to provide the arrangement data to a Layout.
-    */
-  type Arrangement = Map[String,HtmlContentsGenerator]
+  type SimpleGenerator = () ⇒ HtmlContents
+
+  type NamedArguments  = Map[String,String]
 
   /** Arranger Function.
     * An arranger is a function that does the essential layout arrangement for a Layout. It takes in a Context and a
     * tag mapping and produces an `Array[Byte]` result. The Layout trait extends this function so that its apply method
     * can be used to perform the arranging.
     */
-  type Arranger = (Context, Arrangement) ⇒ Future[HtmlElement]
+  type Arranger = (Context, NamedArguments) ⇒ Future[HtmlElement]
 
 
   /** Assets Accessor

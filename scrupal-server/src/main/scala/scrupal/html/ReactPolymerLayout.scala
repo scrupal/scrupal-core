@@ -8,7 +8,7 @@ import scalatags.Text.all._
   * A layout for doing a Single Page Application with Scrupal REST Back End, React.js, Scala.js, and Polymer
   * for web components.
   */
-case class ReactPolymerLayout(appName : String = "")(implicit val scrupal : Scrupal) extends PolymerLayout {
+case class ReactPolymerLayout(implicit val scrupal : Scrupal) extends PolymerLayout {
   def id: Identifier = 'ReactPolymerLayout
 
   val scalajs = new ScalaJS()(scrupal)
@@ -16,25 +16,16 @@ case class ReactPolymerLayout(appName : String = "")(implicit val scrupal : Scru
   val description: String =
     "A Polymer + React layout for Single Page Applications"
 
-  final override def arrangementDescription: Map[String,String] = Map(
-    "contents" → "The main content",
-    "endscripts" → "Scripts to be loaded at the end of the page"
+  final override def argumentDescription: Map[String,String] = Map(
+    "appName" → "The name of the application to load"
   )
 
   override def contents(args: Arguments) : HtmlContents = {
+    val appName : String = args.args.getOrElse("appName","")
     div(scalatags.Text.all.id := "scrupal-jsapp", data("appname"):=appName)
   }
 
-  final override def header(args: Arguments) : HtmlContents = {
-    emptyContents
-  }
-
-  final override def footer(args: Arguments) : HtmlContents = {
-    emptyContents
-  }
-
-  override def endScripts(args: Arguments) : HtmlContents = {
-    super.endScripts(args) ++ scalajs.projectScript("scrupal-jsapp") ++
-      { if (appName.nonEmpty) scalajs.projectScript(appName) else emptyContents }
+  override def epilogue(args: Arguments) : HtmlContents = {
+    super.epilogue(args) ++ scalajs.projectScript("scrupal-jsapp")
   }
 }

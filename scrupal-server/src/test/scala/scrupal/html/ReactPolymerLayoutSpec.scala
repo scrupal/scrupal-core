@@ -7,24 +7,15 @@ import scrupal.core.{Context, HtmlContent}
 /** Test Cases For ScrupalLayout */
 class ReactPolymerLayoutSpec extends ValidatingSpecification("ReactPolymerLayout") {
 
-  def makeScrupalArgs(contents : HtmlContents) = {
-    Map(
-      "header" → HtmlContent(emptyContents),
-      "contents" → HtmlContent(contents),
-      "footer" → HtmlContent(emptyContents),
-      "endscripts" → HtmlContent(emptyContents)
-    )
-  }
-
-  "ScrupalLayout" should {
+  "ReactPolymerLayout" should {
     "produce valid HTML" in withScrupal("ScrupalLayout_validity") { scrupal ⇒
       val content = div()
-      val future = scrupal.reactPolymerLayout.page(Context(scrupal), makeScrupalArgs(content))
+      val future = scrupal.reactPolymerLayout.page(Context(scrupal), Map("appName" → "Test"))
       val result = await(future)
-      result.contains("scrupal-jsapp") must beTrue
-      // FIXME: nu.validator can't handle HTML Imports yet
+      result must contain("scrupal-jsapp")
+      result must contain("rel=\"import\"")
+      result must contain("data-appname=\"Test\"")
       validate("ReactPolymerLayout", result)
-      result.contains("rel=\"import\"")
     }
   }
 }

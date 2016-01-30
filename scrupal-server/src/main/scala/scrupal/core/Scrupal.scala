@@ -35,6 +35,7 @@ import play.api.libs.concurrent.ActorSystemProvider
 import play.api.mvc.{EssentialFilter, RequestHeader}
 import play.api.routing.Router
 import play.api.routing.sird._
+import scrupal.admin.AdminProvider
 
 import scrupal.html._
 
@@ -109,13 +110,15 @@ case class Scrupal (
 
   val layouts : LayoutRegistry = LayoutRegistry()
 
-  val defaultPageLayout = new DefaultPageLayout()(this)
-  val simpleBootstrapLayout = new SimpleBootstrapLayout()(this)
-  val threeColumnBootstrapLayout = new ThreeColumnBootstrapLayout()(this)
-  val reactPolymerLayout = new ReactPolymerLayout()(this)
+  implicit val scrupal : Scrupal = this
+
+  val defaultPageLayout = new DefaultPageLayout
+  val simpleBootstrapLayout = new SimpleBootstrapLayout
+  val threeColumnBootstrapLayout = new ThreeColumnBootstrapLayout
+  val reactPolymerLayout = new ReactPolymerLayout
 
   val DefaultLocalHostSite = new Site(SiteData("localhost"))(this) {
-    object helpprovider extends Provider with Enablee {
+    object helpProvider extends Provider with Enablee {
       def id = 'HelpProvider
       def provide: ReactionRoutes = {
         case GET(p"/") ⇒
@@ -130,7 +133,9 @@ case class Scrupal (
           }
       }
     }
-    enable(helpprovider)
+    object adminProvider extends AdminProvider
+    enable(helpProvider)
+    enable(adminProvider)
   }
 
   applicationLifecycle.addStopHook { () ⇒
@@ -170,6 +175,15 @@ case class Scrupal (
       }
     }
     log.info("Scrupal shutdown completed normally.")
+  }
+
+  def contextForRequest(request : RequestHeader) : Context = {
+    siteForRequest(request) match {
+      case Some(site) ⇒
+        Context(this, site)
+      case _ ⇒
+        Context(this)
+    }
   }
 
   def siteForRequest(header: RequestHeader) : Option[Site] = {

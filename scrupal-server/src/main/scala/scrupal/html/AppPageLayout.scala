@@ -24,73 +24,46 @@ import scala.concurrent.Future
 import scalatags.Text.all._
 import scalatags.generic.Namespace
 
-trait SimpleGenerator extends HtmlContentsGenerator with (() ⇒ HtmlContents) {
-  def apply(context : Context) : HtmlContents = { apply() }
-}
-
-
-
+case class Arguments(context : Context, args : NamedArguments)
 
 /** Abstract Layout
   *
   * A layout is a memory only function object. It
   */
-trait Layout extends ScrupalComponent with Registrable[Layout] with Arranger {
-  type NamedContent  = Map[String,HtmlContents]
+trait AppPageLayout extends ScrupalComponent with Registrable[AppPageLayout] with Arranger {
 
   implicit def scrupal : Scrupal
-
-  case class Arguments(context : Context, content : NamedContent)
 
   def registry : LayoutRegistry = scrupal.layouts
 
   def description : String
-  def arrangementDescription: Map[String,String]
-  def validateArrangement(args : Arrangement) : Iterable[Throwable] = {
-    for ((key,value) ← arrangementDescription if !args.contains(key)) yield {
+
+  def argumentDescription: NamedArguments
+
+  def validateArguments(args : NamedArguments) : Iterable[Throwable] = {
+    for ((key,value) ← argumentDescription if !args.contains(key)) yield {
       new IllegalArgumentException(s"Content key '$key' is missing")
     }
   }
-  def apply(context : Context, arrangement: Arrangement) : Future[HtmlElement] = Future {
-    validateArrangement(arrangement).map { x ⇒ throw x }
-    val content : NamedContent = for ( (name, gen) ← arrangement) yield { name → gen(context) }
-    layout(Arguments(context,content))
+  def apply(context : Context, args: NamedArguments) : Future[HtmlElement] = Future {
+    validateArguments(args).map { x ⇒ throw x }
+    layout(Arguments(context,args))
   }(context.scrupal.executionContext)
 
-  def layout(args : Arguments) : HtmlElement
-}
-
-case class LayoutRegistry() extends Registry[Layout] {
-  val registryName = "Layouts"
-  val registrantsName = "layout"
-}
-
-trait PageLayout extends Layout {
-
-  /** Generate the page title
+  /** Get a full page for this layout with the DOCTYPE declaration (HTML5 only)
     *
-    * @param args the arguments with which to customize the title
-    * @return the title of the page for inclusion in the meta tags
-    */
-  def pageTitle(args : Arguments) : String = "Scrupal"
-
-  /** Generate HTML head Tag
-    *
-    * @param args Arguments from which the head tag should be derived
+    * @param context The context in which to run the page generation
+    * @param args The argument arrangement for substituting into the page layout
     * @return
     */
-  def headTag(args: Arguments): HtmlElement = {
-    head("title".tag[String](Namespace.htmlNamespaceConfig)(pageTitle(args)))
+  def page(context : Context, args: NamedArguments) : Future[String]  = {
+    apply(context, args).map {
+      contents ⇒ "<!DOCTYPE html>" + contents.render
+    }(context.scrupal.executionContext)
   }
 
-  /** Generate HTML body Tag
-    *
-    * @param args Arguments from which the body tag should be derived
-    * @return
-    */
-  def bodyTag(args : Arguments) : HtmlElement = {
-    body(span(em("OOPS!"), " You forgot to override bodyTag(args:Arguments)!"))
-  }
+
+  def layout(context : Context, content: NamedArguments) : HtmlElement = layout(Arguments(context, content))
 
   /** Lay out the content of this page
     *
@@ -101,34 +74,71 @@ trait PageLayout extends Layout {
     html(headTag(args),bodyTag(args))
   }
 
-  /** Get a full page for this layout with the DOCTYPE declaration (HTML5 only)
+  /** Generate HTML head Tag
     *
-    * @param context The context in which to run the page generation
-    * @param arrangement The argument arrangement for substituting into the page layout
+    * @param args Arguments from which the head tag should be derived
     * @return
     */
-  def page(context : Context, arrangement: Arrangement) : Future[String]  = {
-    apply(context, arrangement).map {
-      contents ⇒ "<!DOCTYPE html>" + contents.render
-    }(context.scrupal.executionContext)
+  def headTag(args: Arguments): HtmlElement = {
+    head("title".tag[String](Namespace.htmlNamespaceConfig)(pageTitle(args)))
+  }
+
+  /** Generate the page title
+    *
+    * @param args the arguments with which to customize the title
+    * @return the title of the page for inclusion in the meta tags
+    */
+  def pageTitle(args : Arguments) : String = "Scrupal"
+
+  /** Generate HTML body Tag
+    * The body tag is decomposed into four parts: header, contents, footer and endScripts. They all default to empty
+    * except for contents which provides a warning that a more specific implementation should be chosen.
+    *
+    * @param args Arguments from which the body tag should be derived
+    * @return
+    */
+  def bodyTag(args : Arguments) : HtmlElement = {
+    body(prologue(args) ++ contents(args) ++ epilogue(args))
+  }
+
+  def prologue(args: Arguments) : HtmlContents = {
+    emptyContents
+  }
+
+  def contents(args: Arguments) : HtmlContents = {
+    span(em("OOPS!"), " You forgot to override contents(args:Arguments)!")
+  }
+
+  def epilogue(args : Arguments) : HtmlContents = {
+    emptyContents
   }
 }
 
-class DefaultPageLayout(implicit val scrupal : Scrupal) extends PageLayout {
+case class LayoutRegistry() extends Registry[AppPageLayout] {
+  val registryName = "Layouts"
+  val registrantsName = "layout"
+}
+
+class DefaultPageLayout(implicit val scrupal : Scrupal) extends AppPageLayout {
   def id: Identifier = 'DefaultPageLayout
   val description: String = "Default page layout used when the expected layout could not be found"
-  def arrangementDescription = Map(
+  def argumentDescription = Map(
     "arguments" → "This template accepts all HtmlContent arguments"
   )
-  override def validateArrangement(args : Arrangement) = Iterable.empty[Throwable]
-  override def bodyTag(args : Arguments) : HtmlElement = {
-    val content = Seq(
-      h1("Layout Missing"),
-      p("You are seeing this page because the requested layout was not found. As a result you are seeing this",
-        "basic default layout which just lists the content down the page. This probably isn't what you want, but it's",
-        "what you've got until you specify the layout for your pages.")
-    ) ++ args.content.flatMap { case (key,cont) ⇒ Seq(h2(key),div(cont:_*)) }
-    body(content:_*)
+  override def validateArguments(args : NamedArguments) = Iterable.empty[Throwable]
+
+  override def prologue(args : Arguments) = {
+    h1("Layout Missing")
+  }
+
+  override def contents(args : Arguments) = {
+    p("You are seeing this page because the requested layout was not found. As a result you are seeing this",
+      "basic default layout which just lists the content down the page. This probably isn't what you want, but it's",
+      "what you've got until you specify the layout for your pages.")
+  }
+
+  override def epilogue(args : Arguments) = {
+    args.args.flatMap { case (key,cont) ⇒ Seq(h2(key),div(cont)) }.toSeq
   }
 }
 
@@ -147,14 +157,9 @@ case class LinkTag(relation: String, reference: String, contentType : String = "
   def render : HtmlElement = link(rel:=relation, `type`:=contentType, href:=reference)
 }
 
-trait DetailedPageLayout extends PageLayout {
+trait DetailedPageLayout extends AppPageLayout {
 
-  def arrangementDescription: Map[String,String] = Map(
-    "header" → "Content that comes above the main content",
-    "contents" → "The main content",
-    "footer" → "Content that comes below the main content",
-    "endscripts" → "Scripts to be loaded at the end of the page"
-  )
+  def argumentDescription: Map[String,String] = Map.empty[String,String]
 
   /** Generate HTML Head Element
     * Generates the head tag and all content it requires
@@ -284,33 +289,6 @@ trait DetailedPageLayout extends PageLayout {
   def scripts(args : Arguments) : Seq[String] = Seq.empty[String]
   def sheets(args : Arguments) : Seq[String] = Seq.empty[String]
   def otherLinks(args : Arguments) : Seq[LinkTag] = Seq.empty[LinkTag]
-
-  /** Generate HTML body Tag
-    * The body tag is decomposed into four parts: header, contents, footer and endScripts. They all default to empty
-    * except for contents which provides a warning that a more specific implementation should be chosen.
-    *
-    * @param args Arguments from which the body tag should be derived
-    * @return
-    */
-  override def bodyTag(args : Arguments) : HtmlElement = {
-    body(header(args) ++ contents(args) ++ footer(args) ++ endScripts(args))
-  }
-
-  def header(args: Arguments) : HtmlContents = {
-    args.content.getOrElse("header", emptyContents)
-  }
-
-  def contents(args: Arguments) : HtmlContents = {
-    args.content.getOrElse("contents", span(em("OOPS!"), " You forgot to override contents(args:Arguments)!"))
-  }
-
-  def footer(args: Arguments) : HtmlContents = {
-    args.content.getOrElse("footer", emptyContents)
-  }
-
-  def endScripts(args : Arguments) : HtmlContents = {
-    args.content.getOrElse("endscripts", emptyContents)
-  }
 
 }
 

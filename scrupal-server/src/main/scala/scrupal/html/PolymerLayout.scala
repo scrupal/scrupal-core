@@ -33,5 +33,4 @@ trait PolymerLayout extends DetailedPageLayout {
     super.javascriptLinks(args) ++ Seq(assets.webjar("webcomponentsjs","webcomponents-lite.js").url)
 
   }
-
 }

@@ -73,7 +73,7 @@ object Reactor {
     }
   }
 
-  def from(response: RxResponse) : Reactor = {
+  def from(response: ⇒ RxResponse) : Reactor = {
     new Reactor {
       def apply(stimulus: Stimulus) : Future[RxResponse] = {
         Future.successful { response }

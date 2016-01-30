@@ -21,23 +21,15 @@ import scalatags.Text.all._
 
 class PolymerLayoutSpec extends ValidatingSpecification("Polymer") with SharedTestScrupal {
 
-  class TestPolymerLayout(name : String)(implicit val scrupal: Scrupal)
+  class TestPolymerLayout(name : String, content: HtmlContents)(implicit val scrupal: Scrupal)
     extends { val id : Symbol = Symbol(name) } with PolymerLayout {
     def description: String = "Test Polymer Layout"
-  }
-
-  def makePolymerArgs(contents: HtmlContents) = {
-    Map(
-      "header" → HtmlContent(emptyContents),
-      "contents" → HtmlContent(contents),
-      "footer" → HtmlContent(emptyContents),
-      "endscripts" → HtmlContent(emptyContents)
-    )
+    override def contents(args : Arguments) : HtmlContents = content
   }
 
   "Polymer" should {
-    val tpl = new TestPolymerLayout("TestPolymerLayout")
     "register the TestPolymerLayout" in {
+      val tpl = new TestPolymerLayout("TestPolymerLayout", emptyContents)
       scrupal.layouts.contains('TestPolymerLayout) must beTrue
     }
 
@@ -86,7 +78,8 @@ class PolymerLayoutSpec extends ValidatingSpecification("Polymer") with SharedTe
         `validatable-behavior`,
         `validator-behavior`
       )
-      val future = tpl.page(context, makePolymerArgs(content))
+      val tpl = new TestPolymerLayout("PolymerIron", content)
+      val future = tpl.page(context, Map())
       val result = await(future)
       result.nonEmpty must beTrue // TODO: Nu.Validator doesn't understand web components yet
     }
@@ -127,7 +120,8 @@ class PolymerLayoutSpec extends ValidatingSpecification("Polymer") with SharedTe
         `toolbar`,
         `tooltip`
       )
-      val future = tpl.page(context, makePolymerArgs(content))
+      val tpl = new TestPolymerLayout("PolymerPaper", content)
+      val future = tpl.page(context, Map())
       val result = await(future)
       result.nonEmpty must beTrue // TODO: Nu.Validator doesn't understand web components yet
     }

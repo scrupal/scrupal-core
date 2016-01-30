@@ -53,11 +53,12 @@ object ScrupalJsApp extends js.JSApp {
     */
   def loadApplication(application_name: String) : html.Element = {
     val url = BaseUrl.fromWindowUrl(x⇒x).rtrim_/.value + "/info"
-    Ajax.get(url).map {
+/*    Ajax.get(url).map {
       case xhr ⇒
-        xhr.response
-    }
-    dom.document.createElement("div").asInstanceOf[html.Element]
+        xhr.responseType
+    }*/
+    div(s"Application $application_name with URL ${url}").render
+    // dom.document.createElement("div").asInstanceOf[html.Element]
     // import router.ApplicationRouter._
     // router() render dom.document.getElementById("scrupal")
     /*

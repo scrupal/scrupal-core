@@ -35,25 +35,17 @@ class BootstrapLayoutSpec extends ValidatingSpecification("Bootstrap") with Shar
 
   "ThreeColumnBootstrapLayout" should {
     "generate valid text content" in {
-      val args = Map[String,HtmlContent](
-        "nav" → HtmlContent(span("nav-value")),
-        "header" → HtmlContent(span("header-value")),
-        "left" → HtmlContent(span("left-value")),
-        "right" → HtmlContent(span("right-value")),
-        "contents" → HtmlContent(span("content-value")),
-        "footer" → HtmlContent(span("footer-value")),
-        "endscripts" → HtmlContent(span("endscripts-value"))
+      val args = Map[String,String](
+        "left" → span("left-value").render,
+        "right" → span("right-value").render,
+        "center" → span("content-value").render
       )
 
       val future = context.scrupal.threeColumnBootstrapLayout.page(context, args).map { body : String ⇒
         log.info(s"3col body is: $body")
-        body.contains("nav-value") must beTrue
-        body.contains("header-value") must beTrue
         body.contains("left-value") must beTrue
         body.contains("right-value") must beTrue
         body.contains("content-value") must beTrue
-        body.contains("footer-value") must beTrue
-        body.contains("endscripts-value") must beTrue
         validate("ThreeColumnBootstrapLayout", body)
       }(scrupal.executionContext)
       await(future)
@@ -61,10 +53,9 @@ class BootstrapLayoutSpec extends ValidatingSpecification("Bootstrap") with Shar
 
     "fail if all parameters are not given" in {
       val args = Map(
-        "navheader" → HtmlContent(span("navheader-value")),
-        "header" → HtmlContent(span("header-value")),
-        "right" → HtmlContent(span("right-value")),
-        "footer" → HtmlContent(span("footer-value"))
+        "header" → span("header-value").render,
+        "right" → span("right-value").render,
+        "footer" → span("footer-value").render
       )
       val future = context.scrupal.threeColumnBootstrapLayout.page(context, args).map { body : String ⇒
         failure("Page generation should have failed")
@@ -74,7 +65,7 @@ class BootstrapLayoutSpec extends ValidatingSpecification("Bootstrap") with Shar
 
     "have sane members" in {
       context.scrupal.threeColumnBootstrapLayout.id must beEqualTo('ThreeColumnBootstrapLayout)
-      context.scrupal.threeColumnBootstrapLayout.arrangementDescription.nonEmpty must beTrue
+      context.scrupal.threeColumnBootstrapLayout.argumentDescription.nonEmpty must beTrue
       context.scrupal.threeColumnBootstrapLayout.description.nonEmpty must beTrue
     }
   }

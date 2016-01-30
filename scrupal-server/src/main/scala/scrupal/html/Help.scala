@@ -24,16 +24,7 @@ import scrupal.core.{Stimulus, HtmlContent}
 object Help {
 
   def page( stimulus: Stimulus ) : Future[HtmlElement] = {
-    val args = Map(
-      "nav" → HtmlContent(span("nav")),
-      "header" → HtmlContent(span("header")),
-      "left" → HtmlContent(span("left")),
-      "right" → HtmlContent(span("right")),
-      "contents" → HtmlContent(index),
-      "footer" → HtmlContent(span("footer")),
-      "endscripts" → HtmlContent(emptyContents)
-    )
-    stimulus.context.scrupal.reactPolymerLayout(stimulus.context, args)
+    stimulus.context.scrupal.reactPolymerLayout(stimulus.context, Map("appName" → "Help"))
   }
 
   def index : HtmlElement = {

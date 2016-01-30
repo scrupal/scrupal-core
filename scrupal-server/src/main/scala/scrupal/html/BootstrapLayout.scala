@@ -20,9 +20,6 @@ import scalatags.Text.all._
 import scalatags.Text.tags2
 
 trait BootstrapLayout extends DetailedPageLayout {
-  override def arrangementDescription = super.arrangementDescription ++ Map(
-    "nav" → "Navigation bar and header"
-  )
 
   override def javascriptLinks(args: Arguments) : Seq[String] = {
     super.javascriptLinks(args) ++ Seq(
@@ -38,18 +35,18 @@ trait BootstrapLayout extends DetailedPageLayout {
     )
   }
 
-  override def header(args: Arguments) : HtmlContents = {
+  override def prologue(args: Arguments) : HtmlContents = {
     Seq(
-      tags2.nav(`class`:="navbar navbar-inverse navbar-fixed-top", args.content.get("nav")),
-      super.header(args)
+      super.prologue(args),
+      tags2.nav(`class`:="navbar navbar-inverse navbar-fixed-top", args.args.get("nav"))
     )
   }
 
   override def bodyTag(args: Arguments) : HtmlElement = {
     body(
-      header(args),
-      div(`class`:="container-fluid", contents(args), footer(args)),
-      endScripts(args)
+      prologue(args),
+      div(`class`:="container-fluid", contents(args)),
+      epilogue(args)
     )
   }
 }
@@ -60,23 +57,29 @@ class SimpleBootstrapLayout(implicit val scrupal : Scrupal) extends BootstrapLay
 }
 
 trait ThreeColBootstrapLayout extends BootstrapLayout {
-  override def arrangementDescription = super.arrangementDescription ++ Map(
+  override def argumentDescription = super.argumentDescription ++ Map(
     "left" → "A left side bar 1/6th of the width",
+    "center" → "A center main content area",
     "right" → "A right side bar 1/6th of the width"
   )
 
+  def left(args : Arguments) : HtmlContents = {
+    val l : String = args.args.getOrElse("left", "")
+    div(`class`:="col-sm-2", l)
+  }
+
+  def center(args : Arguments) : HtmlContents = {
+    val c : String = args.args.getOrElse("center", "")
+    div(`class`:="col-sm-8", c)
+  }
+
+  def right(args : Arguments) : HtmlContents = {
+    val r : String = args.args.getOrElse("right", "")
+    div(`class`:="col-sm-2", r)
+  }
+
   override def contents(args: Arguments) : HtmlContents = {
-    val left : Seq[HtmlFragment] = args.content.getOrElse("left",emptyContents)
-    val cont : Seq[HtmlFragment] = args.content.getOrElse("contents", emptyContents)
-    val right : Seq[HtmlFragment] = args.content.getOrElse("right",emptyContents)
-    Seq(
-      div(`class`:="row",
-        div(`class`:="col-sm-2", left),
-        div(`class`:="col-sm-8", div(`class`:="container-fluid", cont)),
-        div(`class`:="col-sm-2", right)
-      ),
-      hr()
-    )
+    div(`class`:="row",left(args),center(args),right(args))
   }
 }
 
