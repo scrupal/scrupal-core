@@ -46,6 +46,27 @@ case class Site(data: SiteData)(implicit scrupal : Scrupal) extends {
     val id: Symbol = Symbol(data.name)
 } with EnablementProvider[Site] with Registrable[Site] {
 
+  def appReactorFor(request : RequestHeader) = {
+    provideFor[ApplicationProvider].lift(request)
+  }
+
+  def apiReactorFor(request : RequestHeader) = {
+    provideFor[EntityProvider].lift(request)
+  }
+
+  override def reactorFor(request : RequestHeader) = {
+    val delegates = mapIf[Provider]{ p : Enablee ⇒
+      !(p.isInstanceOf[EntityProvider] || p.isInstanceOf[ApplicationProvider])
+    } { e : Enablee ⇒
+      e.asInstanceOf[Provider]
+    }
+    val routes = delegates.foldLeft(Provider.emptyReactionRoutes) {
+      case (accum,next) ⇒
+        accum.orElse(next.provide)
+    }
+    routes.lift(request)
+  }
+
   def isChildScope(e : Enablement[_]) : Boolean = delegates.exists { x ⇒ x == e }
 
   def onDevServerError(request : RequestHeader, exception : UsefulException) : Future[Result] = {

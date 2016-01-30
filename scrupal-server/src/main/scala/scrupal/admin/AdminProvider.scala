@@ -22,7 +22,7 @@ class AdminProvider(implicit val scrupal: Scrupal) extends { val id = 'admin } w
   }
 
   def adminRoutes : ReactionRoutes = {
-    case GET(p"/") ⇒ Reactor.from {
+    case GET(p"/name") ⇒ Reactor.from {
       Response("Administration", Successful)
     }
   }

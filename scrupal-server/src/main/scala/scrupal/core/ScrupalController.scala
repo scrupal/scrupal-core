@@ -22,7 +22,7 @@ case class ScrupalController(scrupal : Scrupal, messagesApi : MessagesApi)
   def appReactorFor(context: Context, thing: String, request: RequestHeader) : Option[Reactor] = {
     context.site match {
       case Some(site) ⇒
-        site.provideFor[ApplicationProvider].lift(request)
+        site.appReactorFor(request)
       case None ⇒
         None
     }
@@ -31,7 +31,7 @@ case class ScrupalController(scrupal : Scrupal, messagesApi : MessagesApi)
   def apiReactorFor(context: Context, thing: String, request: RequestHeader): Option[Reactor] = {
     context.site match {
       case Some(site) ⇒
-        site.provideFor[EntityProvider].lift(request)
+        site.apiReactorFor(request)
       case None ⇒
         None
     }
