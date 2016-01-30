@@ -32,7 +32,7 @@ import play.api.inject.{NewInstanceInjector, SimpleInjector, Injector, DefaultAp
 import play.api.libs.Files.{DefaultTemporaryFileCreator, TemporaryFileCreator}
 import play.api.libs.{Crypto, CryptoConfigParser, CryptoConfig}
 import play.api.libs.concurrent.ActorSystemProvider
-import play.api.mvc.{EssentialFilter, RequestHeader}
+import play.api.mvc.{Request, AnyContent, EssentialFilter, RequestHeader}
 import play.api.routing.Router
 import play.api.routing.sird._
 import scrupal.admin.AdminProvider
@@ -175,6 +175,10 @@ case class Scrupal (
       }
     }
     log.info("Scrupal shutdown completed normally.")
+  }
+
+  def stimulusForRequest(request : Request[AnyContent]) : Stimulus = {
+    Stimulus(contextForRequest(request),request)
   }
 
   def contextForRequest(request : RequestHeader) : Context = {

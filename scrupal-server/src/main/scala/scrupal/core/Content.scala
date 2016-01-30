@@ -165,7 +165,8 @@ case class HtmlContent(
 }
 object HtmlContent {
   def apply(elem : HtmlElement) : HtmlContent = new HtmlContent(Seq(elem))
-  def apply(rawfrag : scalatags.Text.RawFrag) : HtmlContent = new HtmlContent(Seq(rawfrag))
+  def apply(rawfrag : RawFrag) : HtmlContent = new HtmlContent(Seq(rawfrag))
+  def raw(content : String) : HtmlContent = new HtmlContent(Seq(RawFrag(content)))
 }
 
 /** Content with a BSONDocument payload.

@@ -245,14 +245,6 @@ trait DetailedPageLayout extends AppPageLayout {
     */
   def keywords(args : Arguments) : Seq[String] = Seq.empty[String]
 
-  /** Generate Page Refresh Time
- *
-    * @param args Arguments from which the page's refresh delay is derived
-    * @return A non-zero value providing the number of seconds after which the page should automatically
-    *         refresh or zero if that feature is not desired.
-    */
-  def refresh(args : Arguments) : Int = 0
-
   def otherMeta(args: Arguments) : Map[String,String] = Map.empty[String,String]
 
   /** Generate Page link tags

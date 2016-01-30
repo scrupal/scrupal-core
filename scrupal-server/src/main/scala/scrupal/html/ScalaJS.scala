@@ -22,7 +22,7 @@ class ScalaJS(implicit scrupal: Scrupal) {
     scrupal.withApplication { implicit application: Application ⇒
       import play.api.Play.resource
       if(resource(s"public/$jsdeps.min.js").isDefined) {
-        Seq(jsdepsScript(s"public/$jsdeps.min.js"))
+        Seq(jsdepsScript(s"$jsdeps.min.js"))
       } else if(resource(s"public/$jsdeps.js").isDefined) {
         Seq(jsdepsScript(s"$jsdeps.js"))
       } else {

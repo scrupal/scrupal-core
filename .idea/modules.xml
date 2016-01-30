@@ -5,8 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-core.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-core-build.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-core-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-jsapp.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-jsapp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-jsapp.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-jsapp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-jsapp-build.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-jsapp-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-jsapp-build.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-jsapp-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-react-polymer.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-react-polymer.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/scrupal-react-polymer-build.iml" filepath="$PROJECT_DIR$/.idea/modules/scrupal-react-polymer-build.iml" />

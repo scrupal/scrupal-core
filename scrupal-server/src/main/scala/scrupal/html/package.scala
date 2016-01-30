@@ -69,17 +69,4 @@ package object html {
     */
   val assets = router.scrupal.core.routes.Assets
 
-  import scalatags.Text.all._
-
-  lazy val `http-equiv` = "http-equiv".attr
-
-  def js(javascript : String) =
-    script(`type` := "application/javascript", javascript)
-  def jslib(lib : String, path : String) =
-    script(`type` := "application/javascript", src := s"/assets/lib/$lib/$path")
-  def webjar(lib: String, path: String) =
-    script(`type` := "application/javascript", src := s"/webjar/$lib/$path")
-
-  val nbsp = raw("&nbsp;")
-
 }

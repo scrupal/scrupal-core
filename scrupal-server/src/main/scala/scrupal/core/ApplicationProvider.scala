@@ -18,7 +18,8 @@ package scrupal.core
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import play.api.routing.sird._
-import scrupal.html._
+
+import scala.concurrent.Future
 
 /** Base Class For Application Server Side
   * The ApplicationProvider defines the standard routes that all applications must provide. Applications should
@@ -33,21 +34,29 @@ trait ApplicationProvider extends SingularProvider with Enablee {
       info(rh)
     case rh @ GET(p"/") ⇒
       loadApplication(rh)
+    case rh @ GET(p"") ⇒
+      loadApplication(rh)
   }
 
   def loadApplication(request : RequestHeader) : Reactor = {
-    Reactor.from {
-      val context = scrupal.contextForRequest(request)
-      val elem = scrupal.reactPolymerLayout.layout(context, Map("appName" → label))
-      Response(elem, Successful)
+    Reactor { stimulus: Stimulus ⇒
+      implicit val ec = stimulus.context.scrupal.executionContext
+      scrupal.reactPolymerLayout.page(stimulus.context, Map("appName" → label)).map { content : String ⇒
+        Response(HtmlContent.raw(content), Successful)
+      }
     }
   }
 
   final def info(request : RequestHeader) : Reactor = {
-    val jsValue = Json.obj(
-      "name" → label
-    )
-    Reactor.from(Response(JsonContent(jsValue)))
+    Reactor { stimulus: Stimulus ⇒
+      implicit val ec = stimulus.context.scrupal.executionContext
+      Future {
+        val jsValue = Json.obj(
+          "name" → label
+        )
+        Response(JsonContent(jsValue))
+      }
+    }
   }
 
 }

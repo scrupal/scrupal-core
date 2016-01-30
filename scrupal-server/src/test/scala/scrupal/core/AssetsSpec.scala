@@ -18,6 +18,7 @@ import java.io.File
 
 import controllers.Assets.Asset
 import org.specs2.matcher.MatchResult
+import play.api.Mode.Mode
 import play.api.http.{DefaultHttpErrorHandler, Status}
 import play.api.mvc.{Action, AnyContent, Request}
 import play.api.test.{FakeRequest, WithApplication}
@@ -30,8 +31,8 @@ import scala.concurrent.duration._
 
 class AssetsSpec extends ScrupalSpecification("Assets") with SharedTestScrupal {
 
-  def mkAssets : Assets = {
-    val environment = Environment(new File("."), this.getClass.getClassLoader, Mode.Test)
+  def mkAssets(mode : Mode = Mode.Test) : Assets = {
+    val environment = Environment(new File("."), this.getClass.getClassLoader, mode)
     val configuration = Configuration.load(environment)
     new Assets(new DefaultHttpErrorHandler(environment, configuration), configuration, environment)
   }
@@ -54,40 +55,64 @@ class AssetsSpec extends ScrupalSpecification("Assets") with SharedTestScrupal {
       success("All themes found")
     }
 
-    def foundAsset(action: Action[AnyContent]) : MatchResult[Int] = {
+    def checkAssetStatus(action: Action[AnyContent], status : Int = Status.OK) : MatchResult[Int] = {
       val future = action(request).map { result ⇒
-        result.header.status must beEqualTo(Status.OK)
+        result.header.status must beEqualTo(status)
       }
       Await.result(future, 2.seconds)
     }
 
     "locate logback.xml three ways" in new WithApplication(scrupal.application) {
-      foundAsset(mkAssets.at("/", "/logback.xml"))
-      foundAsset(mkAssets.root("logback.xml"))
-      foundAsset(mkAssets.root("/logback.xml"))
+      val assets = mkAssets()
+      checkAssetStatus(assets.at("/", "/logback.xml"))
+      checkAssetStatus(assets.root("logback.xml"))
+      checkAssetStatus(assets.root("/logback.xml"))
     }
 
     "locate scrupal.ico with img" in new WithApplication(scrupal.application) {
-      foundAsset(mkAssets.img("scrupal.ico"))
+      checkAssetStatus(mkAssets().img("scrupal.ico"))
     }
     "locate scrupal.ico with public" in new WithApplication(scrupal.application) {
-      foundAsset(mkAssets.public("images/scrupal.ico"))
+      checkAssetStatus(mkAssets().public("images/scrupal.ico"))
     }
 
     "locate scrupal.css with css" in new WithApplication(scrupal.application) {
-      foundAsset(mkAssets.css(Asset("scrupal.min.css")))
+      checkAssetStatus(mkAssets().css(Asset("scrupal.min.css")))
     }
 
     "locate scrupal.js with js" in new WithApplication(scrupal.application) {
-      foundAsset(mkAssets.js(Asset("scrupal.js")))
+      checkAssetStatus(mkAssets().js(Asset("scrupal.js")))
     }
 
     "locate Simplex theme with theme(Simplex)" in new WithApplication(scrupal.application) {
-      foundAsset(mkAssets.theme("Simplex"))
+      checkAssetStatus(mkAssets().theme("Simplex"))
+    }
+
+    "locate Simplex with explicit theme provider" in new WithApplication(scrupal.application) {
+      checkAssetStatus(mkAssets().themeFromProvider("bootswatch", "Simplex"))
+    }
+
+    "not find Simplex with unknown theme provider" in new WithApplication(scrupal.application) {
+      checkAssetStatus(mkAssets().themeFromProvider("unknown", "Simplex"), Status.NOT_FOUND)
+    }
+
+    "not find Duplex theme with theme(Duplex)" in new WithApplication(scrupal.application) {
+      checkAssetStatus(mkAssets().theme("Duplex"),Status.NOT_FOUND)
+    }
+
+    "yield MovedPermanently For Production Theme" in new WithApplication(scrupal.application) {
+      checkAssetStatus(mkAssets(Mode.Prod).theme("Simplex"), Status.MOVED_PERMANENTLY)
     }
 
     "locate Simplex with webjar" in new WithApplication(scrupal.application) {
-      foundAsset(mkAssets.webjar("bootswatch", "simplex/bootstrap.min.css"))
+      checkAssetStatus(mkAssets().webjar("bootswatch", "simplex/bootstrap.min.css"))
+    }
+    "locate scrupal-jsapp js files" in new WithApplication(scrupal.application) {
+      val assets = mkAssets()
+      checkAssetStatus(assets.projectjs("scrupal-jsapp-fastopt.js"))
+      checkAssetStatus(assets.projectjs("scrupal-jsapp-jsdeps.js"))
+      checkAssetStatus(assets.projectjs("scrupal-jsapp-fastopt.js.map"))
+      checkAssetStatus(assets.projectjs("scrupal-jsapp-launcher.js"))
     }
   }
 }
