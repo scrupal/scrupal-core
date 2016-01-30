@@ -17,6 +17,7 @@ class AdminProvider(implicit val scrupal: Scrupal) extends { val id = 'admin } w
       orElse(moduleProvider.provide).
       orElse(userProvider.provide).
       orElse(scrupalProvider.provide).
+      orElse(adminRoutes).
       orElse(super.singularRoutes)
   }
 
