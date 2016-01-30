@@ -1,5 +1,7 @@
 package scrupal.admin
 
+import org.specs2.execute.AsResult
+import play.api.libs.json.{JsArray, JsNull}
 import play.api.test.FakeRequest
 import scrupal.core._
 import scrupal.test.{ControllerSpecification, SharedTestScrupal}
@@ -10,7 +12,7 @@ class AdminProviderSpec extends ControllerSpecification("AdminProvider") with Sh
 
   class SiteForAdminProviderTest(implicit scrpl: Scrupal)
     extends Site(new SiteData("foo", domainName="foo.com"))(scrpl) {
-    object adminProvider extends AdminProvider
+    object adminProvider extends AdminProvider()(scrpl)
     enable(adminProvider, this)
   }
 
@@ -41,6 +43,11 @@ class AdminProviderSpec extends ControllerSpecification("AdminProvider") with Sh
       val req = FakeRequest("GET", "/api/foo/bar")
       val context = Context(scrupal)
       scrupal.scrupalController.appReactorFor(context, "foo", req) must beEqualTo(None)
+    }
+    "have the name 'admin" in {
+      val ap = new AdminProvider()
+      ap.id must beEqualTo('admin)
+      ap.name must beEqualTo("admin")
     }
 
     "have an index page" in {
@@ -151,5 +158,28 @@ class AdminProviderSpec extends ControllerSpecification("AdminProvider") with Sh
         makePage(Ok, Administration.module())
       }
        */
-    }  }
+    }
+  }
+
+  "AdminSiteProvider" should {
+    "return JsNull for no site" in withScrupalSchema("NoSiteGIvesJsNull") { (scrupal, schema) ⇒
+      val asp = new AdminSiteProvider
+      val stim = scrupal.stimulusForRequest(FakeRequest("GET", "/app/foo"))
+      val future = asp.site(-1)(stim).map { response : RxResponse ⇒
+        response.disposition must beEqualTo(Unlocatable)
+        response.payload.content must beEqualTo( JsNull)
+      }(scrupal.executionContext)
+      AsResult(await(future))
+    }
+    "return JsArray() for no site by name" in withScrupalSchema("NoSiteGIvesJsNull") { (scrupal, schema) ⇒
+      val asp = new AdminSiteProvider
+      val stim = scrupal.stimulusForRequest(FakeRequest("GET", "/app/foo"))
+      val future = asp.site("nada")(stim).map { response : RxResponse ⇒
+        response.disposition must beEqualTo(Unlocatable)
+        response.payload.content must beEqualTo( JsArray())
+      }(scrupal.executionContext)
+      AsResult(await(future))
+    }
+  }
+
 }

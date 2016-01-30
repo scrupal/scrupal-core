@@ -23,6 +23,9 @@ import play.api.UsefulException
 import play.api.mvc.Results._
 
 import play.api.mvc.{Results, Result, RequestHeader}
+import play.api.routing.sird._
+import scrupal.admin.AdminProvider
+import scrupal.html.Help
 
 import scala.concurrent.Future
 
@@ -38,7 +41,7 @@ case class SiteData(
   def forHost(hostName: String) : Boolean = { hostName.endsWith(domainName) }
 }
 
-case class Site(data: SiteData)(implicit val scrupal : Scrupal) extends {
+case class Site(data: SiteData)(implicit scrupal : Scrupal) extends {
     val registry: Registry[Site] = scrupal.sites
     val id: Symbol = Symbol(data.name)
 } with EnablementProvider[Site] with Registrable[Site] {
@@ -82,6 +85,25 @@ case class Site(data: SiteData)(implicit val scrupal : Scrupal) extends {
   }
 
   def debugFooter : Boolean = true // TODO: Implement with Feature
+}
+
+class LocalHostSite(implicit scrupal : Scrupal) extends Site(SiteData("localhost"))(scrupal) {
+  object helpProvider extends Provider with Enablee {
+    def id = 'help
+    def provide: ReactionRoutes = {
+      case GET(p"/") ⇒
+        new Reactor {
+          def apply(stimulus: Stimulus) : Future[RxResponse] = {
+            Help.page(stimulus).map { html ⇒
+              Response(HtmlContent(html))
+            }(scrupal.executionContext)
+          }
+        }
+    }
+  }
+  object adminProvider extends AdminProvider
+  enable(helpProvider)
+  enable(adminProvider)
 }
 
 case class SitesRegistry() extends Registry[Site] {

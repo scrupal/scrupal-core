@@ -170,7 +170,7 @@ trait json_fragment extends SimpleGenerator {
 
   }
   def array(array : JsArray) : Modifier = {
-    div(s"Array(${array.value.size}) [",
+    span(s"Array(${array.value.size}) [",
       array.value.flatMap { e ⇒ Seq[Modifier](value(e), ", ") },
       "]"
     )
@@ -189,7 +189,7 @@ trait json_fragment extends SimpleGenerator {
 }
 
 case class json_value(bv : JsValue) extends json_fragment {
-  def apply() = { span(value(bv)) }
+  def apply() = { div(value(bv)) }
 }
 
 case class json_document_panel(title : String, doc : JsObject) extends json_fragment {

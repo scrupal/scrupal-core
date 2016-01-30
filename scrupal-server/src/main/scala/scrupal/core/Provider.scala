@@ -44,7 +44,7 @@ trait Provider { self ⇒
     possibleRoutes.lift(request)
   }
 
-  def withPrefix(prefix: String): Provider = {
+  def prefixRoutes(prefix: String): Provider = {
     if (prefix == "/") {
       self
     } else {
@@ -57,7 +57,7 @@ trait Provider { self ⇒
           }
           Function.unlift(prefixed.lift.andThen(_.flatMap(self.provide.lift)))
         }
-        override def withPrefix(prefix: String) : Provider = self.withPrefix(prefix)
+        override def prefixRoutes(prefix: String) : Provider = self.prefixRoutes(prefix)
       }
     }
   }
@@ -127,23 +127,32 @@ trait SingularProvider extends IdentifiableProvider {
   def singularRoutes : ReactionRoutes
 
   /** Singular form of the entity's label */
-  final val singularPrefix = makeKey(label)
+  final val singularPrefix = {
+    require(!label.startsWith("/"),"SingularProvider names must not start with a /")
+    makeKey(label)
+  }
 
   lazy val provide: ReactionRoutes = {
-    withPrefix(singularRoutes, singularPrefix)
+    prefixRoutes(singularRoutes, singularPrefix)
   }
 
   def isSingular(request: RequestHeader): Boolean = {
     request.path.startsWith(singularPrefix) || request.path.startsWith("/" + singularPrefix)
   }
 
-  protected def withPrefix(routes: ReactionRoutes, prefix: String): ReactionRoutes = {
-
-    val p = if (prefix.startsWith("/")) {
-      prefix
-    } else {
-      "/" + prefix
-    }
+  /** Change Routes To Require A Prefix
+    * This function is used to prefix the routes provided by singularRoutes with the singularPrefix, as invoked
+    * in the provide method. It is also used in PluralProvider for the same purpose. The ideas that the routes
+    * for this provider might be GET(p"/foo") but in a SingularProvider named "bar", the route matched will actually
+    * be GET(p"/bar/foo"). This allows the routes to vary depending on the name of the provider.
+    * @param routes The routes to be modified
+    * @param prefix The prefix to prepend to the routes
+    * @return ReactionRoutes with the prefix prepended to the routes
+    */
+  protected def prefixRoutes(routes: ReactionRoutes, prefix: String): ReactionRoutes = {
+    assert(!prefix.startsWith("/"))
+    assert(!prefix.startsWith("-"))
+    val p = s"/$prefix"
     val prefixed: PartialFunction[RequestHeader, RequestHeader] = {
       case header: RequestHeader if header.path.startsWith(p) =>
         header.copy(path = header.path.drop(p.length))
@@ -165,7 +174,9 @@ trait SingularProvider extends IdentifiableProvider {
     *
     * @return The constant string used to identify this ActionProvider
     */
-  protected def makeKey(name: String) = name.toLowerCase.replaceAll(Patterns.NotAllowedInUrl.pattern.pattern, "-")
+  protected def makeKey(name: String) = {
+    name.toLowerCase.replaceAll(Patterns.NotAllowedInUrl.pattern.pattern, "-")
+  }
 
 }
 
@@ -178,8 +189,8 @@ trait PluralProvider extends SingularProvider {
   final val pluralPrefix = makeKey(Pluralizer.pluralize(label))
 
   override lazy val provide: ReactionRoutes = {
-    val prefixedSingular = withPrefix(singularRoutes, singularPrefix)
-    val prefixedPlural = withPrefix(pluralRoutes, pluralPrefix)
+    val prefixedSingular = prefixRoutes(singularRoutes, singularPrefix)
+    val prefixedPlural = prefixRoutes(pluralRoutes, pluralPrefix)
     prefixedPlural.orElse(prefixedSingular)
   }
 

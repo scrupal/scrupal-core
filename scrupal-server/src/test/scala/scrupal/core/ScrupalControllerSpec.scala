@@ -68,6 +68,7 @@ class ScrupalControllerSpec extends ControllerSpecification("ScrupalController")
         def pathPrefix: String = "foo"
         override def apiReactorFor(context: Context, thing: String, request: RequestHeader): Option[Reactor] = None
         override def appReactorFor(context: Context, thing: String, request: RequestHeader): Option[Reactor] = None
+        override def thingReactorFor(context: Context, thing: String, request: RequestHeader): Option[Reactor] = None
         override def contextFor(thing: String, request: RequestHeader): Option[Context] = None
       }
 
@@ -87,18 +88,27 @@ class ScrupalControllerSpec extends ControllerSpecification("ScrupalController")
         def pathPrefix: String = "foo"
         override def appReactorFor(context: Context, thing: String, request: RequestHeader): Option[Reactor] = None
         override def apiReactorFor(context: Context, thing: String, request: RequestHeader): Option[Reactor] = None
+        override def thingReactorFor(context: Context, thing: String, request: RequestHeader): Option[Reactor] = None
         override def contextFor(thing: String, request: RequestHeader): Option[Context] = Some(Context(scrupal))
       }
 
       val ctrlr = new TestController(scrupal, scrupal.messagesApi)
-      val req = FakeRequest("GET", "/api/foo/bar")
-      route(scrupal.application, req) match {
-        case Some(fr) ⇒
-          val result = await(fr)
-          result.header.status must beEqualTo(Status.NOT_FOUND)
-        case None ⇒
-          0 must beEqualTo(Status.NOT_FOUND)
+      val requests = Seq(
+        FakeRequest("GET", "/api/foo/bar"),
+        FakeRequest("GET", "/app/nada"),
+        FakeRequest("GET", "/thing/nada")
+      )
+
+      for (req ← requests) {
+        route(scrupal.application, req) match {
+          case Some(fr) ⇒
+            val result = await(fr)
+            result.header.status must beEqualTo(Status.NOT_FOUND)
+          case None ⇒
+            0 must beEqualTo(Status.NOT_FOUND)
+        }
       }
+      success
     }
 
     "not provide route for nonsense" in withScrupal("nonsense_route_failure") { scrupal ⇒

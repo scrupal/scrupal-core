@@ -57,7 +57,7 @@ case class ScrupalController(scrupal : Scrupal, messagesApi : MessagesApi)
   def apiDELETE(entity: String, what : String) = apiReactor(cleanse(entity), what)
   def apiHEAD(entity: String, what : String) = apiReactor(cleanse(entity), what)
 
-  def apiReactor(api : String, what : String) = reactorFor(4, api, what, apiReactorFor)
+  protected def apiReactor(api : String, what : String) = reactorFor(4, api, what, apiReactorFor)
 
   def appGET(app: String, what : String) = appReactor(cleanse(app), what)
   def appPUT(app: String, what : String) = appReactor(cleanse(app), what)
@@ -66,7 +66,7 @@ case class ScrupalController(scrupal : Scrupal, messagesApi : MessagesApi)
   def appDELETE(app: String, what : String) = appReactor(cleanse(app), what)
   def appHEAD(app: String, what : String) = appReactor(cleanse(app), what)
 
-  def appReactor(app : String, what : String) = reactorFor(4, app, what, appReactorFor)
+  protected def appReactor(app : String, what : String) = reactorFor(4, app, what, appReactorFor)
 
   def thingGET(thing: String, what : String) = thingReactor(cleanse(thing), what)
   def thingPUT(thing: String, what : String) = thingReactor(cleanse(thing), what)
@@ -75,9 +75,9 @@ case class ScrupalController(scrupal : Scrupal, messagesApi : MessagesApi)
   def thingDELETE(thing: String, what : String) = thingReactor(cleanse(thing), what)
   def thingHEAD(thing: String, what : String) = thingReactor(cleanse(thing), what)
 
-  def thingReactor(thing : String, what : String) = reactorFor(0, thing, what, thingReactorFor)
+  protected def thingReactor(thing : String, what : String) = reactorFor(0, thing, what, thingReactorFor)
 
-  def reactorFor(prefixLenToDrop : Int, thing: String, what : String, rxFinder : RxFinder ) = {
+  protected def reactorFor(prefixLenToDrop : Int, thing: String, what : String, rxFinder : RxFinder ) = {
     Action.async { implicit request : Request[AnyContent] ⇒
       val rh: RequestHeader = request.copy(path = request.path.drop(prefixLenToDrop))
       log.debug(s"RequestHeader(method=${rh.method}, host=${rh.host}, uri=${rh.uri}, path=${rh.path}")

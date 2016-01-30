@@ -68,8 +68,8 @@ class ProviderSpec extends ScrupalSpecification("Provider") with SharedTestScrup
     "find provides with prefix" in {
       scrupal.withExecutionContext { implicit ec: ExecutionContext ⇒
         val req: RequestHeader = null
-        dp.withPrefix("foo").provide.lift(req).isDefined must beFalse
-        val maybe_reaction = dp.withPrefix("/").provide.lift(req)
+        dp.prefixRoutes("foo").provide.lift(req).isDefined must beFalse
+        val maybe_reaction = dp.prefixRoutes("/").provide.lift(req)
         maybe_reaction.isDefined must beTrue
         val reaction = maybe_reaction.get
         reaction must beEqualTo(NullReactor)
@@ -123,12 +123,13 @@ class ProviderSpec extends ScrupalSpecification("Provider") with SharedTestScrup
   }
 
   "SingularProvider" should {
-    val sp = new SingularProvider {
-      def id: Identifier = 'foot$
+    case class TestSingularProvider(id : Identifier = 'foot$) extends SingularProvider {
       override def singularRoutes: ReactionRoutes = {
-        case (r : RequestHeader) ⇒ UnimplementedReactor("single")
+        case (r : RequestHeader) ⇒
+          UnimplementedReactor("single")
       }
     }
+    val sp = TestSingularProvider()
 
     "have isSingular categorize requests properly" in {
       sp.singularPrefix must beEqualTo("foot-")
@@ -140,11 +141,14 @@ class ProviderSpec extends ScrupalSpecification("Provider") with SharedTestScrup
     "have withPrefix provide " in {
       scrupal.withExecutionContext { implicit ec: ExecutionContext ⇒
         val req: RequestHeader = null
-        sp.withPrefix("foo").provide.lift(req).isDefined must beFalse
-        sp.withPrefix("/foo").provide.lift(req).isDefined must beFalse
+        sp.prefixRoutes("foo").provide.lift(req).isDefined must beFalse
+        sp.prefixRoutes("/foo").provide.lift(req).isDefined must beFalse
       }
     }
 
+    "prevent prefix starting with /" in {
+      TestSingularProvider(Symbol("/foot")) must throwA[IllegalArgumentException]
+    }
 
     "provides reactor appropriately" in {
       val request = FakeRequest("GET", "/foot-")

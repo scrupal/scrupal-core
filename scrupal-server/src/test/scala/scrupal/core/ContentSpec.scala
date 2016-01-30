@@ -20,6 +20,7 @@ import java.util
 import akka.http.scaladsl.model.{MediaType, MediaTypes}
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.{Json, JsString}
+import scrupal.html.HtmlElement
 
 import scrupal.test.ScrupalSpecification
 
@@ -80,6 +81,12 @@ class ContentSpec extends ScrupalSpecification("Content") {
       val hc = HtmlContent(rawFrag)
       hc.content.render must beEqualTo(div("foo").render)
     }
+    "be a SimpleGenerator" in {
+      import scalatags.Text.all._
+      val elem : HtmlElement = div("foo")
+      val hc = HtmlContent(elem)
+      hc() must beEqualTo(List(elem))
+    }
   }
 
   "EmptyContent" should {
@@ -106,11 +113,20 @@ class ContentSpec extends ScrupalSpecification("Content") {
       message.isInstanceOf[JsString] must beTrue
       message.asInstanceOf[JsString].value.contains("testing") must beTrue
     }
+
     "convert to Html" in {
       val tc = ThrowableContent(mkThrowable("testing"), Some("while testing"))
       val html = tc.toHtml.render
       html must contain("testing")
       html must contain("while testing")
+    }
+
+    "convert to Text" in {
+      val tc = ThrowableContent(mkThrowable("testing"), Some("while testing"))
+      val text = tc.toText
+      text must contain("testing")
+      text must contain("while testing")
+
     }
 
     "convert to Bytes" in {
@@ -121,7 +137,14 @@ class ContentSpec extends ScrupalSpecification("Content") {
           str must contain("testing")
           str must contain("foo_context")
         }
-        await(future)
+        val enum = tc.toEnumerator
+        val ec = EnumeratedContent(enum)
+        val future2 = ec.toBytes.map { bytes ⇒
+          val str = new String(bytes, utf8)
+          str must contain("testing")
+          str must contain("foo_context")
+        }
+        await(Future.sequence(Seq(future,future2)))
       }
       check(ThrowableContent(mkThrowable("testing"), Some("foo_context"), MediaTypes.`text/html`))
       check(ThrowableContent(mkThrowable("testing"), Some("foo_context"), MediaTypes.`application/json`))

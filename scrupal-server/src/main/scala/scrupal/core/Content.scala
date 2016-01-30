@@ -26,7 +26,7 @@ import scala.concurrent.{Future, ExecutionContext}
 
 import scalatags.Text.all._
 
-import scrupal.html.{HtmlContents, HtmlContentsGenerator, HtmlElement}
+import scrupal.html.{SimpleGenerator, HtmlContents, HtmlElement}
 
 /** Generic Content Representation
   * Content can come in many forms, as defined by the type parameter T. What they all need in common is a
@@ -156,17 +156,17 @@ case class TextContent(
   */
 case class HtmlContent(
   content : HtmlContents
-) extends Content[HtmlContents] with HtmlContentsGenerator {
+) extends Content[HtmlContents] with SimpleGenerator {
   val mediaType : MediaType = MediaTypes.`text/html`
   import scrupal.html._
   def toEnumerator(implicit ec: ExecutionContext) = Enumerator(content.render.getBytes(utf8))
   def toBytes(implicit ec: ExecutionContext) = Future.successful { content.render.getBytes(utf8) }
-  def apply(context : Context) : HtmlContents = content
+  def apply : HtmlContents = content
 }
 object HtmlContent {
   def apply(elem : HtmlElement) : HtmlContent = new HtmlContent(Seq(elem))
   def apply(rawfrag : RawFrag) : HtmlContent = new HtmlContent(Seq(rawfrag))
-  def raw(content : String) : HtmlContent = new HtmlContent(Seq(RawFrag(content)))
+  def raw(content : String) : HtmlContent = apply(RawFrag(content))
 }
 
 /** Content with a BSONDocument payload.
@@ -247,24 +247,25 @@ case class ThrowableContent(
       "rootCauseStack" → ExceptionUtils.getRootCauseStackTrace(content).mkString("\n\tat ")
     )
   }
-  def toEnumerator(implicit ec: ExecutionContext) = {
-    mediaType match {
-      case MediaTypes.`text/html` ⇒
-        Enumerator(toHtml.render.getBytes(utf8))
-      case MediaTypes.`application/json` ⇒
-        Enumerator(Json.stringify(toJson).getBytes(utf8))
-      case _ ⇒
-        Enumerator(content.toString.getBytes(utf8))
-    }
+
+  def toText : String = {
+    s"While ${context.getOrElse("doing something")}: $content"
   }
-  def toBytes(implicit ec: ExecutionContext) = Future.successful {
+
+  def toEnumerator(implicit ec: ExecutionContext) = {
+    Enumerator(convertToBytes)
+  }
+
+  def convertToBytes : Array[Byte] = {
     mediaType match {
       case MediaTypes.`text/html` ⇒
         toHtml.render.getBytes(utf8)
       case MediaTypes.`application/json` ⇒
         Json.stringify(toJson).getBytes(utf8)
       case _ ⇒
-        s"while ${context.getOrElse("Processing")}: $content".getBytes(utf8)
+        toText.getBytes(utf8)
     }
   }
+
+  def toBytes(implicit ec: ExecutionContext) = Future.successful { convertToBytes }
 }

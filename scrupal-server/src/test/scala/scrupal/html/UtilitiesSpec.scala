@@ -16,7 +16,7 @@ package scrupal.html
 
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
-import scrupal.core.{ThrowableContent, Stimulus}
+import scrupal.core.{Context, ThrowableContent, Stimulus}
 import scrupal.test.SharedTestScrupal
 
 import scalatags.Text.all._
@@ -106,14 +106,33 @@ class UtilitiesSpec extends ValidatingSpecification("Utilities") with SharedTest
       val html = debug_footer(context).render
       validate("debug_footer", html, "div")
     }
+    "yield nothing without a site" in {
+      val context = Context(scrupal)
+      val html = debug_footer(context)
+      html must beEqualTo(emptyContents)
+    }
   }
 
   "json_value" should {
     "lay out content properly" in {
       val jsv = JsString("first value")
       val html = json_value(jsv)().render
-      html.contains("first value") must beTrue
+      html must contain("first value")
       validate("json_value", html, "div")
+    }
+    "handle mixed array" in {
+      val jsv = Json.obj(
+        "string" → "string",
+        "number" → 23,
+        "boolean" → false,
+        "array" → Json.arr("one", 2.0, 3),
+        "object" → Json.obj("key" → "value")
+      )
+      val html = json_value(jsv)().render
+      validate("json object", html, "div")
+      html must contain("string")
+      html must contain("23")
+      html must contain("false")
     }
   }
 

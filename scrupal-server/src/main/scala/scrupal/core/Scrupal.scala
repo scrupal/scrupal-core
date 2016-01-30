@@ -117,26 +117,7 @@ case class Scrupal (
   val threeColumnBootstrapLayout = new ThreeColumnBootstrapLayout
   val reactPolymerLayout = new ReactPolymerLayout
 
-  val DefaultLocalHostSite = new Site(SiteData("localhost"))(this) {
-    object helpProvider extends Provider with Enablee {
-      def id = 'HelpProvider
-      def provide: ReactionRoutes = {
-        case GET(p"/") ⇒
-          new Reactor {
-            val description = "Help Page Reactor"
-            def oid : Option[OIDType] = None
-            def apply(stimulus: Stimulus) : Future[RxResponse] = {
-              Help.page(stimulus).map { html ⇒
-                Response(HtmlContent(html))
-              }
-            }
-          }
-      }
-    }
-    object adminProvider extends AdminProvider
-    enable(helpProvider)
-    enable(adminProvider)
-  }
+  val localHostSite = new LocalHostSite()(this)
 
   applicationLifecycle.addStopHook { () ⇒
     Future.successful {

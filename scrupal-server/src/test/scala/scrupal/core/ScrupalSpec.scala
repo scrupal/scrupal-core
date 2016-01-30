@@ -108,8 +108,11 @@ class ScrupalSpec extends ScrupalSpecification("Scrupal") {
     }
 
     "provides default site" in withScrupal("default_site") { scrupal ⇒
-      val site = scrupal.DefaultLocalHostSite
+      val site = scrupal.localHostSite
       val req = FakeRequest("GET", "/")
+      site.helpProvider.id must beEqualTo('help)
+      site.adminProvider.id must beEqualTo('admin)
+
       site.reactorFor(req) match {
         case Some(reactor) ⇒
           val stimulus = Stimulus(Context(scrupal), req)
