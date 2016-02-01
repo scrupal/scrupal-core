@@ -55,7 +55,8 @@ trait Reactor extends Reaction {
         val d = response.disposition
         val status = d.toStatusCode.intValue()
         val reason = Some(s"HTTP($status): ${d.id.name}(${d.code}): ${d.msg}")
-        val header = ResponseHeader(status, reasonPhrase = reason)
+        val headers = Map("ContentType" → response.mediaType.toString())
+        val header = ResponseHeader(status, headers, reasonPhrase = reason)
         Result(header, response.toEnumerator)
       }
     }

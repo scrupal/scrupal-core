@@ -30,6 +30,8 @@ trait ApplicationProvider extends SingularProvider with Enablee {
   def scrupal : Scrupal
 
   def singularRoutes: ReactionRoutes = {
+    case rh @ GET(p"/config") ⇒
+      config(rh)
     case rh @ GET(p"/info") ⇒
       info(rh)
     case rh @ GET(p"/") ⇒
@@ -38,6 +40,19 @@ trait ApplicationProvider extends SingularProvider with Enablee {
       loadApplication(rh)
   }
 
+  def config(request : RequestHeader) : Reactor = {
+    Reactor { stimulus: Stimulus ⇒
+      implicit val ec = stimulus.context.scrupal.executionContext
+      Future {
+        val jsValue = Json.obj(
+          "name" → label,
+          "layout" → "ThreeColumns",
+          "menu" → "static"
+        )
+        Response(JsonContent(jsValue))
+      }
+    }
+  }
   def loadApplication(request : RequestHeader) : Reactor = {
     Reactor { stimulus: Stimulus ⇒
       implicit val ec = stimulus.context.scrupal.executionContext
